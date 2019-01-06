@@ -18,6 +18,7 @@ const Layout = ({ children }) => (
     `}
     render={data => (
       <>
+        {children}
         <Header siteTitle={data.site.siteMetadata.title} />
         <div
           style={{
@@ -27,7 +28,6 @@ const Layout = ({ children }) => (
             paddingTop: 0,
           }}
         >
-          {children}
           <footer>
             © {new Date().getFullYear()}, Built with
             {` `}
