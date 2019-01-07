@@ -25,11 +25,12 @@ class Search extends Component {
       })
 
   render() {
+    const { input, query, data } = this.state
     return (
       <div className="search">
         <input
           style={{ width: '300px' }}
-          value={this.state.input}
+          value={input}
           onChange={event => {
             event.persist()
             this.setState(state => ({
@@ -48,18 +49,16 @@ class Search extends Component {
         >
           Add URL
         </button>
-        <button onClick={() => this.getData(this.state.query)}>
-          Run Lighthouse
-        </button>
+        <button onClick={() => this.getData(query)}>Run Lighthouse</button>
         <ul>
-          {this.state.query.length >= 1 &&
-            this.state.query.map(item => {
+          {query.length >= 1 &&
+            query.map(item => {
               return <li key={item}>{item}</li>
             })}
         </ul>
         <ul>
-          {this.state.data.length >= 1 &&
-            this.state.data.map(item => (
+          {data.length >= 1 &&
+            data.map(item => (
               <li>
                 {item.categories.performance.id}
                 {item.categories.performance.score}

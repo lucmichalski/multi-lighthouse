@@ -1,5 +1,6 @@
-var express = require('express')
-var app = express()
+const express = require('express')
+
+const app = express()
 const port = 8001
 const lighthouse = require('lighthouse')
 const chromeLauncher = require('chrome-launcher')
