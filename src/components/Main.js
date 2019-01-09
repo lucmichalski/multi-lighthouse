@@ -49,26 +49,61 @@ class Main extends Component {
         console.log(error)
       })
 
-  onChange = event => {
+  onChangeInput = event => {
     event.persist()
     this.setState(() => ({
       input: `${event.target.value}`,
     }))
   }
 
-  onClick = () =>
-    this.setState(state => ({
-      query: [...state.query, state.input],
-      input: `https://www.`,
-    }))
+  onClickAddUrl = () => {
+    //todo: utils file
+    function validURL(str) {
+      const pattern = new RegExp(
+        '^(https?:\\/\\/)?' + // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name and extension
+        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+        '(\\:\\d+)?' + // port
+        '(\\/[-a-z\\d%@_.~+&:]*)*' + // path
+        '(\\?[;&a-z\\d%@_.,~+&:=-]*)?' + // query string
+          '(\\#[-a-z\\d_]*)?$',
+        'i'
+      )
+
+      return pattern.test(str)
+    }
+
+    this.setState(state => {
+      if (validURL(state.input)) {
+        if (!state.query.includes(state.input)) {
+          return {
+            query: [...state.query, state.input],
+            input: `https://www.`,
+          }
+        } else {
+          alert('already there')
+        }
+      } else {
+        alert('not valid')
+      }
+    })
+  }
 
   render() {
     const { input, query, data, metrics, error, errorMessage } = this.state
 
     return (
       <div className="main">
-        <Search input={input} onClick={this.onClick} onChange={this.onChange} />
-        <button type="button" onClick={() => this.getData()}>
+        <Search
+          input={input}
+          onClick={this.onClickAddUrl}
+          onChange={this.onChangeInput}
+        />
+        <button
+          type="button"
+          disabled={query.length === 0}
+          onClick={query.length >= 1 ? () => this.getData() : null}
+        >
           Run Lighthouse
         </button>
         <ul>
