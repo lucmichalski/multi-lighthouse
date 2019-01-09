@@ -40,7 +40,8 @@ app.get('/lighthouse', function(req, res) {
       launchChromeAndRunLighthouse(url, opts)
         .then(results => results)
         .catch(err => {
-          console.log(err)
+          console.log(err, 'this is the error')
+          res.send(err)
         })
     )
   ).then(results => res.send(results))

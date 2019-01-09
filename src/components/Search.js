@@ -24,6 +24,8 @@ class Search extends Component {
       'interactive',
       'estimated-input-latency',
     ],
+    error: false,
+    errorMessage: '',
   }
 
   getData = () =>
@@ -34,15 +36,21 @@ class Search extends Component {
         },
       })
       .then(response => {
-        console.log(response.data)
-        this.setState(() => ({ data: response.data }))
+        if (response.data.code) {
+          this.setState(() => ({
+            error: true,
+            errorMessage: response.data.friendlyMessage,
+          }))
+        } else {
+          this.setState(() => ({ data: response.data }))
+        }
       })
       .catch(error => {
         console.log(error)
       })
 
   render() {
-    const { input, query, data, metrics } = this.state
+    const { input, query, data, metrics, error, errorMessage } = this.state
     const legendItems = data.map(({ finalUrl }) => finalUrl)
     return (
       <div className="search">
@@ -72,42 +80,38 @@ class Search extends Component {
           Run Lighthouse
         </button>
         <ul>
-          {query.length >= 1 &&
+          {data.length === 0 &&
+            query.length >= 1 &&
             query.map(item => {
               return <li key={item}>{item}</li>
             })}
         </ul>
-
-        <DiscreteColorLegend height={200} width={300} items={legendItems} />
-        <XYPlot height={700} width={1200} xType="ordinal">
-          <VerticalGridLines />
-          <HorizontalGridLines />
-          <XAxis title="metric" />
-          <YAxis title="ms" />
-          {data.map(item => {
-            return (
-              <VerticalBarSeries
-                key={item.finalUrl}
-                data={metrics.map(metric => {
-                  console.log(item.audits[metric])
-                  return {
-                    x: item.audits[metric].title,
-                    y: item.audits[metric].rawValue,
-                  }
-                })}
-              />
-            )
-          })}
-          {/* <VerticalBarSeries
-            key="blah"
-            data={[
-              {
-                x: 10,
-                y: 20,
-              },
-            ]}
-          /> */}
-        </XYPlot>
+        {!error ? (
+          <div>
+            <DiscreteColorLegend height={200} width={300} items={legendItems} />
+            <XYPlot height={700} width={1200} xType="ordinal">
+              <VerticalGridLines />
+              <HorizontalGridLines />
+              <XAxis title="metric" />
+              <YAxis title="ms" />
+              {data.map(item => {
+                return (
+                  <VerticalBarSeries
+                    key={item.finalUrl}
+                    data={metrics.map(metric => {
+                      return {
+                        x: item.audits[metric].title,
+                        y: item.audits[metric].rawValue,
+                      }
+                    })}
+                  />
+                )
+              })}
+            </XYPlot>
+          </div>
+        ) : (
+          <div>{errorMessage}</div>
+        )}
       </div>
     )
   }
