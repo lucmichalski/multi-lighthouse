@@ -36,10 +36,17 @@ class Search extends Component {
         },
       })
       .then(response => {
-        if (response.data.code) {
+        console.log(response.data)
+        /*this needs to be for every item in array */
+        if (response.data[0].code) {
           this.setState(() => ({
             error: true,
-            errorMessage: response.data.friendlyMessage,
+            errorMessage: response.data[0].friendlyMessage,
+          }))
+        } else if (response.data[0].runtimeError.code !== 'NO_ERROR') {
+          this.setState(() => ({
+            error: true,
+            errorMessage: response.data[0].runtimeError.message,
           }))
         } else {
           this.setState(() => ({ data: response.data }))

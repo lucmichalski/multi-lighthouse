@@ -10,13 +10,14 @@ function launchChromeAndRunLighthouse(url, opts, config = null) {
     .launch({ chromeFlags: opts.chromeFlags })
     .then(chrome => {
       opts.port = chrome.port
-      return lighthouse(url, opts, config).then(results => {
-        // use results.lhr for the JS-consumeable output
-        // https://github.com/GoogleChrome/lighthouse/blob/master/types/lhr.d.ts
-        // use results.report for the HTML/JSON/CSV output as a string
-        // use results.artifacts for the trace/screenshots/other specific case you need (rarer)
-        return chrome.kill().then(() => results.lhr)
-      })
+      return lighthouse(url, opts, config)
+        .then(results => {
+          return chrome.kill().then(() => results.lhr)
+        })
+        .catch(err => {
+          console.log(err, 'this is the error from lighthouse')
+          return chrome.kill().then(() => err)
+        })
     })
 }
 
@@ -40,8 +41,7 @@ app.get('/lighthouse', function(req, res) {
       launchChromeAndRunLighthouse(url, opts)
         .then(results => results)
         .catch(err => {
-          console.log(err, 'this is the error')
-          res.send(err)
+          console.log(err, 'this is the error from promise.all')
         })
     )
   ).then(results => res.send(results))
