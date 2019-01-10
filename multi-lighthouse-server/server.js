@@ -1,9 +1,9 @@
 const express = require('express')
 
 const app = express()
-const port = 8001
 const lighthouse = require('lighthouse')
 const chromeLauncher = require('chrome-launcher')
+const puppeteer = require('puppeteer')
 
 function launchChromeAndRunLighthouse(url, opts, config = null) {
   return chromeLauncher
@@ -22,7 +22,7 @@ function launchChromeAndRunLighthouse(url, opts, config = null) {
 }
 
 const opts = {
-  chromeFlags: ['--show-paint-rects'],
+  chromeFlags: ['--headless'],
 }
 
 app.use(function(req, res, next) {
@@ -32,6 +32,44 @@ app.use(function(req, res, next) {
     'Origin, X-Requested-With, Content-Type, Accept'
   )
   next()
+})
+
+app.get('/', async function(req, res) {
+  try {
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox'],
+    })
+    console.log(browser, 'browser')
+    const URL = 'https://www.chromestatus.com/features'
+    try {
+      const { report } = await lighthouse(URL, {
+        opts,
+      })
+      console.log(report, 'lighthouse report')
+    } catch (error) {
+      console.log('lighthose error', error)
+    }
+
+    await browser.disconnect()
+    try {
+      const opts = {
+        chromeFlags: ['--headless'],
+        logLevel: 'info',
+        output: 'json',
+      }
+      const chrome = await chromeLauncher.launch(opts)
+      console.log(chrome, 'chrome')
+
+      await chrome.kill()
+    } catch (error) {
+      console.log(error, 'error')
+    }
+
+    res.send(browser.toString() + 'hi')
+  } catch (error) {
+    console.log(error)
+    res.send(error + 'error')
+  }
 })
 
 app.get('/lighthouse', function(req, res) {
@@ -47,4 +85,8 @@ app.get('/lighthouse', function(req, res) {
   ).then(results => res.send(results))
 })
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+const server = app.listen(process.env.PORT || 8080, err => {
+  if (err) return console.error(err)
+  const port = server.address().port
+  console.info(`App listening on port ${port}`)
+})

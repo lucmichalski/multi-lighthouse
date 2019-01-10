@@ -19,11 +19,13 @@ class Main extends Component {
     ],
     error: false,
     errorMessage: '',
+    fetching: false,
   }
 
-  getData = () =>
-    axios
-      .get('http://localhost:8001/lighthouse', {
+  getData = () => {
+    this.setState(() => ({ fetching: true }))
+    return axios
+      .get('http://localhost:8080/lighthouse', {
         params: {
           urls: this.state.query,
         },
@@ -35,19 +37,22 @@ class Main extends Component {
           this.setState(() => ({
             error: true,
             errorMessage: response.data[0].friendlyMessage,
+            fetching: false,
           }))
         } else if (response.data[0].runtimeError.code !== 'NO_ERROR') {
           this.setState(() => ({
             error: true,
             errorMessage: response.data[0].runtimeError.message,
+            fetching: false,
           }))
         } else {
-          this.setState(() => ({ data: response.data }))
+          this.setState(() => ({ data: response.data, fetching: false }))
         }
       })
       .catch(error => {
         console.log(error)
       })
+  }
 
   onChangeInput = event => {
     event.persist()
@@ -90,7 +95,15 @@ class Main extends Component {
   }
 
   render() {
-    const { input, query, data, metrics, error, errorMessage } = this.state
+    const {
+      input,
+      query,
+      data,
+      metrics,
+      error,
+      errorMessage,
+      fetching,
+    } = this.state
 
     return (
       <div className="main">
@@ -113,6 +126,9 @@ class Main extends Component {
               return <li key={item}>{item}</li>
             })}
         </ul>
+        {!error && data.length === 0 && fetching === true && (
+          <div>Headless Chrome is running!</div>
+        )}
         {!error ? (
           <BarGraph metrics={metrics} data={data} />
         ) : (
