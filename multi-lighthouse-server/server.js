@@ -20,6 +20,7 @@ async function launchPuppeteerRunLighthouse(url) {
     const { lhr } = await lighthouse(url, {
       port,
       output: 'json',
+      onlyCategories: ['performance'],
     })
     browser.close()
     return lhr
