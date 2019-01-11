@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "chrome-launcher": "^0.10.5",
     "express": "^4.16.4",
     "lighthouse": "^4.0.0-alpha.2-3.2.1",
     "puppeteer": "^1.11.0"

@@ -25,7 +25,7 @@ class Main extends Component {
   getData = () => {
     this.setState(() => ({ fetching: true }))
     return axios
-      .get('http://localhost:8080/lighthouse', {
+      .get('http://localhost:8080/', {
         params: {
           urls: this.state.query,
         },
