@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
 import axios from 'axios'
+import isUrl from 'is-url'
 import BarGraph from './BarGraph'
 import Search from './Search'
+
 import './Main.css'
 
 class Main extends Component {
@@ -67,24 +69,8 @@ class Main extends Component {
   }
 
   onClickAddUrl = () => {
-    //todo: utils file
-    function validURL(str) {
-      const pattern = new RegExp(
-        '^(https?:\\/\\/)?' + // protocol
-        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name and extension
-        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-        '(\\:\\d+)?' + // port
-        '(\\/[-a-z\\d%@_.~+&:]*)*' + // path
-        '(\\?[;&a-z\\d%@_.,~+&:=-]*)?' + // query string
-          '(\\#[-a-z\\d_]*)?$',
-        'i'
-      )
-
-      return pattern.test(str)
-    }
-
     this.setState(state => {
-      if (validURL(state.input)) {
+      if (isUrl(state.input)) {
         if (!state.query.includes(state.input)) {
           return {
             query: [...state.query, state.input],

@@ -19,7 +19,7 @@ const BarGraph = ({ data, metrics }) => {
       <FlexibleXYPlot xType="ordinal">
         <VerticalGridLines />
         <HorizontalGridLines />
-        <XAxis title="metric" />
+        <XAxis />
         <YAxis title="ms" />
         {data.map(item => {
           return (
