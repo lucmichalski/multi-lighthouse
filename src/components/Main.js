@@ -24,8 +24,12 @@ class Main extends Component {
 
   getData = () => {
     this.setState(() => ({ fetching: true }))
+    const url =
+      process.env.NODE_ENV === 'production'
+        ? 'https://multi-lighthouse.appspot.com'
+        : 'http://localhost:8080/'
     return axios
-      .get('http://localhost:8080/', {
+      .get(url, {
         params: {
           urls: this.state.query,
         },
