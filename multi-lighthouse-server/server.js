@@ -7,22 +7,23 @@ const puppeteer = require('puppeteer')
 async function launchPuppeteerRunLighthouse(url) {
   try {
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox'],
+      args: ['--no-sandbox', '--incognito'],
     })
-    //await browser.newPage()
+
     const port = browser._connection._url.slice(15, 20)
     console.log(port, 'port')
-    process.on('unhandledRejection', async (reason, p) => {
-      console.error('Unhandled Rejection at: Promise', p, 'reason: ', reason)
-      browser.close()
-    })
-    //await page.goto(url)
+
     const { lhr } = await lighthouse(url, {
       port,
       output: 'json',
       onlyCategories: ['performance'],
     })
     browser.close()
+
+    if (lhr.runtimeError) {
+      console.log(lhr.runtimeError.code, lhr.requestedUrl)
+    }
+
     return lhr
   } catch (error) {
     console.log(error)
