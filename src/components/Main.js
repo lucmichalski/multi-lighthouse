@@ -24,6 +24,7 @@ class Main extends Component {
 
   getData = () => {
     this.setState(() => ({ fetching: true }))
+    const { query } = this.state
     const url =
       process.env.NODE_ENV === 'production'
         ? 'https://multi-lighthouse.appspot.com'
@@ -31,7 +32,7 @@ class Main extends Component {
     return axios
       .get(url, {
         params: {
-          urls: this.state.query,
+          urls: query,
         },
       })
       .then(response => {
