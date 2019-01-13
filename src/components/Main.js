@@ -24,6 +24,7 @@ class Main extends Component {
     errorMessage: '',
     fetching: false,
     UrlSearch: true,
+    searchEnabled: true,
   }
 
   UrlSearch = () => {
@@ -53,10 +54,12 @@ class Main extends Component {
           errorMessage: response[i].runtimeError.message,
           errorUrl: response[i].finalUrl,
           fetching: false,
+          query: [],
+          searchEnabled: false,
         }
       }
     }
-    return { data: response, fetching: false }
+    return { data: response, fetching: false, query: [], searchEnabled: false }
   }
 
   onChangeInput = event => {
@@ -72,7 +75,7 @@ class Main extends Component {
         if (!state.query.includes(state.input)) {
           return { query: [...state.query, state.input], input: `` }
         } else {
-          alert('already there')
+          alert('already in your query')
         }
       } else {
         alert('not valid')
@@ -130,69 +133,98 @@ class Main extends Component {
       errorUrl,
       fetching,
       UrlSearch,
+      searchEnabled,
     } = this.state
 
     return (
       <div className="main">
-        <div>
-          <input
-            type="radio"
-            id="Url"
-            name="searchType"
-            value="Url Search"
-            checked={UrlSearch}
-            onChange={() =>
-              this.setState(state => ({
-                UrlSearch: !state.UrlSearch,
+        {searchEnabled && (
+          <div>
+            <input
+              type="radio"
+              id="Url"
+              name="searchType"
+              value="Url Search"
+              checked={UrlSearch}
+              onChange={() =>
+                this.setState(state => ({
+                  UrlSearch: !state.UrlSearch,
+                  query: [],
+                }))
+              }
+            />
+            <label htmlFor="Url">Url Search</label>
+            <input
+              type="radio"
+              id="topFive"
+              name="searchType"
+              value="Top Five Search"
+              checked={!UrlSearch}
+              onChange={() =>
+                this.setState(state => ({
+                  UrlSearch: !state.UrlSearch,
+                  query: [],
+                }))
+              }
+            />
+            <label htmlFor="topFive">Top Five Search</label>
+            <Search
+              input={input}
+              onClick={
+                UrlSearch ? this.onClickAddUrl : this.onClickAddSearchTerm
+              }
+              onChange={this.onChangeInput}
+            />
+            <button
+              type="button"
+              disabled={query.length === 0}
+              onClick={
+                query.length >= 1
+                  ? UrlSearch
+                    ? () =>
+                        this.setState(
+                          () => ({ searchEnabled: false }),
+                          () => this.UrlSearch()
+                        )
+                    : () =>
+                        this.setState(
+                          () => ({ searchEnabled: false }),
+                          () => this.topFiveSearch()
+                        )
+                  : null
+              }
+            >
+              Run Lighthouse
+            </button>
+            <ul>
+              {data.length === 0 &&
+                query.length >= 1 &&
+                query.map(item => {
+                  return <li key={item}>{item}</li>
+                })}
+            </ul>
+          </div>
+        )}
+        {!searchEnabled && !fetching && (
+          <button
+            onClick={() =>
+              this.setState(() => ({
+                searchEnabled: true,
+                data: [],
                 query: [],
+                input: '',
               }))
             }
-          />
-          <label htmlFor="Url">Url Search</label>
-          <input
-            type="radio"
-            id="topFive"
-            name="searchType"
-            value="topFive Search"
-            checked={!UrlSearch}
-            onChange={() =>
-              this.setState(state => ({
-                UrlSearch: !state.UrlSearch,
-                query: [],
-              }))
-            }
-          />
-          <label htmlFor="topFive">Top Five Search</label>
-        </div>
-        <Search
-          input={input}
-          onClick={UrlSearch ? this.onClickAddUrl : this.onClickAddSearchTerm}
-          onChange={this.onChangeInput}
-        />
-        <button
-          type="button"
-          disabled={query.length === 0}
-          onClick={
-            query.length >= 1
-              ? UrlSearch
-                ? () => this.UrlSearch()
-                : () => this.topFiveSearch()
-              : null
-          }
-        >
-          Run Lighthouse
-        </button>
-        <ul>
-          {data.length === 0 &&
-            query.length >= 1 &&
-            query.map(item => {
-              return <li key={item}>{item}</li>
-            })}
-        </ul>
+            type="button"
+          >
+            Another Search?
+          </button>
+        )}
+
         {!error && data.length === 0 && fetching === true && (
           <div>Headless Chrome is running!</div>
         )}
-        {!error ? (
+        {!error && !searchEnabled ? (
           <BarGraph metrics={metrics} data={data} />
         ) : (
           <div>

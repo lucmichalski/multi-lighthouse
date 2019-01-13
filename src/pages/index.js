@@ -19,7 +19,7 @@ const IndexPage = () => (
         title={process.env.NODE_ENV === 'production' ? 'Prod' : 'Dev'}
         keywords={[`gatsby`, `application`, `react`]}
       />
-      <Link to="/page-2/">Go to page 2</Link>
+      {/* <Link to="/page-2/">Go to page 2</Link> */}
     </Layout>
   </Fragment>
 )
