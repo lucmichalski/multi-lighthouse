@@ -90,6 +90,7 @@ class Main extends Component {
     }))
 
   topFiveSearch = () => {
+    const { query } = this.state
     axios
       .get(
         `https://www.googleapis.com/customsearch/v1?key=${
@@ -97,7 +98,7 @@ class Main extends Component {
         }&cx=${process.env.SEARCH_ENGINE}&num=5&start=1`,
         {
           params: {
-            q: this.state.query[0],
+            q: query[0],
           },
         }
       )
@@ -140,19 +141,6 @@ class Main extends Component {
       <div className="main">
         {searchEnabled && (
           <div>
-            <input
-              type="radio"
-              id="Url"
-              name="searchType"
-              value="Url Search"
-              checked={UrlSearch}
-              onChange={() =>
-                this.setState(state => ({
-                  UrlSearch: !state.UrlSearch,
-                  query: [],
-                }))
-              }
-            />
             <label htmlFor="Url">Url Search</label>
             <input
               type="radio"
