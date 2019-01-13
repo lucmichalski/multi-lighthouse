@@ -19,6 +19,7 @@ class Main extends Component {
       'interactive',
       'estimated-input-latency',
     ],
+    errorUrl: '',
     error: false,
     errorMessage: '',
     fetching: false,
@@ -36,26 +37,25 @@ class Main extends Component {
       })
       .then(response => {
         console.log(response.data)
-        /*this needs to be for every item in array */
-        if (response.data[0].code) {
-          this.setState(() => ({
-            error: true,
-            errorMessage: response.data[0].friendlyMessage,
-            fetching: false,
-          }))
-        } else if (response.data[0].runtimeError.code !== 'NO_ERROR') {
-          this.setState(() => ({
-            error: true,
-            errorMessage: response.data[0].runtimeError.message,
-            fetching: false,
-          }))
-        } else {
-          this.setState(() => ({ data: response.data, fetching: false }))
-        }
+        this.setState(() => this.handleResponse(response.data))
       })
       .catch(error => {
         console.log(error)
       })
+  }
+
+  handleResponse = response => {
+    for (let i = 0; i < response.length; i++) {
+      if (response[i].runtimeError.code !== 'NO_ERROR') {
+        return {
+          error: true,
+          errorMessage: response[i].runtimeError.message,
+          errorUrl: response[i].finalUrl,
+          fetching: false,
+        }
+      }
+    }
+    return { data: response, fetching: false }
   }
 
   onChangeInput = event => {
@@ -106,23 +106,7 @@ class Main extends Component {
             },
           })
           .then(response => {
-            console.log(response.data)
-            /*this needs to be for every item in array */
-            if (response.data[0].code) {
-              this.setState(() => ({
-                error: true,
-                errorMessage: response.data[0].friendlyMessage,
-                fetching: false,
-              }))
-            } else if (response.data[0].runtimeError.code !== 'NO_ERROR') {
-              this.setState(() => ({
-                error: true,
-                errorMessage: response.data[0].runtimeError.message,
-                fetching: false,
-              }))
-            } else {
-              this.setState(() => ({ data: response.data, fetching: false }))
-            }
+            this.setState(() => this.handleResponse(response.data))
           })
           .catch(error => {
             console.log(error)
@@ -139,6 +123,7 @@ class Main extends Component {
       metrics,
       error,
       errorMessage,
+      errorUrl,
       fetching,
     } = this.state
 
@@ -172,7 +157,10 @@ class Main extends Component {
         {!error ? (
           <BarGraph metrics={metrics} data={data} />
         ) : (
-          <div>{errorMessage}</div>
+          <div>
+            <div>{errorUrl}</div>
+            <div>{errorMessage}</div>
+          </div>
         )}
       </div>
     )
