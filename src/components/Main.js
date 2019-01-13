@@ -1,10 +1,39 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import isUrl from 'is-url'
+import styled from 'styled-components'
 import BarGraph from './BarGraph'
 import Search from './Search'
 
 import './Main.css'
+
+const RunLighthouseButton = styled.button`
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.302),
+    0 1px 3px 1px rgba(60, 64, 67, 0.149);
+  align-items: center;
+  background:  #448aff;
+  opacity: ${props => (props.disabled ? '.7' : '1.0')}
+  border: 1px solid transparent;
+  border-radius: 24px;
+  color: #ffffff;
+  display: inline-flex;
+  font-family: 'Google Sans', Roboto, RobotoDraft, Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  height: 48px;
+  letter-spacing: 0.15px;
+  line-height: 22px;
+  margin: 0;
+  min-width: 120px;
+  padding: 0;
+  text-transform: none;
+  width: inherit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')}
+`
 
 class Main extends Component {
   state = {
@@ -69,7 +98,10 @@ class Main extends Component {
     }))
   }
 
-  onClickAddUrl = () => {
+  onClickAddUrl = e => {
+    if (e) {
+      e.preventDefault()
+    }
     this.setState(state => {
       if (isUrl(state.input)) {
         if (!state.query.includes(state.input)) {
@@ -174,15 +206,15 @@ class Main extends Component {
               placeholder={
                 UrlSearch
                   ? 'Enter URL to test with Lighthouse'
-                  : 'Enter search term to test with Lighthouse'
+                  : 'Enter search term'
               }
               input={input}
-              onClick={
+              onSubmit={
                 UrlSearch ? this.onClickAddUrl : this.onClickAddSearchTerm
               }
               onChange={this.onChangeInput}
             />
-            <button
+            <RunLighthouseButton
               type="button"
               disabled={query.length === 0}
               onClick={
@@ -202,7 +234,7 @@ class Main extends Component {
               }
             >
               Run Lighthouse
-            </button>
+            </RunLighthouseButton>
             <ul>
               {data.length === 0 &&
                 query.length >= 1 &&
