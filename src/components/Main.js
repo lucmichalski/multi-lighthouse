@@ -141,7 +141,21 @@ class Main extends Component {
       <div className="main">
         {searchEnabled && (
           <div>
+            <input
+              type="radio"
+              id="UrlSearch"
+              name="searchType"
+              value="Url Search"
+              checked={UrlSearch}
+              onChange={() =>
+                this.setState(state => ({
+                  UrlSearch: !state.UrlSearch,
+                  query: [],
+                }))
+              }
+            />
             <label htmlFor="Url">Url Search</label>
+
             <input
               type="radio"
               id="topFive"
@@ -157,6 +171,11 @@ class Main extends Component {
             />
             <label htmlFor="topFive">Top Five Search</label>
             <Search
+              placeholder={
+                UrlSearch
+                  ? 'Enter URL to test with Lighthouse'
+                  : 'Enter search term to test with Lighthouse'
+              }
               input={input}
               onClick={
                 UrlSearch ? this.onClickAddUrl : this.onClickAddSearchTerm
