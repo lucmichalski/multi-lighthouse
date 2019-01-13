@@ -27,10 +27,7 @@ class Main extends Component {
   getData = () => {
     this.setState(() => ({ fetching: true }))
     const { query } = this.state
-    const url =
-      process.env.NODE_ENV === 'production'
-        ? 'https://multi-lighthouse.appspot.com'
-        : 'http://localhost:8080/'
+    const url = process.env.SERVER
     return axios
       .get(url, {
         params: {
@@ -85,6 +82,55 @@ class Main extends Component {
     })
   }
 
+  getTopFive = () => {
+    axios
+      .get(
+        `https://www.googleapis.com/customsearch/v1?key=${
+          process.env.API_KEY
+        }&cx=${process.env.SEARCH_ENGINE}&num=5`,
+        {
+          params: {
+            q: 'land for sale texas',
+          },
+        }
+      )
+      .then(response => {
+        console.log(response)
+        this.setState(() => ({ fetching: true }))
+        const query = response.data.items.map(({ link }) => link)
+        const url = process.env.SERVER
+        return axios
+          .get(url, {
+            params: {
+              urls: query,
+            },
+          })
+          .then(response => {
+            console.log(response.data)
+            /*this needs to be for every item in array */
+            if (response.data[0].code) {
+              this.setState(() => ({
+                error: true,
+                errorMessage: response.data[0].friendlyMessage,
+                fetching: false,
+              }))
+            } else if (response.data[0].runtimeError.code !== 'NO_ERROR') {
+              this.setState(() => ({
+                error: true,
+                errorMessage: response.data[0].runtimeError.message,
+                fetching: false,
+              }))
+            } else {
+              this.setState(() => ({ data: response.data, fetching: false }))
+            }
+          })
+          .catch(error => {
+            console.log(error)
+          })
+      })
+      .catch(error => console.log(error))
+  }
+
   render() {
     const {
       input,
@@ -109,6 +155,9 @@ class Main extends Component {
           onClick={query.length >= 1 ? () => this.getData() : null}
         >
           Run Lighthouse
+        </button>
+        <button onClick={() => this.getTopFive()} type="button">
+          Top 5
         </button>
         <ul>
           {data.length === 0 &&

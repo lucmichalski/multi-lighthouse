@@ -12,10 +12,17 @@ import {
 import './BarGraph.css'
 
 const BarGraph = ({ data, metrics }) => {
-  const legendItems = data.map(({ finalUrl }) => finalUrl)
+  const legendItems = data.map(({ finalUrl, categories }) => (
+    <span key={finalUrl}>
+      {finalUrl}
+      {' '}
+Performance Score
+      {` ${categories.performance.score}`}
+    </span>
+  ))
   return (
     <div className="graph">
-      <DiscreteColorLegend height={200} width={300} items={legendItems} />
+      <DiscreteColorLegend items={legendItems} />
       <FlexibleXYPlot xType="ordinal">
         <VerticalGridLines />
         <HorizontalGridLines />

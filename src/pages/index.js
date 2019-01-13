@@ -15,7 +15,10 @@ const IndexPage = () => (
     </Helmet>
     <Layout>
       <Main />
-      <SEO title="Home" keywords={[`gatsby`, `application`, `react`]} />
+      <SEO
+        title={process.env.NODE_ENV === 'production' ? 'Prod' : 'Dev'}
+        keywords={[`gatsby`, `application`, `react`]}
+      />
       <Link to="/page-2/">Go to page 2</Link>
     </Layout>
   </Fragment>
