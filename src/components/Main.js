@@ -9,7 +9,7 @@ import './Main.css'
 class Main extends Component {
   state = {
     data: [],
-    input: 'https://www.',
+    input: '',
     query: [],
     metrics: [
       'first-contentful-paint',
@@ -23,16 +23,17 @@ class Main extends Component {
     error: false,
     errorMessage: '',
     fetching: false,
+    UrlSearch: true,
   }
 
-  getData = () => {
+  UrlSearch = () => {
     this.setState(() => ({ fetching: true }))
     const { query } = this.state
-    const url = process.env.SERVER
+    const Url = process.env.SERVER
     return axios
-      .get(url, {
+      .get(Url, {
         params: {
-          urls: query,
+          query,
         },
       })
       .then(response => {
@@ -69,10 +70,7 @@ class Main extends Component {
     this.setState(state => {
       if (isUrl(state.input)) {
         if (!state.query.includes(state.input)) {
-          return {
-            query: [...state.query, state.input],
-            input: `https://www.`,
-          }
+          return { query: [...state.query, state.input], input: `` }
         } else {
           alert('already there')
         }
@@ -82,15 +80,21 @@ class Main extends Component {
     })
   }
 
-  getTopFive = () => {
+  onClickAddSearchTerm = () =>
+    this.setState(state => ({
+      query: [state.input],
+      input: ``,
+    }))
+
+  topFiveSearch = () => {
     axios
       .get(
         `https://www.googleapis.com/customsearch/v1?key=${
           process.env.API_KEY
-        }&cx=${process.env.SEARCH_ENGINE}&num=5`,
+        }&cx=${process.env.SEARCH_ENGINE}&num=5&start=1`,
         {
           params: {
-            q: 'land for sale texas',
+            q: this.state.query[0],
           },
         }
       )
@@ -98,11 +102,11 @@ class Main extends Component {
         console.log(response)
         this.setState(() => ({ fetching: true }))
         const query = response.data.items.map(({ link }) => link)
-        const url = process.env.SERVER
+        const Url = process.env.SERVER
         return axios
-          .get(url, {
+          .get(Url, {
             params: {
-              urls: query,
+              query,
             },
           })
           .then(response => {
@@ -125,24 +129,58 @@ class Main extends Component {
       errorMessage,
       errorUrl,
       fetching,
+      UrlSearch,
     } = this.state
 
     return (
       <div className="main">
+        <div>
+          <input
+            type="radio"
+            id="Url"
+            name="searchType"
+            value="Url Search"
+            checked={UrlSearch}
+            onChange={() =>
+              this.setState(state => ({
+                UrlSearch: !state.UrlSearch,
+                query: [],
+              }))
+            }
+          />
+          <label htmlFor="Url">Url Search</label>
+          <input
+            type="radio"
+            id="topFive"
+            name="searchType"
+            value="topFive Search"
+            checked={!UrlSearch}
+            onChange={() =>
+              this.setState(state => ({
+                UrlSearch: !state.UrlSearch,
+                query: [],
+              }))
+            }
+          />
+          <label htmlFor="topFive">Top Five Search</label>
+        </div>
         <Search
           input={input}
-          onClick={this.onClickAddUrl}
+          onClick={UrlSearch ? this.onClickAddUrl : this.onClickAddSearchTerm}
           onChange={this.onChangeInput}
         />
         <button
           type="button"
           disabled={query.length === 0}
-          onClick={query.length >= 1 ? () => this.getData() : null}
+          onClick={
+            query.length >= 1
+              ? UrlSearch
+                ? () => this.UrlSearch()
+                : () => this.topFiveSearch()
+              : null
+          }
         >
           Run Lighthouse
-        </button>
-        <button onClick={() => this.getTopFive()} type="button">
-          Top 5
         </button>
         <ul>
           {data.length === 0 &&
