@@ -60,6 +60,7 @@ class Main extends Component {
     this.setState(() => ({ fetching: true }))
     const { query } = this.state
     const Url = process.env.SERVER
+    console.log(Url)
     return axios
       .get(Url, {
         params: {
