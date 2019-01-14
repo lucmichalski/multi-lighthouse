@@ -59,7 +59,7 @@ class Main extends Component {
   UrlSearch = () => {
     this.setState(() => ({ fetching: true }))
     const { query } = this.state
-    const Url = process.env.SERVER
+    const Url = process.env.GATSBY_SERVER
     console.log(Url)
     return axios
       .get(Url, {
