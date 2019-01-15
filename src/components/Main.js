@@ -1,39 +1,10 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import isUrl from 'is-url'
-import styled from 'styled-components'
 import BarGraph from './BarGraph'
 import Search from './Search'
 
-import './Main.css'
-
-const RunLighthouseButton = styled.button`
-  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.302),
-    0 1px 3px 1px rgba(60, 64, 67, 0.149);
-  align-items: center;
-  background:  #448aff;
-  opacity: ${props => (props.disabled ? '.7' : '1.0')}
-  border: 1px solid transparent;
-  border-radius: 24px;
-  color: #ffffff;
-  display: inline-flex;
-  font-family: 'Google Sans', Roboto, RobotoDraft, Helvetica, Arial, sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  height: 48px;
-  letter-spacing: 0.15px;
-  line-height: 22px;
-  margin: 0;
-  min-width: 120px;
-  padding: 0;
-  text-transform: none;
-  width: inherit;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto;
-  cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')}
-`
+import { RunLighthouseButton } from './MainStyles'
 
 class Main extends Component {
   state = {
@@ -147,6 +118,7 @@ class Main extends Component {
             },
           })
           .then(response => {
+            console.log(response)
             this.setState(() => this.handleResponse(response.data))
           })
           .catch(error => {
@@ -204,11 +176,7 @@ class Main extends Component {
             />
             <label htmlFor="topFive">Top Five Search</label>
             <Search
-              placeholder={
-                UrlSearch
-                  ? 'Enter URL to test with Lighthouse'
-                  : 'Enter search term'
-              }
+              placeholder={UrlSearch ? 'Enter URL(s)' : 'Enter Search Term'}
               input={input}
               onSubmit={
                 UrlSearch ? this.onClickAddUrl : this.onClickAddSearchTerm

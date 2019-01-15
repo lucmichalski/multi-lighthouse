@@ -2,6 +2,7 @@
   "extends": ["airbnb", "eslint:recommended", "plugin:react/recommended"],
   "parser": "babel-eslint",
   "rules": {
+    "import/prefer-default-export": 0,
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
     "no-var": "error",
     "prefer-const": [

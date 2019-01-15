@@ -8,7 +8,7 @@ import {
   VerticalBarSeries,
   DiscreteColorLegend,
 } from 'react-vis'
-
+import { Graph } from './BarGraphStyles'
 import './BarGraph.css'
 
 const BarGraph = ({ data, metrics }) => {
@@ -21,7 +21,7 @@ Performance Score
     </span>
   ))
   return (
-    <div className="graph">
+    <Graph>
       <DiscreteColorLegend items={legendItems} />
       <FlexibleXYPlot xType="ordinal">
         <VerticalGridLines />
@@ -42,7 +42,7 @@ Performance Score
           )
         })}
       </FlexibleXYPlot>
-    </div>
+    </Graph>
   )
 }
 
