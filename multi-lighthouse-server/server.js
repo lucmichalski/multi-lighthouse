@@ -40,7 +40,7 @@ app.use(function(req, res, next) {
 })
 
 app.get('/', function(req, res) {
-  const urls = req.query.query
+  const urls = req.query.q
 
   Promise.all(urls.map(url => launchPuppeteerRunLighthouse(url)))
     .then(results => res.send(results))

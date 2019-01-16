@@ -10,7 +10,6 @@ export const RunLighthouseButton = styled.button`
   border-radius: 24px;
   color: #ffffff;
   display: inline-flex;
-  font-family: 'Google Sans', Roboto, RobotoDraft, Helvetica, Arial, sans-serif;
   font-weight: 500;
   font-size: 14px;
   height: 48px;
@@ -26,4 +25,26 @@ export const RunLighthouseButton = styled.button`
   align-items: center;
   margin: 0 auto;
   cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')}
+`
+export const RadioGroupWrapper = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 460px;
+  height: 74px;
+  color: #202124;
+  font-size: 18px;
+`
+export const RadioInputLabelWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`
+
+export const MainWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 `

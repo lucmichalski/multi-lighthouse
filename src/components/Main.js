@@ -3,8 +3,13 @@ import axios from 'axios'
 import isUrl from 'is-url'
 import BarGraph from './BarGraph'
 import Search from './Search'
+import RadioGroup from './RadioGroup'
 
-import { RunLighthouseButton } from './MainStyles'
+import {
+  MainWrapper,
+  RunLighthouseButton,
+  RadioGroupWrapper,
+} from './MainStyles'
 
 class Main extends Component {
   state = {
@@ -28,14 +33,18 @@ class Main extends Component {
   }
 
   UrlSearch = () => {
-    this.setState(() => ({ fetching: true }))
     const { query } = this.state
+    this.runLighthouse(query)
+  }
+
+  runLighthouse = query => {
+    this.setState(() => ({ fetching: true, searchEnabled: false }))
     const Url = process.env.GATSBY_SERVER
-    console.log(Url)
+
     return axios
       .get(Url, {
         params: {
-          query,
+          q: query,
         },
       })
       .then(response => {
@@ -87,19 +96,27 @@ class Main extends Component {
     })
   }
 
-  onClickAddSearchTerm = () =>
-    this.setState(state => ({
-      query: [state.input],
-      input: ``,
-    }))
+  addSearchTermRunTopFiveSearch = e => {
+    if (e) {
+      e.preventDefault()
+    }
+    this.setState(
+      state => ({
+        query: [state.input],
+        input: ``,
+      }),
+      () => this.topFiveSearch()
+    )
+  }
 
   topFiveSearch = () => {
     const { query } = this.state
+    console.log(query)
     axios
       .get(
         `https://www.googleapis.com/customsearch/v1?key=${
-          process.env.API_KEY
-        }&cx=${process.env.SEARCH_ENGINE}&num=5&start=1`,
+          process.env.GATSBY_API_KEY
+        }&cx=${process.env.GATSBY_SEARCH_ENGINE}&num=5&start=1`,
         {
           params: {
             q: query[0],
@@ -108,22 +125,8 @@ class Main extends Component {
       )
       .then(response => {
         console.log(response)
-        this.setState(() => ({ fetching: true }))
         const query = response.data.items.map(({ link }) => link)
-        const Url = process.env.SERVER
-        return axios
-          .get(Url, {
-            params: {
-              query,
-            },
-          })
-          .then(response => {
-            console.log(response)
-            this.setState(() => this.handleResponse(response.data))
-          })
-          .catch(error => {
-            console.log(error)
-          })
+        this.runLighthouse(query)
       })
       .catch(error => console.log(error))
   }
@@ -141,69 +144,55 @@ class Main extends Component {
       UrlSearch,
       searchEnabled,
     } = this.state
-
+    const radioIdentifiers = [
+      { value: 'Url Search', id: 'UrlSearch', checked: UrlSearch },
+      { value: 'Top Five Search', id: 'topFive', checked: !UrlSearch },
+    ]
     return (
-      <div className="main">
+      <MainWrapper>
         {searchEnabled && (
           <div>
-            <input
-              type="radio"
-              id="UrlSearch"
-              name="searchType"
-              value="Url Search"
-              checked={UrlSearch}
-              onChange={() =>
-                this.setState(state => ({
-                  UrlSearch: !state.UrlSearch,
-                  query: [],
-                }))
-              }
-            />
-            <label htmlFor="Url">Url Search</label>
+            <RadioGroupWrapper>
+              <RadioGroup
+                onChange={() =>
+                  this.setState(state => ({
+                    UrlSearch: !state.UrlSearch,
+                    query: [],
+                  }))
+                }
+                identifiers={radioIdentifiers}
+                groupName="searchType"
+                className="radio-group"
+              />
+            </RadioGroupWrapper>
 
-            <input
-              type="radio"
-              id="topFive"
-              name="searchType"
-              value="Top Five Search"
-              checked={!UrlSearch}
-              onChange={() =>
-                this.setState(state => ({
-                  UrlSearch: !state.UrlSearch,
-                  query: [],
-                }))
-              }
-            />
-            <label htmlFor="topFive">Top Five Search</label>
             <Search
               placeholder={UrlSearch ? 'Enter URL(s)' : 'Enter Search Term'}
               input={input}
               onSubmit={
-                UrlSearch ? this.onClickAddUrl : this.onClickAddSearchTerm
+                UrlSearch
+                  ? this.onClickAddUrl
+                  : this.addSearchTermRunTopFiveSearch
               }
+              UrlSearch={UrlSearch}
               onChange={this.onChangeInput}
             />
-            <RunLighthouseButton
-              type="button"
-              disabled={query.length === 0}
-              onClick={
-                query.length >= 1
-                  ? UrlSearch
-                    ? () =>
-                        this.setState(
-                          () => ({ searchEnabled: false }),
-                          () => this.UrlSearch()
-                        )
-                    : () =>
-                        this.setState(
-                          () => ({ searchEnabled: false }),
-                          () => this.topFiveSearch()
-                        )
-                  : null
-              }
-            >
-              Run Lighthouse
-            </RunLighthouseButton>
+            {UrlSearch && (
+              <RunLighthouseButton
+                type="button"
+                disabled={query.length === 0}
+                onClick={
+                  query.length >= 1
+                    ? UrlSearch
+                      ? () => this.UrlSearch()
+                      : () => this.topFiveSearch()
+                    : null
+                }
+              >
+                Run Lighthouse
+              </RunLighthouseButton>
+            )}
+
             <ul>
               {data.length === 0 &&
                 query.length >= 1 &&
@@ -240,7 +229,7 @@ class Main extends Component {
             <div>{errorMessage}</div>
           </div>
         )}
-      </div>
+      </MainWrapper>
     )
   }
 }
