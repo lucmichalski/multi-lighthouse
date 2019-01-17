@@ -1,8 +1,13 @@
 import React from 'react'
 
-const RadioGroup = ({ groupName, onChange, identifiers }) => {
+const RadioGroup = ({
+  groupName,
+  onChange,
+  identifiers,
+  styles: RadioGroup,
+}) => {
   return identifiers.map(({ value, id, checked }) => (
-    <div key={id}>
+    <RadioGroup key={id}>
       <input
         type="radio"
         id={id}
@@ -12,7 +17,7 @@ const RadioGroup = ({ groupName, onChange, identifiers }) => {
         onChange={() => onChange()}
       />
       <label htmlFor={id}>{value}</label>
-    </div>
+    </RadioGroup>
   ))
 }
 

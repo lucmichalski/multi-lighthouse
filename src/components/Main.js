@@ -1,14 +1,21 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import axios from 'axios'
 import isUrl from 'is-url'
+import ReactLoading from 'react-loading'
 import BarGraph from './BarGraph'
 import Search from './Search'
 import RadioGroup from './RadioGroup'
+import closeImg from '../images/baseline_close_black_18dp.png'
 
 import {
   MainWrapper,
   RunLighthouseButton,
   RadioGroupWrapper,
+  RadioGroupStyles,
+  SearchAgainButton,
+  UL,
+  LI,
+  IMG,
 } from './MainStyles'
 
 class Main extends Component {
@@ -131,6 +138,9 @@ class Main extends Component {
       .catch(error => console.log(error))
   }
 
+  removeQueryItem = item =>
+    this.setState(state => ({ query: state.query.filter(url => url !== item) }))
+
   render() {
     const {
       input,
@@ -145,7 +155,7 @@ class Main extends Component {
       searchEnabled,
     } = this.state
     const radioIdentifiers = [
-      { value: 'Url Search', id: 'UrlSearch', checked: UrlSearch },
+      { value: 'URL Search', id: 'UrlSearch', checked: UrlSearch },
       { value: 'Top Five Search', id: 'topFive', checked: !UrlSearch },
     ]
     return (
@@ -163,6 +173,7 @@ class Main extends Component {
                 identifiers={radioIdentifiers}
                 groupName="searchType"
                 className="radio-group"
+                styles={RadioGroupStyles}
               />
             </RadioGroupWrapper>
 
@@ -193,17 +204,27 @@ class Main extends Component {
               </RunLighthouseButton>
             )}
 
-            <ul>
+            <UL>
               {data.length === 0 &&
                 query.length >= 1 &&
                 query.map(item => {
-                  return <li key={item}>{item}</li>
+                  return (
+                    <LI key={item}>
+                      {item}
+                      {' '}
+                      <IMG
+                        onClick={() => this.removeQueryItem(item)}
+                        alt="Delete List Item"
+                        src={closeImg}
+                      />
+                    </LI>
+                  )
                 })}
-            </ul>
+            </UL>
           </div>
         )}
         {!searchEnabled && !fetching && (
-          <button
+          <SearchAgainButton
             onClick={() =>
               this.setState(() => ({
                 searchEnabled: true,
@@ -214,12 +235,20 @@ class Main extends Component {
             }
             type="button"
           >
-            Another Search?
-          </button>
+            Search Again
+          </SearchAgainButton>
         )}
 
         {!error && data.length === 0 && fetching === true && (
-          <div>Headless Chrome is running!</div>
+          <Fragment>
+            <div>Headless Chrome is running!</div>
+            <ReactLoading
+              type="bars"
+              color="gray"
+              height="20%"
+              width="20%"
+            />
+          </Fragment>
         )}
         {!error && !searchEnabled ? (
           <BarGraph metrics={metrics} data={data} />
