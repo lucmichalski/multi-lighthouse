@@ -8,6 +8,7 @@ const RadioGroup = ({
 }) => {
   return identifiers.map(({ value, id, checked }) => (
     <RadioGroup key={id}>
+      <label htmlFor={id}>{value}</label>
       <input
         type="radio"
         id={id}
@@ -16,7 +17,6 @@ const RadioGroup = ({
         checked={checked}
         onChange={() => onChange()}
       />
-      <label htmlFor={id}>{value}</label>
     </RadioGroup>
   ))
 }

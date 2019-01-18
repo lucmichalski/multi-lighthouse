@@ -16,6 +16,8 @@ import {
   UL,
   LI,
   IMG,
+  H2,
+  LoadingMessage,
 } from './MainStyles'
 
 class Main extends Component {
@@ -171,6 +173,7 @@ class Main extends Component {
       <MainWrapper>
         {searchEnabled && (
           <div>
+            <H2>Compare performance scores for multiple sites</H2>
             <RadioGroupWrapper>
               <RadioGroup
                 onChange={() => this.onChangeRadio()}
@@ -182,7 +185,7 @@ class Main extends Component {
             </RadioGroupWrapper>
 
             <Search
-              placeholder={UrlSearch ? 'Enter URL(s)' : 'Enter Search Term'}
+              placeholder={UrlSearch ? 'Enter URL(s)' : 'Enter a Search Term'}
               input={input}
               onSubmit={
                 UrlSearch
@@ -192,22 +195,6 @@ class Main extends Component {
               UrlSearch={UrlSearch}
               onChange={this.onChangeSearchInput}
             />
-            {UrlSearch && (
-              <RunLighthouseButton
-                type="button"
-                disabled={query.length === 0}
-                onClick={
-                  query.length >= 1
-                    ? UrlSearch
-                      ? () => this.UrlSearch()
-                      : () => this.topFiveSearch()
-                    : null
-                }
-              >
-                Run Lighthouse
-              </RunLighthouseButton>
-            )}
-
             <UL>
               {data.length === 0 &&
                 query.length >= 1 &&
@@ -225,6 +212,21 @@ class Main extends Component {
                   )
                 })}
             </UL>
+            {UrlSearch && query.length >= 1 && (
+              <RunLighthouseButton
+                type="button"
+                disabled={query.length === 0}
+                onClick={
+                  query.length >= 1
+                    ? UrlSearch
+                      ? () => this.UrlSearch()
+                      : () => this.topFiveSearch()
+                    : null
+                }
+              >
+                Run Lighthouse
+              </RunLighthouseButton>
+            )}
           </div>
         )}
         {!searchEnabled && !fetching && (
@@ -245,7 +247,7 @@ class Main extends Component {
 
         {!error && data.length === 0 && fetching === true && (
           <Fragment>
-            <div>Headless Chrome is running!</div>
+            <LoadingMessage>Headless Chrome is running!</LoadingMessage>
             <ReactLoading type="bars" color="gray" height="20%" width="20%" />
           </Fragment>
         )}

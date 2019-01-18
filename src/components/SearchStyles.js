@@ -4,6 +4,7 @@ export const Form = styled.form`
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 25px;
 `
 
 export const InputWrapper = styled.div`
@@ -42,6 +43,9 @@ export const Button = styled.button`
   padding: 0;
   :focus {
     outline: 0;
+  }
+  :hover {
+    filter: brightness(90%);
   }
 `
 export const Plus = styled.div`

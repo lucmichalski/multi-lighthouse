@@ -1,8 +1,8 @@
 import React, { Fragment } from 'react'
-import { Link } from 'gatsby'
+
 import Helmet from 'react-helmet'
 import Main from '../components/Main'
-import Layout from '../components/layout'
+import Layout from '../components/Layout'
 import SEO from '../components/seo'
 
 const IndexPage = () => (

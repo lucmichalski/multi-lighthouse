@@ -1,23 +1,21 @@
 import styled from 'styled-components'
 
+export const H2 = styled.h2`
+  font-family: Noto Naskh Arabic, Roboto Slab, Helvetica Neue, Helvetica, Arial;
+  font-weight: lighter;
+  font-size: 2.5rem;
+  letter-spacing: 4px;
+  line-height: 1;
+  width: 460px;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  margin-bottom: 50px;
+`
+export const LoadingMessage = styled(H2)``
+
 const Button = styled.button`
-  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.302),
-    0 1px 3px 1px rgba(60, 64, 67, 0.149);
-  align-items: center;
-  background:  #448aff;
-  opacity: ${props => (props.disabled ? '.7' : '1.0')}
-  border: 1px solid transparent;
-  border-radius: 24px;
-  color: #ffffff;
-  display: inline-flex;
-  font-weight: 500;
-  font-size: 14px;
-  height: 48px;
-  letter-spacing: 0.15px;
-  line-height: 22px;
-  margin: 0;
+  opacity: ${props => (props.disabled ? '.7' : '1.0')};
+  font-weight: 300;
   width: auto;
-  padding: 0 15px;
   text-transform: none;
   display: flex;
   justify-content: center;
@@ -25,6 +23,24 @@ const Button = styled.button`
   margin: 0 auto;
   cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
   :focus {outline: 0;}
+  :hover {  filter: brightness(90%);}
+  font-size: .9rem;
+    height: 52px;
+        text-decoration: none;
+    color: #fff;
+    background-color: #448aff;
+    text-align: center;
+    letter-spacing: .5px;
+    transition: .2s ease-out;
+    border: none;
+    border-radius: 2px;
+    line-height: 36px;
+    padding: 0 1rem;
+    outline: 0;
+    text-transform: uppercase;
+    vertical-align: middle;
+    -webkit-tap-highlight-color: 
+        box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
 `
 
 export const RunLighthouseButton = styled(Button)``
@@ -38,23 +54,30 @@ export const RadioGroupWrapper = styled.div`
   justify-content: space-between;
   align-items: center;
   width: 460px;
-  height: 74px;
-  font-size: 18px;
+  height: 75px;
+  margin-bottom: 25px;
 `
 export const RadioGroupStyles = styled.div`
+  font-family: Noto Naskh Arabic, Roboto Slab, Helvetica Neue, Helvetica, Arial;
+  font-weight: lighter;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  height: 100%;
+  border: 1px solid #757575;
+  padding: 10px 0;
+  width: 40%;
 `
 
 export const MainWrapper = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   flex-direction: column;
   width: 100%;
-  height: 100%;
+  height: 100vh;
 `
 
 export const UL = styled.ul`
