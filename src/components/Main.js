@@ -36,16 +36,17 @@ class Main extends Component {
     errorMessage: '',
     fetching: false,
     UrlSearch: true,
+    topFiveSearch: false,
     searchEnabled: true,
   }
 
   UrlSearch = () => {
     const { query } = this.state
+    this.setState(() => ({ fetching: true, searchEnabled: false }))
     this.runLighthouse(query)
   }
 
   runLighthouse = query => {
-    this.setState(() => ({ fetching: true, searchEnabled: false }))
     const Url = process.env.GATSBY_SERVER
 
     return axios
@@ -79,7 +80,7 @@ class Main extends Component {
     return { data: response, fetching: false, query: [], searchEnabled: false }
   }
 
-  onChangeInput = event => {
+  onChangeSearchInput = event => {
     event.persist()
     this.setState(() => ({
       input: `${event.target.value}`,
@@ -95,10 +96,10 @@ class Main extends Component {
         if (!state.query.includes(state.input)) {
           return { query: [...state.query, state.input], input: `` }
         } else {
-          alert('already in your query')
+          alert('You have already entered this URL')
         }
       } else {
-        alert('not valid')
+        alert('URL is not valid. Please enter a valid URL.')
       }
     })
   }
@@ -117,6 +118,7 @@ class Main extends Component {
   }
 
   topFiveSearch = () => {
+    this.setState(() => ({ fetching: true, searchEnabled: false }))
     const { query } = this.state
     console.log(query)
     axios
@@ -141,6 +143,13 @@ class Main extends Component {
   removeQueryItem = item =>
     this.setState(state => ({ query: state.query.filter(url => url !== item) }))
 
+  onChangeRadio = () =>
+    this.setState(state => ({
+      UrlSearch: !state.UrlSearch,
+      topFiveSearch: !state.topFiveSearch,
+      query: [],
+    }))
+
   render() {
     const {
       input,
@@ -164,12 +173,7 @@ class Main extends Component {
           <div>
             <RadioGroupWrapper>
               <RadioGroup
-                onChange={() =>
-                  this.setState(state => ({
-                    UrlSearch: !state.UrlSearch,
-                    query: [],
-                  }))
-                }
+                onChange={() => this.onChangeRadio()}
                 identifiers={radioIdentifiers}
                 groupName="searchType"
                 className="radio-group"
@@ -186,7 +190,7 @@ class Main extends Component {
                   : this.addSearchTermRunTopFiveSearch
               }
               UrlSearch={UrlSearch}
-              onChange={this.onChangeInput}
+              onChange={this.onChangeSearchInput}
             />
             {UrlSearch && (
               <RunLighthouseButton
@@ -242,12 +246,7 @@ class Main extends Component {
         {!error && data.length === 0 && fetching === true && (
           <Fragment>
             <div>Headless Chrome is running!</div>
-            <ReactLoading
-              type="bars"
-              color="gray"
-              height="20%"
-              width="20%"
-            />
+            <ReactLoading type="bars" color="gray" height="20%" width="20%" />
           </Fragment>
         )}
         {!error && !searchEnabled ? (
