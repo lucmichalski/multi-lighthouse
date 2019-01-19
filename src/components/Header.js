@@ -14,7 +14,16 @@ const Logo = styled.h1`
 
 const Header = () => (
   <header>
-    <Logo>all the Lighthouses</Logo>
+    <a
+      style={{ textDecoration: 'none' }}
+      href={
+        process.env.NODE_ENV === 'production'
+          ? 'https://allthelighthouses.netlify.com/'
+          : 'http://localhost:8000/'
+      }
+    >
+      <Logo>all the Lighthouses</Logo>
+    </a>
   </header>
 )
 

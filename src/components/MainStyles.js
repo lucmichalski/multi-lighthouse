@@ -20,7 +20,6 @@ export const H2 = styled.h2`
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
   margin-bottom: 50px;
 `
-export const LoadingMessage = styled(H2)``
 
 const Button = styled.button`
   opacity: ${props => (props.disabled ? '.7' : '1.0')};

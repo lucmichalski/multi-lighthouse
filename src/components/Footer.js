@@ -11,11 +11,21 @@ const Logo = styled.h3`
   margin: 0;
   font-size: 1.5rem;
   font-weight: 300;
+  color: #ffffff;
 `
 const Footer = () => {
   return (
     <FooterWrapper>
-      <Logo>all the Lighthouses</Logo>
+      <a
+        style={{ textDecoration: 'none' }}
+        href={
+          process.env.NODE_ENV === 'production'
+            ? 'https://allthelighthouses.netlify.com/'
+            : 'http://localhost:8000/'
+        }
+      >
+        <Logo>all the Lighthouses</Logo>
+      </a>
     </FooterWrapper>
   )
 }

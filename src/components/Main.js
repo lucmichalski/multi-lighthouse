@@ -1,10 +1,11 @@
 import React, { Component, Fragment } from 'react'
 import axios from 'axios'
 import isUrl from 'is-url'
-import ReactLoading from 'react-loading'
 import BarGraph from './BarGraph'
 import Search from './Search'
 import RadioGroup from './RadioGroup'
+import Error from './Error'
+import Loading from './Loading'
 import closeImg from '../images/baseline_close_black_18dp.png'
 
 import {
@@ -17,7 +18,6 @@ import {
   LI,
   IMG,
   H2,
-  LoadingMessage,
   SearchTermDescription,
   SearchTerm,
 } from './MainStyles'
@@ -263,22 +263,18 @@ class Main extends Component {
         )}
 
         {!error && data.length === 0 && fetching === true && (
-          <Fragment>
-            <LoadingMessage>Headless Chrome is running!</LoadingMessage>
-            <ReactLoading
-              type="bars"
-              color="#757575"
-              height="20%"
-              width="20%"
-            />
-          </Fragment>
+          <Loading
+            showLoading={!error && data.length === 0 && fetching === true}
+            loadingMessage="Headless Chrome is running!"
+          />
         )}
         {!error && !searchEnabled && <BarGraph metrics={metrics} data={data} />}
         {error && !searchEnabled && (
-          <div>
-            <div>{errorUrl}</div>
-            <div>{errorMessage}</div>
-          </div>
+          <Error
+            showError={error && !searchEnabled}
+            errorUrl={errorUrl}
+            errorMessage={errorMessage}
+          />
         )}
       </MainWrapper>
     )
