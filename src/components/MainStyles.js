@@ -1,5 +1,15 @@
 import styled from 'styled-components'
 
+export const MainWrapper = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  padding: 0 40px;
+`
+
 export const H2 = styled.h2`
   font-family: Noto Naskh Arabic, Roboto Slab, Helvetica Neue, Helvetica, Arial;
   font-weight: lighter;
@@ -43,8 +53,10 @@ const Button = styled.button`
         box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
 `
 
-export const RunLighthouseButton = styled(Button)``
-export const SearchAgainButton = styled(Button)`
+export const RunLighthouseButton = styled(Button)`
+  margin-bottom: 25px;
+`
+export const RunAnotherAuditButton = styled(Button)`
   margin: 20px 0;
 `
 
@@ -71,15 +83,6 @@ export const RadioGroupStyles = styled.div`
   width: 40%;
 `
 
-export const MainWrapper = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  flex-direction: column;
-  width: 100%;
-  height: 100vh;
-`
-
 export const UL = styled.ul`
   list-style: none;
   padding: 0;
@@ -101,4 +104,15 @@ export const IMG = styled.img`
   width: 30px;
   height: 30px;
   cursor: pointer;
+`
+
+export const SearchTermDescription = styled.div`
+  font-family: Noto Naskh Arabic, Roboto Slab, Helvetica Neue, Helvetica, Arial;
+  font-weight: lighter;
+  margin-bottom: 25px;
+`
+export const SearchTerm = styled.div`
+  font-size: 1.5rem;
+  text-align: center;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
 `

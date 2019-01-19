@@ -32,13 +32,13 @@ export const Input = styled.input`
 `
 
 export const Button = styled.button`
+  cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
   box-sizing: border-box;
   background: #448aff;
   border-radius: 100%;
   color: #ffffff;
   width: 48px;
   height: 48px;
-  cursor: pointer;
   font-size: 1.5rem;
   padding: 0;
   :focus {

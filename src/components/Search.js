@@ -5,7 +5,11 @@ import lighthouseImg from '../images/lighthouse.png'
 
 const Search = ({ input, onChange, onSubmit, placeholder, UrlSearch }) => {
   return (
-    <Form onSubmit={e => onSubmit(e)}>
+    <Form
+      onSubmit={e =>
+        input && input.length > 0 ? onSubmit(e) : e.preventDefault()
+      }
+    >
       <InputWrapper>
         <Input
           placeholder={placeholder}
@@ -13,7 +17,11 @@ const Search = ({ input, onChange, onSubmit, placeholder, UrlSearch }) => {
           onChange={event => onChange(event)}
           type="text"
         />
-        <Button type="button" onClick={() => onSubmit()}>
+        <Button
+          disabled={!input || input.length < 1}
+          type="button"
+          onClick={() => onSubmit()}
+        >
           {UrlSearch ? (
             <Plus>&#43;</Plus>
           ) : (

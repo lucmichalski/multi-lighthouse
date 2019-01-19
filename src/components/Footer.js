@@ -7,9 +7,9 @@ const FooterWrapper = styled.footer`
 `
 const Logo = styled.h3`
   line-height: 1.3;
-  padding: 1rem 0 2rem 0;
-  margin: 0 0.5em;
-  font-size: 2rem;
+  padding: 25px 40px 50px 40px;
+  margin: 0;
+  font-size: 1.5rem;
   font-weight: 300;
 `
 const Footer = () => {

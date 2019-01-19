@@ -12,35 +12,41 @@ import {
   RunLighthouseButton,
   RadioGroupWrapper,
   RadioGroupStyles,
-  SearchAgainButton,
+  RunAnotherAuditButton,
   UL,
   LI,
   IMG,
   H2,
   LoadingMessage,
+  SearchTermDescription,
+  SearchTerm,
 } from './MainStyles'
 
+const initialState = {
+  data: [],
+  input: '',
+  query: [],
+  metrics: [
+    'first-contentful-paint',
+    'first-meaningful-paint',
+    'speed-index',
+    'first-cpu-idle',
+    'interactive',
+    'estimated-input-latency',
+  ],
+  errorUrl: '',
+  error: false,
+  errorMessage: '',
+  fetching: false,
+  UrlSearch: true,
+  topFiveSearch: false,
+  searchEnabled: true,
+  googleSearchTerm: '',
+}
 class Main extends Component {
-  state = {
-    data: [],
-    input: '',
-    query: [],
-    metrics: [
-      'first-contentful-paint',
-      'first-meaningful-paint',
-      'speed-index',
-      'first-cpu-idle',
-      'interactive',
-      'estimated-input-latency',
-    ],
-    errorUrl: '',
-    error: false,
-    errorMessage: '',
-    fetching: false,
-    UrlSearch: true,
-    topFiveSearch: false,
-    searchEnabled: true,
-  }
+  state = initialState
+
+  reset = () => this.setState(() => initialState)
 
   UrlSearch = () => {
     const { query } = this.state
@@ -114,13 +120,14 @@ class Main extends Component {
       state => ({
         query: [state.input],
         input: ``,
+        fetching: true,
+        searchEnabled: false,
       }),
       () => this.topFiveSearch()
     )
   }
 
   topFiveSearch = () => {
-    this.setState(() => ({ fetching: true, searchEnabled: false }))
     const { query } = this.state
     console.log(query)
     axios
@@ -137,6 +144,9 @@ class Main extends Component {
       .then(response => {
         console.log(response)
         const query = response.data.items.map(({ link }) => link)
+        this.setState(() => ({
+          googleSearchTerm: response.data.queries.request[0].searchTerms,
+        }))
         this.runLighthouse(query)
       })
       .catch(error => console.log(error))
@@ -164,6 +174,8 @@ class Main extends Component {
       fetching,
       UrlSearch,
       searchEnabled,
+      googleSearchTerm,
+      topFiveSearch,
     } = this.state
     const radioIdentifiers = [
       { value: 'URL Search', id: 'UrlSearch', checked: UrlSearch },
@@ -230,30 +242,39 @@ class Main extends Component {
           </div>
         )}
         {!searchEnabled && !fetching && (
-          <SearchAgainButton
-            onClick={() =>
-              this.setState(() => ({
-                searchEnabled: true,
-                data: [],
-                query: [],
-                input: '',
-              }))
-            }
-            type="button"
-          >
-            Search Again
-          </SearchAgainButton>
+          <Fragment>
+            <RunAnotherAuditButton onClick={() => this.reset()} type="button">
+              Perform Another Audit
+            </RunAnotherAuditButton>
+            {topFiveSearch && (
+              <SearchTermDescription>
+                <div>
+                  Performance comparison for the top 5 search results returned
+                  by Google
+                </div>
+                <SearchTerm>
+"
+                  {googleSearchTerm}
+"
+                </SearchTerm>
+              </SearchTermDescription>
+            )}
+          </Fragment>
         )}
 
         {!error && data.length === 0 && fetching === true && (
           <Fragment>
             <LoadingMessage>Headless Chrome is running!</LoadingMessage>
-            <ReactLoading type="bars" color="gray" height="20%" width="20%" />
+            <ReactLoading
+              type="bars"
+              color="#757575"
+              height="20%"
+              width="20%"
+            />
           </Fragment>
         )}
-        {!error && !searchEnabled ? (
-          <BarGraph metrics={metrics} data={data} />
-        ) : (
+        {!error && !searchEnabled && <BarGraph metrics={metrics} data={data} />}
+        {error && !searchEnabled && (
           <div>
             <div>{errorUrl}</div>
             <div>{errorMessage}</div>
