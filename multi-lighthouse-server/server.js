@@ -4,6 +4,9 @@ const app = express()
 const lighthouse = require('lighthouse')
 const puppeteer = require('puppeteer')
 const fetch = require('node-fetch')
+const dotenv = require('dotenv')
+
+dotenv.config()
 
 async function launchPuppeteerRunLighthouse(url) {
   try {
@@ -53,9 +56,9 @@ app.get('/urlsearch', async function(req, res) {
 
 app.get('/topfivesearch', async function(req, res) {
   const googleSearchResults = await fetch(
-    `https://www.googleapis.com/customsearch/v1?key=AIzaSyCB7eoyUNrmnNwviK10XGC4c4fvHumQoC8&cx=007483753184132044320:muwh9xmkpqk&num=5&start=1&q=${
-      req.query.q
-    }`
+    `https://www.googleapis.com/customsearch/v1?key=${process.env.API_KEY}&cx=${
+      process.env.SEARCH_ENGINE
+    }&start=1&num=5&q=${req.query.q}`
   )
     .then(res => res.json())
     .catch(error => console.log(error))
