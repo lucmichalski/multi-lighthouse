@@ -1,4 +1,3 @@
 language: node_js
-before_script:
-  - npm install
-script: gatsby build
+before_script: 'npm install'
+script: 'gatsby build'
