@@ -5,6 +5,5 @@ install:
   - npm install
 script:
   - gatsby build
-  after_success:
- - npm run lh --perf=95 https://allthelighthouses.netlify.com/
-
+after_success:
+  - npm run lh --perf=95 https://allthelighthouses.netlify.com/
