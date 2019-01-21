@@ -3,6 +3,7 @@ const express = require('express')
 const app = express()
 const lighthouse = require('lighthouse')
 const puppeteer = require('puppeteer')
+const fetch = require('node-fetch')
 
 async function launchPuppeteerRunLighthouse(url) {
   try {
@@ -30,6 +31,12 @@ async function launchPuppeteerRunLighthouse(url) {
   }
 }
 
+function concurrentPuppeteerandLighthouses(urls) {
+  return Promise.all(urls.map(url => launchPuppeteerRunLighthouse(url)))
+    .then(results => results)
+    .catch(error => console.log(error))
+}
+
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header(
@@ -39,12 +46,21 @@ app.use(function(req, res, next) {
   next()
 })
 
-app.get('/', function(req, res) {
+app.get('/urlsearch', async function(req, res) {
   const urls = req.query.q
+  res.send(await concurrentPuppeteerandLighthouses(urls))
+})
 
-  Promise.all(urls.map(url => launchPuppeteerRunLighthouse(url)))
-    .then(results => res.send(results))
+app.get('/topfivesearch', async function(req, res) {
+  const googleSearchResults = await fetch(
+    `https://www.googleapis.com/customsearch/v1?key=AIzaSyCB7eoyUNrmnNwviK10XGC4c4fvHumQoC8&cx=007483753184132044320:muwh9xmkpqk&num=5&start=1&q=${
+      req.query.q
+    }`
+  )
+    .then(res => res.json())
     .catch(error => console.log(error))
+  const query = googleSearchResults.items.map(({ link }) => link)
+  res.send(await concurrentPuppeteerandLighthouses(query))
 })
 
 const server = app.listen(process.env.PORT || 8080, err => {

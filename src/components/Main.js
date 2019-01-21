@@ -55,7 +55,7 @@ class Main extends Component {
   }
 
   runLighthouse = query => {
-    const Url = process.env.GATSBY_SERVER
+    const Url = `${process.env.GATSBY_SERVER}urlsearch`
 
     return axios
       .get(Url, {
@@ -119,6 +119,7 @@ class Main extends Component {
     this.setState(
       state => ({
         query: [state.input],
+        googleSearchTerm: state.input,
         input: ``,
         fetching: true,
         searchEnabled: false,
@@ -129,25 +130,16 @@ class Main extends Component {
 
   topFiveSearch = () => {
     const { query } = this.state
-    console.log(query)
-    axios
-      .get(
-        `https://www.googleapis.com/customsearch/v1?key=${
-          process.env.GATSBY_API_KEY
-        }&cx=${process.env.GATSBY_SEARCH_ENGINE}&num=5&start=1`,
-        {
-          params: {
-            q: query[0],
-          },
-        }
-      )
+    const Url = `${process.env.GATSBY_SERVER}topfivesearch`
+
+    return axios
+      .get(Url, {
+        params: {
+          q: query,
+        },
+      })
       .then(response => {
-        console.log(response)
-        const query = response.data.items.map(({ link }) => link)
-        this.setState(() => ({
-          googleSearchTerm: response.data.queries.request[0].searchTerms,
-        }))
-        this.runLighthouse(query)
+        this.setState(() => this.handleResponse(response.data))
       })
       .catch(error => console.log(error))
   }
