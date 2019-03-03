@@ -6,7 +6,7 @@ const RadioGroup = ({
   identifiers,
   styles: RadioGroup,
 }) => {
-  return identifiers.map(({ value, id, checked }) => (
+  return identifiers.map(({ value, id, checked, onClick }) => (
     <RadioGroup key={id}>
       <label htmlFor={id}>{value}</label>
       <input
@@ -15,7 +15,7 @@ const RadioGroup = ({
         name={groupName}
         value={value}
         checked={checked}
-        onChange={() => onChange()}
+        onChange={() => onChange(id, onClick)}
       />
     </RadioGroup>
   ))

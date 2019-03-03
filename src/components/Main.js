@@ -40,8 +40,14 @@ const initialState = {
   fetching: false,
   UrlSearch: true,
   topFiveSearch: false,
+  timelineResults: false,
   searchEnabled: true,
   googleSearchTerm: '',
+  radioIds: {
+    topFiveSearch: 'topFive',
+    UrlSearch: 'UrlSearch',
+    timelineResults: 'timeline',
+  },
 }
 class Main extends Component {
   state = initialState
@@ -147,12 +153,18 @@ class Main extends Component {
   removeQueryItem = item =>
     this.setState(state => ({ query: state.query.filter(url => url !== item) }))
 
-  onChangeRadio = () =>
-    this.setState(state => ({
-      UrlSearch: !state.UrlSearch,
-      topFiveSearch: !state.topFiveSearch,
-      query: [],
-    }))
+  onChangeRadio = (id, onClick) => {
+    console.log(id)
+    this.setState(
+      state => ({
+        UrlSearch: id === state.radioIds.UrlSearch ? true : false,
+        topFiveSearch: id === state.radioIds.topFiveSearch ? true : false,
+        timelineResults: id === state.radioIds.timelineResults ? true : false,
+        query: [],
+      }),
+      () => onClick()
+    )
+  }
 
   render() {
     const {
@@ -168,10 +180,28 @@ class Main extends Component {
       searchEnabled,
       googleSearchTerm,
       topFiveSearch,
+      timelineResults,
+      radioIds,
     } = this.state
     const radioIdentifiers = [
-      { value: 'URL Search', id: 'UrlSearch', checked: UrlSearch },
-      { value: 'Top Five Search', id: 'topFive', checked: !UrlSearch },
+      {
+        value: 'URL Search',
+        id: radioIds.UrlSearch,
+        checked: UrlSearch,
+        onClick: () => console.log('hi'),
+      },
+      {
+        value: 'Top Five Search',
+        id: radioIds.topFiveSearch,
+        checked: topFiveSearch,
+        onClick: () => console.log('hi'),
+      },
+      {
+        value: 'Timeline Results',
+        id: radioIds.timelineResults,
+        checked: timelineResults,
+        onClick: () => console.log('hi'),
+      },
     ]
     return (
       <MainWrapper>
@@ -180,7 +210,7 @@ class Main extends Component {
             <H2>Compare performance scores for multiple sites</H2>
             <RadioGroupWrapper>
               <RadioGroup
-                onChange={() => this.onChangeRadio()}
+                onChange={this.onChangeRadio}
                 identifiers={radioIdentifiers}
                 groupName="searchType"
                 className="radio-group"
