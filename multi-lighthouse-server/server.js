@@ -5,13 +5,31 @@ const lighthouse = require('lighthouse')
 const puppeteer = require('puppeteer')
 const fetch = require('node-fetch')
 const dotenv = require('dotenv')
+const admin = require('firebase-admin')
+
+const serviceAccount =
+  './multi-lighthouse-firebase-adminsdk-3yznr-744b1662ca.json'
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://multi-lighthouse.firebaseio.com/',
+})
+const db = admin.database()
 
 dotenv.config()
 
 async function launchPuppeteerRunLighthouse(url) {
   try {
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--incognito'],
+      args: [
+        '--no-sandbox',
+        '--incognito',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        '--no-first-run',
+        '--no-zygote',
+      ],
     })
 
     const port = browser._connection._url.slice(15, 20)
@@ -21,6 +39,7 @@ async function launchPuppeteerRunLighthouse(url) {
       port,
       output: 'json',
       onlyCategories: ['performance'],
+      logLevel: 'debug',
     })
     browser.close()
 
@@ -51,7 +70,11 @@ app.use(function(req, res, next) {
 
 app.get('/urlsearch', async function(req, res) {
   const urls = req.query.q
-  res.send(await concurrentPuppeteerandLighthouses(urls))
+  try {
+    res.send(await concurrentPuppeteerandLighthouses(urls))
+  } catch (error) {
+    console.log(error)
+  }
 })
 
 app.get('/topfivesearch', async function(req, res) {
@@ -63,7 +86,24 @@ app.get('/topfivesearch', async function(req, res) {
     .then(res => res.json())
     .catch(error => console.log(error))
   const query = googleSearchResults.items.map(({ link }) => link)
-  res.send(await concurrentPuppeteerandLighthouses(query))
+  try {
+    res.send(await concurrentPuppeteerandLighthouses(query))
+  } catch (error) {
+    console.log(error)
+  }
+})
+app.get('/setLighthouseReport', async function(req, res) {
+  const lighthouse = launchPuppeteerRunLighthouse(
+    'https://www-dev.landsofamerica.com'
+  )
+  const ref = db.ref('lighthouseReports')
+  try {
+    ref.set({ hello: 'hi' })
+  } catch (error) {
+    console.log(error)
+  }
+
+  res.send(await lighthouse)
 })
 
 const server = app.listen(process.env.PORT || 8080, err => {

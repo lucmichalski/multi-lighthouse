@@ -1,7 +1,4 @@
-//import { Link } from 'gatsby'
-//import PropTypes from 'prop-types'
 import React from 'react'
-
 import styled from 'styled-components'
 
 const Logo = styled.h1`
@@ -26,25 +23,5 @@ const Header = () => (
     </a>
   </header>
 )
-
-// const Header = ({ siteTitle }) => (
-//   <Link
-//     to="/"
-//     style={{
-//       color: `white`,
-//       textDecoration: `none`,
-//     }}
-//   >
-//     {siteTitle}
-//   </Link>
-// )
-
-// Header.propTypes = {
-//   siteTitle: PropTypes.string,
-// }
-
-// Header.defaultProps = {
-//   siteTitle: ``,
-// }
 
 export default Header
