@@ -92,18 +92,49 @@ app.get('/topfivesearch', async function(req, res) {
     console.log(error)
   }
 })
+
+function getDefinedData(data) {
+  let lighthouseReports = {}
+
+  Object.entries(data).forEach(([key, value]) => {
+    lighthouseReports =
+      value !== undefined
+        ? {
+            ...lighthouseReports,
+            ...{ [key]: value },
+          }
+        : { ...lighthouseReports }
+  })
+  return lighthouseReports
+}
+
 app.get('/setLighthouseReport', async function(req, res) {
-  const lighthouse = launchPuppeteerRunLighthouse(
+  const lighthouse = await launchPuppeteerRunLighthouse(
     'https://www-dev.landsofamerica.com'
   )
-  const ref = db.ref('lighthouseReports')
-  try {
-    ref.set({ hello: 'hi' })
-  } catch (error) {
-    console.log(error)
+  const { fetchTime, audits, categories } = lighthouse
+  const { performance } = categories
+  const {
+    interactive,
+    'first-contentful-paint': firstContentfulPaint,
+    'first-meaningful-paint': firstMeaningfulPaint,
+    'estimated-input-latency': estimatedInputLatency,
+    'first-cpu-idle': firstCpuIdle,
+    'speed-index': speedIndex,
+  } = audits
+  const date = fetchTime.split(':')[0]
+  const ref = db.ref(`lighthouseReports/Home/${date}`)
+  const data = {
+    'First-Contentful-Paint': getDefinedData(firstContentfulPaint),
+    'First-Meaningful-Paint': getDefinedData(firstMeaningfulPaint),
+    'Time-To-Interactive': getDefinedData(interactive),
+    'First-CPU-Idle': getDefinedData(firstCpuIdle),
+    'Estimated-Input-Latency': getDefinedData(estimatedInputLatency),
+    'Speed-Index': getDefinedData(speedIndex),
   }
 
-  res.send(await lighthouse)
+  ref.set({ ...data, performance: performance.score })
+  res.send(lighthouse)
 })
 
 const server = app.listen(process.env.PORT || 8080, err => {
