@@ -5,16 +5,7 @@ const lighthouse = require('lighthouse')
 const puppeteer = require('puppeteer')
 const fetch = require('node-fetch')
 const dotenv = require('dotenv')
-const admin = require('firebase-admin')
-
-const serviceAccount =
-  './multi-lighthouse-firebase-adminsdk-3yznr-744b1662ca.json'
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://multi-lighthouse.firebaseio.com/',
-})
-const db = admin.database()
+const { db } = require('./firebase')
 
 dotenv.config()
 
@@ -112,7 +103,7 @@ app.get('/setLighthouseReport', async function(req, res) {
   const lighthouse = await launchPuppeteerRunLighthouse(
     'https://www-dev.landsofamerica.com'
   )
-  const { fetchTime, audits, categories } = lighthouse
+  const { fetchTime, audits, categories, runtimeError } = lighthouse
   const { performance } = categories
   const {
     interactive,
@@ -125,15 +116,19 @@ app.get('/setLighthouseReport', async function(req, res) {
   const date = fetchTime.split(':')[0]
   const ref = db.ref(`lighthouseReports/Home/${date}`)
   const data = {
-    'First-Contentful-Paint': getDefinedData(firstContentfulPaint),
-    'First-Meaningful-Paint': getDefinedData(firstMeaningfulPaint),
-    'Time-To-Interactive': getDefinedData(interactive),
-    'First-CPU-Idle': getDefinedData(firstCpuIdle),
-    'Estimated-Input-Latency': getDefinedData(estimatedInputLatency),
-    'Speed-Index': getDefinedData(speedIndex),
+    'first-contentful-paint': getDefinedData(firstContentfulPaint),
+    'first-meaningful-paint': getDefinedData(firstMeaningfulPaint),
+    'time-to-interactive': getDefinedData(interactive),
+    'first-cpu-idle': getDefinedData(firstCpuIdle),
+    'estimated-input-latency': getDefinedData(estimatedInputLatency),
+    'speed-index': getDefinedData(speedIndex),
   }
 
-  ref.set({ ...data, performance: performance.score })
+  ref.set({
+    runtimeError,
+    audits: data,
+    categories: { performance: { score: performance.score } },
+  })
   res.send(lighthouse)
 })
 

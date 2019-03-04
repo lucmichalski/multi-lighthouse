@@ -1,13 +1,15 @@
 import React, { Component, Fragment } from 'react'
 import axios from 'axios'
+import firebase from 'firebase/app'
+import 'firebase/database'
 import isUrl from 'is-url'
 import BarGraph from './BarGraph'
+import Legend from './Legend'
 import Search from './Search'
 import RadioGroup from './RadioGroup'
 import Error from './Error'
 import Loading from './Loading'
 import closeImg from '../images/baseline_close_black_18dp.png'
-
 import {
   MainWrapper,
   RunLighthouseButton,
@@ -21,6 +23,8 @@ import {
   SearchTermDescription,
   SearchTerm,
 } from './MainStyles'
+
+firebase.initializeApp(config)
 
 const initialState = {
   data: [],
@@ -79,7 +83,9 @@ class Main extends Component {
   }
 
   handleResponse = response => {
+    console.log('hi')
     for (let i = 0; i < response.length; i++) {
+      console.log(response[i].runtimeError)
       if (response[i].runtimeError.code !== 'NO_ERROR') {
         return {
           error: true,
@@ -153,8 +159,23 @@ class Main extends Component {
   removeQueryItem = item =>
     this.setState(state => ({ query: state.query.filter(url => url !== item) }))
 
-  onChangeRadio = (id, onClick) => {
-    console.log(id)
+  retrieveDbReports = () => {
+    const db = firebase.database()
+    const ref = db.ref(`lighthouseReports/Home`)
+    ref.on(
+      'value',
+      snapshot => {
+        const data = [snapshot.val()]
+        console.log(data)
+        this.setState(() => this.handleResponse(data))
+      },
+      function(errorObject) {
+        console.log('The read failed: ' + errorObject.code)
+      }
+    )
+  }
+
+  onChangeRadio = (id, onClick) =>
     this.setState(
       state => ({
         UrlSearch: id === state.radioIds.UrlSearch ? true : false,
@@ -164,7 +185,6 @@ class Main extends Component {
       }),
       () => onClick()
     )
-  }
 
   render() {
     const {
@@ -188,21 +208,31 @@ class Main extends Component {
         value: 'URL Search',
         id: radioIds.UrlSearch,
         checked: UrlSearch,
-        onClick: () => console.log('hi'),
+        onClick: () => null,
       },
       {
         value: 'Top Five Search',
         id: radioIds.topFiveSearch,
         checked: topFiveSearch,
-        onClick: () => console.log('hi'),
+        onClick: () => null,
       },
       {
         value: 'Timeline Results',
         id: radioIds.timelineResults,
         checked: timelineResults,
-        onClick: () => console.log('hi'),
+        onClick: () => this.retrieveDbReports(),
       },
     ]
+    const colors = ['#448aff', '#ffde03', `#6200ee`, `#03dac5`, '#e30425']
+    const legendItems = data.map(({ finalUrl, categories }) => (
+      <span key={finalUrl}>
+        <span>{finalUrl}</span> 
+        {' '}
+        <span> | </span>
+        <span>Performance Score</span>
+        <span>{` ${categories.performance.score.toString().slice(2)}`}</span>
+      </span>
+    ))
     return (
       <MainWrapper>
         {searchEnabled && (
@@ -290,7 +320,12 @@ class Main extends Component {
             loadingMessage="Headless Chrome is running!"
           />
         )}
-        {!error && !searchEnabled && <BarGraph metrics={metrics} data={data} />}
+        {!error && !searchEnabled && !fetching && (
+          <Fragment>
+            <Legend legendItems={legendItems} colors={colors} />
+            <BarGraph colors={colors} metrics={metrics} data={data} />
+          </Fragment>
+        )}
         {error && !searchEnabled && (
           <Error
             showError={error && !searchEnabled}
