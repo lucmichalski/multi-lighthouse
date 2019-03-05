@@ -10,6 +10,7 @@ import RadioGroup from './RadioGroup'
 import Error from './Error'
 import Loading from './Loading'
 import closeImg from '../images/baseline_close_black_18dp.png'
+import BarGraphTimeline from './BarGraphTimeline'
 import {
   MainWrapper,
   RunLighthouseButton,
@@ -22,6 +23,7 @@ import {
   H2,
   SearchTermDescription,
   SearchTerm,
+  BarGraphTimelineContainer,
 } from './MainStyles'
 
 const config = {
@@ -36,6 +38,8 @@ const config = {
 firebase.initializeApp(config)
 
 const initialState = {
+  databaseData: [],
+  databaseDataDates: [],
   data: [],
   input: '',
   query: [],
@@ -92,9 +96,7 @@ class Main extends Component {
   }
 
   handleResponse = response => {
-    console.log('hi')
     for (let i = 0; i < response.length; i++) {
-      console.log(response[i].runtimeError)
       if (response[i].runtimeError.code !== 'NO_ERROR') {
         return {
           error: true,
@@ -172,12 +174,20 @@ class Main extends Component {
     const db = firebase.database()
     const ref = db.ref(`lighthouseReports/Home`)
 
-    ref.on(
+    ref.once(
       'value',
       snapshot => {
-        const data = [snapshot.val()]
-        console.log(data)
-        this.setState(() => this.handleResponse(data))
+        const data = snapshot.val()
+        const values = Object.entries(data).map(([key, value]) => value)
+        const keys = Object.entries(data).map(([key, value]) => key)
+
+        this.setState(() => ({
+          databaseData: values,
+          databaseDataDates: keys,
+          fetching: false,
+          query: [],
+          searchEnabled: false,
+        }))
       },
       function(errorObject) {
         console.log('The read failed: ' + errorObject.code)
@@ -212,6 +222,8 @@ class Main extends Component {
       topFiveSearch,
       timelineResults,
       radioIds,
+      databaseData,
+      databaseDataDates,
     } = this.state
 
     const radioIdentifiers = [
@@ -331,12 +343,32 @@ class Main extends Component {
             loadingMessage="Headless Chrome is running!"
           />
         )}
-        {!error && !searchEnabled && !fetching && (
-          <Fragment>
-            <Legend legendItems={legendItems} colors={colors} />
-            <BarGraph colors={colors} metrics={metrics} data={data} />
-          </Fragment>
-        )}
+        {!error &&
+          !searchEnabled &&
+          !fetching &&
+          !timelineResults &&
+          data.length > 0 && (
+            <Fragment>
+              <Legend legendItems={legendItems} colors={colors} />
+              <BarGraph colors={colors} metrics={metrics} data={data} />
+            </Fragment>
+          )}
+        {!error &&
+          !searchEnabled &&
+          !fetching &&
+          timelineResults &&
+          databaseData.length > 0 && (
+            <BarGraphTimelineContainer>
+              {metrics.map(metric => (
+                <BarGraphTimeline
+                  key={metric}
+                  data={databaseData}
+                  dates={databaseDataDates}
+                  metric={metric}
+                />
+              ))}
+            </BarGraphTimelineContainer>
+          )}
         {error && !searchEnabled && (
           <Error
             showError={error && !searchEnabled}

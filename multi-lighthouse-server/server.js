@@ -113,18 +113,19 @@ app.get('/setLighthouseReport', async function(req, res) {
     'first-cpu-idle': firstCpuIdle,
     'speed-index': speedIndex,
   } = audits
-  const date = fetchTime.split(':')[0]
+  const date = fetchTime.split(':')[0].split('T')[0]
   const ref = db.ref(`lighthouseReports/Home/${date}`)
   const data = {
     'first-contentful-paint': getDefinedData(firstContentfulPaint),
     'first-meaningful-paint': getDefinedData(firstMeaningfulPaint),
-    'time-to-interactive': getDefinedData(interactive),
+    interactive: getDefinedData(interactive),
     'first-cpu-idle': getDefinedData(firstCpuIdle),
     'estimated-input-latency': getDefinedData(estimatedInputLatency),
     'speed-index': getDefinedData(speedIndex),
   }
 
   ref.set({
+    fetchTime,
     runtimeError,
     audits: data,
     categories: { performance: { score: performance.score } },
