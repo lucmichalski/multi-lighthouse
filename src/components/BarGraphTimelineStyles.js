@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 export const OuterGraph = styled.div`
   box-sizing: border-box;
-  width: 33%;
+  width: 45%;
   padding: 0 15px;
   margin-bottom: 25px;
 `

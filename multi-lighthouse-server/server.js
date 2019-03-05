@@ -113,7 +113,12 @@ app.get('/setLighthouseReport', async function(req, res) {
     'first-cpu-idle': firstCpuIdle,
     'speed-index': speedIndex,
   } = audits
-  const date = fetchTime.split(':')[0].split('T')[0]
+
+  const date = fetchTime
+    .split(':')
+    .join('')
+    .split('.')
+    .join('')
   const ref = db.ref(`lighthouseReports/Home/${date}`)
   const data = {
     'first-contentful-paint': getDefinedData(firstContentfulPaint),

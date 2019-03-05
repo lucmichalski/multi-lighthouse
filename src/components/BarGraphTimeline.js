@@ -22,7 +22,7 @@ const BarGraphTimeline = ({ data, dates, metric }) => (
         {data.map((item, idx) => {
           return (
             <VerticalBarSeries
-              barWidth={0.1}
+              barWidth={1}
               color="#448aff"
               key={dates[idx]}
               data={[
