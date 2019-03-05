@@ -4,3 +4,10 @@ svg:not(:root) {
 .rv-xy-plot {
   margin: 0 auto;
 }
+
+.bar {
+  cursor: pointer;
+}
+.rv-xy-plot__axis--horizontal {
+  display: none;
+}

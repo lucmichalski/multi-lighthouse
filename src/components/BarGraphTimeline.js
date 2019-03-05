@@ -6,9 +6,12 @@ import {
   VerticalGridLines,
   HorizontalGridLines,
   VerticalBarSeries,
+  Hint,
 } from 'react-vis'
 import { OuterGraph, Title, InnerGraph } from './BarGraphTimelineStyles'
 import './BarGraph.css'
+
+const val = (value, event) => console.log(value, event)
 
 const BarGraphTimeline = ({ data, dates, metric }) => (
   <OuterGraph>
@@ -19,21 +22,17 @@ const BarGraphTimeline = ({ data, dates, metric }) => (
         <HorizontalGridLines />
         <XAxis />
         <YAxis title="ms" />
-        {data.map((item, idx) => {
-          return (
-            <VerticalBarSeries
-              barWidth={1}
-              color="#448aff"
-              key={dates[idx]}
-              data={[
-                {
-                  x: dates[idx],
-                  y: item.audits[metric].rawValue,
-                },
-              ]}
-            />
-          )
-        })}
+        <VerticalBarSeries
+          className="bar"
+          onValueMouseOver={val}
+          barWidth={0.1}
+          color="#448aff"
+          data={data.map((item, idx) => ({
+            x: dates[idx],
+            y: item.audits[metric].rawValue,
+          }))}
+        />
+        <Hint value={{ x: dates[0], y: data[0].audits[metric].rawValue }} />
       </FlexibleXYPlot>
     </InnerGraph>
   </OuterGraph>
