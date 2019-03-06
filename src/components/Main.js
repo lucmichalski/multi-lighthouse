@@ -1,13 +1,16 @@
 import React, { Component, Fragment } from 'react'
 import axios from 'axios'
+import firebase from 'firebase/app'
+import 'firebase/database'
 import isUrl from 'is-url'
 import BarGraph from './BarGraph'
+import Legend from './Legend'
 import Search from './Search'
 import RadioGroup from './RadioGroup'
 import Error from './Error'
 import Loading from './Loading'
 import closeImg from '../images/baseline_close_black_18dp.png'
-
+import BarGraphTimeline from './BarGraphTimeline'
 import {
   MainWrapper,
   RunLighthouseButton,
@@ -20,9 +23,23 @@ import {
   H2,
   SearchTermDescription,
   SearchTerm,
+  BarGraphTimelineContainer,
 } from './MainStyles'
 
+const config = {
+  apiKey: process.env.GATSBY_FIREBASE_API_KEY,
+  authDomain: process.env.GATSBY_FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.GATSBY_FIREBASE_DATABASE_URL,
+  projectId: process.env.GATSBY_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.GATSBY_FIREBASE_GOOGLE_STORAGE_BUCKET,
+  messagingSenderId: process.env.GATSBY_FIREBASE_MESSAGING_SENDER_ID,
+}
+
+firebase.initializeApp(config)
+
 const initialState = {
+  databaseData: [],
+  databaseDataDates: [],
   data: [],
   input: '',
   query: [],
@@ -40,8 +57,14 @@ const initialState = {
   fetching: false,
   UrlSearch: true,
   topFiveSearch: false,
+  timelineResults: false,
   searchEnabled: true,
   googleSearchTerm: '',
+  radioIds: {
+    topFiveSearch: 'topFive',
+    UrlSearch: 'UrlSearch',
+    timelineResults: 'timeline',
+  },
 }
 class Main extends Component {
   state = initialState
@@ -147,12 +170,41 @@ class Main extends Component {
   removeQueryItem = item =>
     this.setState(state => ({ query: state.query.filter(url => url !== item) }))
 
-  onChangeRadio = () =>
-    this.setState(state => ({
-      UrlSearch: !state.UrlSearch,
-      topFiveSearch: !state.topFiveSearch,
-      query: [],
-    }))
+  retrieveDbReports = () => {
+    const db = firebase.database()
+    const ref = db.ref(`lighthouseReports/Home`)
+
+    ref.once(
+      'value',
+      snapshot => {
+        const data = snapshot.val()
+        const values = Object.entries(data).map(([key, value]) => value)
+        const keys = Object.entries(data).map(([key, value]) => key)
+
+        this.setState(() => ({
+          databaseData: values,
+          databaseDataDates: keys,
+          fetching: false,
+          query: [],
+          searchEnabled: false,
+        }))
+      },
+      function(errorObject) {
+        console.log('The read failed: ' + errorObject.code)
+      }
+    )
+  }
+
+  onChangeRadio = (id, onClick) =>
+    this.setState(
+      state => ({
+        UrlSearch: id === state.radioIds.UrlSearch ? true : false,
+        topFiveSearch: id === state.radioIds.topFiveSearch ? true : false,
+        timelineResults: id === state.radioIds.timelineResults ? true : false,
+        query: [],
+      }),
+      () => onClick()
+    )
 
   render() {
     const {
@@ -168,11 +220,42 @@ class Main extends Component {
       searchEnabled,
       googleSearchTerm,
       topFiveSearch,
+      timelineResults,
+      radioIds,
+      databaseData,
+      databaseDataDates,
     } = this.state
+
     const radioIdentifiers = [
-      { value: 'URL Search', id: 'UrlSearch', checked: UrlSearch },
-      { value: 'Top Five Search', id: 'topFive', checked: !UrlSearch },
+      {
+        value: 'URL Search',
+        id: radioIds.UrlSearch,
+        checked: UrlSearch,
+        onClick: () => null,
+      },
+      {
+        value: 'Top Five Search',
+        id: radioIds.topFiveSearch,
+        checked: topFiveSearch,
+        onClick: () => null,
+      },
+      {
+        value: 'Timeline Results',
+        id: radioIds.timelineResults,
+        checked: timelineResults,
+        onClick: () => this.retrieveDbReports(),
+      },
     ]
+    const colors = ['#448aff', '#ffde03', `#6200ee`, `#03dac5`, '#e30425']
+    const legendItems = data.map(({ finalUrl, categories }) => (
+      <span key={finalUrl}>
+        <span>{finalUrl}</span> 
+        {' '}
+        <span> | </span>
+        <span>Performance Score</span>
+        <span>{` ${categories.performance.score.toString().slice(2)}`}</span>
+      </span>
+    ))
     return (
       <MainWrapper>
         {searchEnabled && (
@@ -180,7 +263,7 @@ class Main extends Component {
             <H2>Compare performance scores for multiple sites</H2>
             <RadioGroupWrapper>
               <RadioGroup
-                onChange={() => this.onChangeRadio()}
+                onChange={this.onChangeRadio}
                 identifiers={radioIdentifiers}
                 groupName="searchType"
                 className="radio-group"
@@ -260,7 +343,32 @@ class Main extends Component {
             loadingMessage="Headless Chrome is running!"
           />
         )}
-        {!error && !searchEnabled && <BarGraph metrics={metrics} data={data} />}
+        {!error &&
+          !searchEnabled &&
+          !fetching &&
+          !timelineResults &&
+          data.length > 0 && (
+            <Fragment>
+              <Legend legendItems={legendItems} colors={colors} />
+              <BarGraph colors={colors} metrics={metrics} data={data} />
+            </Fragment>
+          )}
+        {!error &&
+          !searchEnabled &&
+          !fetching &&
+          timelineResults &&
+          databaseData.length > 0 && (
+            <BarGraphTimelineContainer>
+              {metrics.map(metric => (
+                <BarGraphTimeline
+                  key={metric}
+                  data={databaseData}
+                  dates={databaseDataDates}
+                  metric={metric}
+                />
+              ))}
+            </BarGraphTimelineContainer>
+          )}
         {error && !searchEnabled && (
           <Error
             showError={error && !searchEnabled}

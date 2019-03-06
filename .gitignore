@@ -70,3 +70,6 @@ yarn-error.log
 # Yarn Integrity file
 .yarn-integrity
 multi-lighthouse-server/app.yaml
+
+# Firebase Credentials
+multi-lighthouse-server/multi-lighthouse-firebase-adminsdk-3yznr-744b1662ca.json

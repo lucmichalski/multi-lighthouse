@@ -56,7 +56,7 @@ export const RunLighthouseButton = styled(Button)`
   margin-bottom: 25px;
 `
 export const RunAnotherAuditButton = styled(Button)`
-  margin: 20px 0;
+  margin: 20px 0 60px 0;
 `
 
 export const RadioGroupWrapper = styled.div`
@@ -114,4 +114,11 @@ export const SearchTerm = styled.div`
   font-size: 1.5rem;
   text-align: center;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+`
+
+export const BarGraphTimelineContainer = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  width: 100%;
 `

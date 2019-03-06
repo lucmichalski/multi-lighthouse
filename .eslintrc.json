@@ -1,7 +1,9 @@
 {
   "extends": ["airbnb", "eslint:recommended", "plugin:react/recommended"],
   "parser": "babel-eslint",
+  "plugins": ["react-hooks"],
   "rules": {
+    "react-hooks/rules-of-hooks": "error",
     "import/prefer-default-export": 0,
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
     "no-var": "error",

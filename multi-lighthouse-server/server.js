@@ -5,13 +5,22 @@ const lighthouse = require('lighthouse')
 const puppeteer = require('puppeteer')
 const fetch = require('node-fetch')
 const dotenv = require('dotenv')
+const { db } = require('./firebase')
 
 dotenv.config()
 
 async function launchPuppeteerRunLighthouse(url) {
   try {
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--incognito'],
+      args: [
+        '--no-sandbox',
+        '--incognito',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        '--no-first-run',
+        '--no-zygote',
+      ],
     })
 
     const port = browser._connection._url.slice(15, 20)
@@ -21,6 +30,7 @@ async function launchPuppeteerRunLighthouse(url) {
       port,
       output: 'json',
       onlyCategories: ['performance'],
+      logLevel: 'debug',
     })
     browser.close()
 
@@ -51,7 +61,11 @@ app.use(function(req, res, next) {
 
 app.get('/urlsearch', async function(req, res) {
   const urls = req.query.q
-  res.send(await concurrentPuppeteerandLighthouses(urls))
+  try {
+    res.send(await concurrentPuppeteerandLighthouses(urls))
+  } catch (error) {
+    console.log(error)
+  }
 })
 
 app.get('/topfivesearch', async function(req, res) {
@@ -63,7 +77,65 @@ app.get('/topfivesearch', async function(req, res) {
     .then(res => res.json())
     .catch(error => console.log(error))
   const query = googleSearchResults.items.map(({ link }) => link)
-  res.send(await concurrentPuppeteerandLighthouses(query))
+  try {
+    res.send(await concurrentPuppeteerandLighthouses(query))
+  } catch (error) {
+    console.log(error)
+  }
+})
+
+function getDefinedData(data) {
+  let lighthouseReports = {}
+
+  Object.entries(data).forEach(([key, value]) => {
+    lighthouseReports =
+      value !== undefined
+        ? {
+            ...lighthouseReports,
+            ...{ [key]: value },
+          }
+        : { ...lighthouseReports }
+  })
+  return lighthouseReports
+}
+
+app.get('/setLighthouseReport', async function(req, res) {
+  const lighthouse = await launchPuppeteerRunLighthouse(
+    'https://www-dev.landsofamerica.com'
+  )
+  const { fetchTime, audits, categories, runtimeError } = lighthouse
+  const { performance } = categories
+  const {
+    interactive,
+    'first-contentful-paint': firstContentfulPaint,
+    'first-meaningful-paint': firstMeaningfulPaint,
+    'estimated-input-latency': estimatedInputLatency,
+    'first-cpu-idle': firstCpuIdle,
+    'speed-index': speedIndex,
+  } = audits
+
+  const date = fetchTime
+    .split(':')
+    .join('')
+    .split('.')
+    .join('')
+  const ref = db.ref(`lighthouseReports/Home/${date}`)
+  const data = {
+    'first-contentful-paint': getDefinedData(firstContentfulPaint),
+    'first-meaningful-paint': getDefinedData(firstMeaningfulPaint),
+    interactive: getDefinedData(interactive),
+    'first-cpu-idle': getDefinedData(firstCpuIdle),
+    'estimated-input-latency': getDefinedData(estimatedInputLatency),
+    'speed-index': getDefinedData(speedIndex),
+  }
+
+  ref.set({
+    fetchTime,
+    runtimeError,
+    audits: data,
+    categories: { performance: { score: performance.score } },
+  })
+  res.send(lighthouse)
 })
 
 const server = app.listen(process.env.PORT || 8080, err => {
