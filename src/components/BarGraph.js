@@ -20,6 +20,9 @@ const BarGraph = ({ data, metrics, colors }) => (
       {data.map((item, idx) => {
         return (
           <VerticalBarSeries
+            onValueMouseOver={(datapoint, event) => {
+              console.log(datapoint)
+            }}
             barWidth={0.7}
             color={colors[idx]}
             key={item.finalUrl}

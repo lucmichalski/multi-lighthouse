@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   FlexibleXYPlot,
   XAxis,
@@ -11,31 +11,52 @@ import {
 import { OuterGraph, Title, InnerGraph } from './BarGraphTimelineStyles'
 import './BarGraph.css'
 
-const val = (value, event) => console.log(value, event)
+const BarGraphTimeline = ({ data, dates, metric }) => {
+  const defaultState = {
+    isTooltip: false,
+    tooltipValue: { x: null, y: null },
+  }
+  const [tooltip, setTooltip] = useState(defaultState)
+  const { isTooltip, tooltipValue } = tooltip
 
-const BarGraphTimeline = ({ data, dates, metric }) => (
-  <OuterGraph>
-    <Title>{metric}</Title>
-    <InnerGraph>
-      <FlexibleXYPlot xType="ordinal">
-        <VerticalGridLines />
-        <HorizontalGridLines />
-        <XAxis />
-        <YAxis title="ms" />
-        <VerticalBarSeries
-          className="bar"
-          onValueMouseOver={val}
-          barWidth={0.1}
-          color="#448aff"
-          data={data.map((item, idx) => ({
-            x: dates[idx],
-            y: item.audits[metric].rawValue,
-          }))}
-        />
-        <Hint value={{ x: dates[0], y: data[0].audits[metric].rawValue }} />
-      </FlexibleXYPlot>
-    </InnerGraph>
-  </OuterGraph>
-)
+  const handleMouseOver = value => {
+    setTooltip({ isTooltip: true, tooltipValue: value })
+  }
+  const handleMouseOut = () => {
+    setTooltip(defaultState)
+  }
+  return (
+    <OuterGraph>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `.rv-xy-plot__axis--horizontal {
+                    display: none;
+                  }`,
+        }}
+      />
+      <Title>{metric}</Title>
+      <InnerGraph>
+        <FlexibleXYPlot xType="ordinal">
+          <VerticalGridLines />
+          <HorizontalGridLines />
+          <XAxis />
+          <YAxis title="ms" />
+          <VerticalBarSeries
+            className="bar"
+            onValueMouseOver={handleMouseOver}
+            onValueMouseOut={handleMouseOut}
+            barWidth={0.1}
+            color="#448aff"
+            data={data.map((item, idx) => ({
+              x: dates[idx],
+              y: item.audits[metric].rawValue,
+            }))}
+          />
+          {isTooltip && <Hint value={tooltipValue} />}
+        </FlexibleXYPlot>
+      </InnerGraph>
+    </OuterGraph>
+  )
+}
 
 export default BarGraphTimeline

@@ -8,6 +8,3 @@ svg:not(:root) {
 .bar {
   cursor: pointer;
 }
-.rv-xy-plot__axis--horizontal {
-  display: none;
-}
