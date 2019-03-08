@@ -11,7 +11,7 @@ import {
 import { OuterGraph, Title, InnerGraph } from './BarGraphTimelineStyles'
 import './BarGraph.css'
 
-const BarGraphTimeline = ({ data, dates, metric }) => {
+const BarGraphTimeline = ({ data, metric, color }) => {
   const defaultState = {
     isTooltip: false,
     tooltipValue: { x: null, y: null },
@@ -46,9 +46,9 @@ const BarGraphTimeline = ({ data, dates, metric }) => {
             onValueMouseOver={handleMouseOver}
             onValueMouseOut={handleMouseOut}
             barWidth={0.1}
-            color="#448aff"
-            data={data.map((item, idx) => ({
-              x: dates[idx],
+            color={color}
+            data={data.map(item => ({
+              x: item.fetchTime,
               y: item.audits[metric].rawValue,
             }))}
           />
