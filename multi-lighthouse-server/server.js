@@ -100,42 +100,52 @@ function getDefinedData(data) {
 }
 
 app.get('/setLighthouseReport', async function(req, res) {
-  const lighthouse = await launchPuppeteerRunLighthouse(
-    'https://www-dev.landsofamerica.com'
-  )
-  const { fetchTime, audits, categories, runtimeError } = lighthouse
-  const { performance } = categories
-  const {
-    interactive,
-    'first-contentful-paint': firstContentfulPaint,
-    'first-meaningful-paint': firstMeaningfulPaint,
-    'estimated-input-latency': estimatedInputLatency,
-    'first-cpu-idle': firstCpuIdle,
-    'speed-index': speedIndex,
-  } = audits
+  const query = [
+    'https://www-dev.landsofamerica.com',
+    'https://www-dev.landsofamerica.com/United-States/all-land/',
+  ]
+  const routes = ['Home', 'Search Results']
+  const lighthouses = await concurrentPuppeteerandLighthouses(query)
 
-  const date = fetchTime
-    .split(':')
-    .join('')
-    .split('.')
-    .join('')
-  const ref = db.ref(`lighthouseReports/Home/${date}`)
-  const data = {
-    'first-contentful-paint': getDefinedData(firstContentfulPaint),
-    'first-meaningful-paint': getDefinedData(firstMeaningfulPaint),
-    interactive: getDefinedData(interactive),
-    'first-cpu-idle': getDefinedData(firstCpuIdle),
-    'estimated-input-latency': getDefinedData(estimatedInputLatency),
-    'speed-index': getDefinedData(speedIndex),
-  }
+  lighthouses.forEach((lighthouse, index) => {
+    const { fetchTime, audits, categories, runtimeError, finalUrl } = lighthouse
+    const { performance } = categories
+    const {
+      interactive,
+      'first-contentful-paint': firstContentfulPaint,
+      'first-meaningful-paint': firstMeaningfulPaint,
+      'estimated-input-latency': estimatedInputLatency,
+      'first-cpu-idle': firstCpuIdle,
+      'speed-index': speedIndex,
+    } = audits
 
-  ref.set({
-    fetchTime,
-    runtimeError,
-    audits: data,
-    categories: { performance: { score: performance.score } },
+    const date = fetchTime
+      .split(':')
+      .join('')
+      .split('.')
+      .join('')
+
+    const data = {
+      'first-contentful-paint': getDefinedData(firstContentfulPaint),
+      'first-meaningful-paint': getDefinedData(firstMeaningfulPaint),
+      interactive: getDefinedData(interactive),
+      'first-cpu-idle': getDefinedData(firstCpuIdle),
+      'estimated-input-latency': getDefinedData(estimatedInputLatency),
+      'speed-index': getDefinedData(speedIndex),
+    }
+
+    const dbData = {
+      finalUrl,
+      fetchTime,
+      runtimeError,
+      audits: data,
+      categories: { performance: { score: performance.score } },
+    }
+    const ref = db.ref(`lighthouseReports/${routes[index]}/${date}`)
+    ref.set(dbData)
   })
-  res.send(lighthouse)
+
+  res.send('OK')
 })
 
 const server = app.listen(process.env.PORT || 8080, err => {

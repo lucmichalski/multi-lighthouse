@@ -38,8 +38,8 @@ const config = {
 firebase.initializeApp(config)
 
 const initialState = {
-  databaseData: [],
-  databaseDataDates: [],
+  databaseData: null,
+  databaseDataDates: null,
   data: [],
   input: '',
   query: [],
@@ -65,6 +65,7 @@ const initialState = {
     UrlSearch: 'UrlSearch',
     timelineResults: 'timeline',
   },
+  routes: { Home: 'Home', SearchResults: 'Search Results' },
 }
 class Main extends Component {
   state = initialState
@@ -171,19 +172,30 @@ class Main extends Component {
     this.setState(state => ({ query: state.query.filter(url => url !== item) }))
 
   retrieveDbReports = () => {
+    const { routes } = this.state
+    const { Home, SearchResults } = routes
     const db = firebase.database()
-    const ref = db.ref(`lighthouseReports/Home`)
+    const ref = db.ref(`lighthouseReports`)
 
     ref.once(
       'value',
       snapshot => {
         const data = snapshot.val()
-        const values = Object.entries(data).map(([key, value]) => value)
-        const keys = Object.entries(data).map(([key, value]) => key)
+        const routes = [Home, SearchResults]
+        const databaseData = {}
+        const databaseDataDates = {}
 
+        routes.forEach(route => {
+          const values = Object.entries(data[route]).map(
+            ([key, value]) => value
+          )
+          const keys = Object.entries(data[route]).map(([key, value]) => key)
+          databaseData[route] = values
+          databaseDataDates[route] = keys
+        })
         this.setState(() => ({
-          databaseData: values,
-          databaseDataDates: keys,
+          databaseData,
+          databaseDataDates,
           fetching: false,
           query: [],
           searchEnabled: false,
@@ -223,7 +235,6 @@ class Main extends Component {
       timelineResults,
       radioIds,
       databaseData,
-      databaseDataDates,
     } = this.state
 
     const radioIdentifiers = [
@@ -336,7 +347,6 @@ class Main extends Component {
             )}
           </Fragment>
         )}
-
         {!error && data.length === 0 && fetching === true && (
           <Loading
             showLoading={!error && data.length === 0 && fetching === true}
@@ -357,18 +367,23 @@ class Main extends Component {
           !searchEnabled &&
           !fetching &&
           timelineResults &&
-          databaseData.length > 0 && (
-            <BarGraphTimelineContainer>
-              {metrics.map(metric => (
-                <BarGraphTimeline
-                  key={metric}
-                  data={databaseData}
-                  dates={databaseDataDates}
-                  metric={metric}
-                />
-              ))}
-            </BarGraphTimelineContainer>
-          )}
+          databaseData &&
+          Object.entries(databaseData).map(([key, value], index) => (
+            <Fragment key={key}>
+              <h2>{key}</h2>
+              <BarGraphTimelineContainer>
+                {metrics.map(metric => (
+                  <BarGraphTimeline
+                    color={colors[index]}
+                    key={metric}
+                    data={value}
+                    metric={metric}
+                  />
+                ))}
+              </BarGraphTimelineContainer>
+            </Fragment>
+          ))}
+
         {error && !searchEnabled && (
           <Error
             showError={error && !searchEnabled}
