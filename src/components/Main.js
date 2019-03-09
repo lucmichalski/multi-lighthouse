@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react'
 import axios from 'axios'
+import base64 from 'base-64'
 import firebase from 'firebase/app'
 import 'firebase/database'
 import isUrl from 'is-url'
@@ -39,7 +40,6 @@ firebase.initializeApp(config)
 
 const initialState = {
   databaseData: null,
-  databaseDataDates: null,
   data: [],
   input: '',
   query: [],
@@ -65,7 +65,6 @@ const initialState = {
     UrlSearch: 'UrlSearch',
     timelineResults: 'timeline',
   },
-  routes: { Home: 'Home', SearchResults: 'Search Results' },
 }
 class Main extends Component {
   state = initialState
@@ -172,30 +171,24 @@ class Main extends Component {
     this.setState(state => ({ query: state.query.filter(url => url !== item) }))
 
   retrieveDbReports = () => {
-    const { routes } = this.state
-    const { Home, SearchResults } = routes
     const db = firebase.database()
-    const ref = db.ref(`lighthouseReports`)
+    const ref = db.ref(`lhr`)
 
     ref.once(
       'value',
       snapshot => {
         const data = snapshot.val()
-        const routes = [Home, SearchResults]
+        const routes = Object.keys(data)
         const databaseData = {}
-        const databaseDataDates = {}
 
         routes.forEach(route => {
           const values = Object.entries(data[route]).map(
             ([key, value]) => value
           )
-          const keys = Object.entries(data[route]).map(([key, value]) => key)
           databaseData[route] = values
-          databaseDataDates[route] = keys
         })
         this.setState(() => ({
           databaseData,
-          databaseDataDates,
           fetching: false,
           query: [],
           searchEnabled: false,
@@ -370,7 +363,7 @@ class Main extends Component {
           databaseData &&
           Object.entries(databaseData).map(([key, value], index) => (
             <Fragment key={key}>
-              <h2>{key}</h2>
+              <h2>{base64.decode(key)}</h2>
               <BarGraphTimelineContainer>
                 {metrics.map(metric => (
                   <BarGraphTimeline
