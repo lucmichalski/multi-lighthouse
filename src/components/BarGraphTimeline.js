@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+
 import {
   FlexibleXYPlot,
   XAxis,
@@ -11,7 +12,7 @@ import {
 import { OuterGraph, Title, InnerGraph } from './BarGraphTimelineStyles'
 import './BarGraph.css'
 
-const BarGraphTimeline = ({ data, metric, color }) => {
+const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
   const defaultState = {
     isTooltip: false,
     tooltipValue: { x: null, y: null },
@@ -25,6 +26,7 @@ const BarGraphTimeline = ({ data, metric, color }) => {
   const handleMouseOut = () => {
     setTooltip(defaultState)
   }
+
   return (
     <OuterGraph>
       <style
@@ -43,6 +45,7 @@ const BarGraphTimeline = ({ data, metric, color }) => {
           <YAxis title="ms" />
           <VerticalBarSeries
             className="bar"
+            onValueClick={datapoint => onClick(dbKey, datapoint.x)}
             onValueMouseOver={handleMouseOver}
             onValueMouseOut={handleMouseOut}
             barWidth={0.1}

@@ -25,6 +25,7 @@ import {
   SearchTermDescription,
   SearchTerm,
   BarGraphTimelineContainer,
+  IFrameContainer,
 } from './MainStyles'
 
 const config = {
@@ -39,6 +40,7 @@ const config = {
 firebase.initializeApp(config)
 
 const initialState = {
+  reportHtml: null,
   databaseData: null,
   data: [],
   input: '',
@@ -170,10 +172,26 @@ class Main extends Component {
   removeQueryItem = item =>
     this.setState(state => ({ query: state.query.filter(url => url !== item) }))
 
-  retrieveDbReports = () => {
+  retrieveDbReport = (URL, date) => {
+    const db = firebase.database()
+    const encodedDate = base64.encode(date)
+    console.log(URL, date)
+    const ref = db.ref(`report/${URL}/${encodedDate}`)
+    ref.once(
+      'value',
+      snapshot => {
+        const reportHtml = snapshot.val()
+        this.setState(() => ({ reportHtml }))
+      },
+      errorObject => {
+        console.log('The read failed: ' + errorObject.code)
+      }
+    )
+  }
+
+  retrieveDbLHR = () => {
     const db = firebase.database()
     const ref = db.ref(`lhr`)
-
     ref.once(
       'value',
       snapshot => {
@@ -194,7 +212,7 @@ class Main extends Component {
           searchEnabled: false,
         }))
       },
-      function(errorObject) {
+      errorObject => {
         console.log('The read failed: ' + errorObject.code)
       }
     )
@@ -228,6 +246,7 @@ class Main extends Component {
       timelineResults,
       radioIds,
       databaseData,
+      reportHtml,
     } = this.state
 
     const radioIdentifiers = [
@@ -247,7 +266,7 @@ class Main extends Component {
         value: 'Timeline Results',
         id: radioIds.timelineResults,
         checked: timelineResults,
-        onClick: () => this.retrieveDbReports(),
+        onClick: () => this.retrieveDbLHR(),
       },
     ]
     const colors = ['#448aff', '#ffde03', `#6200ee`, `#03dac5`, '#e30425']
@@ -261,7 +280,7 @@ class Main extends Component {
       </span>
     ))
     return (
-      <MainWrapper>
+      <MainWrapper style={{ overflow: reportHtml ? 'hidden' : 'auto' }}>
         {searchEnabled && (
           <div>
             <H2>Compare performance scores for multiple sites</H2>
@@ -367,7 +386,9 @@ class Main extends Component {
               <BarGraphTimelineContainer>
                 {metrics.map(metric => (
                   <BarGraphTimeline
+                    onClick={this.retrieveDbReport}
                     color={colors[index]}
+                    dbKey={key}
                     key={metric}
                     data={value}
                     metric={metric}
@@ -376,6 +397,25 @@ class Main extends Component {
               </BarGraphTimelineContainer>
             </Fragment>
           ))}
+        {reportHtml && (
+          <IFrameContainer
+            onClick={() => this.setState(() => ({ reportHtml: null }))}
+          >
+            <iframe
+              style={{
+                width: '100%',
+                height: '100%',
+              }}
+              title="Lighthouse Report"
+              srcDoc={reportHtml}
+            />
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `body{overflow: hidden} html{overflow: hidden}`,
+              }}
+            />
+          </IFrameContainer>
+        )}
 
         {error && !searchEnabled && (
           <Error
