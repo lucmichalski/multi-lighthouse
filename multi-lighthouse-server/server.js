@@ -117,18 +117,10 @@ app.get('/setLighthouseReport', async function(req, res) {
   const lighthouses = await concurrentPuppeteerandLighthouses(query)
 
   lighthouses.forEach((lighthouse, index) => {
-    //different functions for storing lhr vs report
-    //const {lhr, report} = lighthouses;
-    //setRealTimeData(lhr)
-    //setStorageBucketFile(report, lhr.fetchTime)
-    const {
-      fetchTime,
-      audits,
-      categories,
-      runtimeError,
-      finalUrl,
-    } = lighthouse.lhr
+    const { lhr, report } = lighthouse
+    const { fetchTime, audits, categories, runtimeError, finalUrl } = lhr
     const { performance } = categories
+    const date = base64.encode(fetchTime)
     const {
       interactive,
       'first-contentful-paint': firstContentfulPaint,
@@ -137,8 +129,6 @@ app.get('/setLighthouseReport', async function(req, res) {
       'first-cpu-idle': firstCpuIdle,
       'speed-index': speedIndex,
     } = audits
-
-    const date = base64.encode(fetchTime)
 
     const data = {
       'first-contentful-paint': getDefinedData(firstContentfulPaint),
@@ -156,8 +146,11 @@ app.get('/setLighthouseReport', async function(req, res) {
       audits: data,
       categories: { performance: { score: performance.score } },
     }
-    const ref = db.ref(`lighthouseReports/${routes[index]}/${date}`)
-    ref.set(dbData)
+
+    const lhrRef = db.ref(`lhr/${routes[index]}/${date}`)
+    const reportRef = db.ref(`report/${routes[index]}/${date}`)
+    reportRef.set(report)
+    lhrRef.set(dbData)
   })
 
   res.send('OK')

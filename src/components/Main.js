@@ -172,7 +172,7 @@ class Main extends Component {
 
   retrieveDbReports = () => {
     const db = firebase.database()
-    const ref = db.ref(`lighthouseReports`)
+    const ref = db.ref(`lhr`)
 
     ref.once(
       'value',
