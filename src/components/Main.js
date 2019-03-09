@@ -39,7 +39,6 @@ firebase.initializeApp(config)
 
 const initialState = {
   databaseData: null,
-  databaseDataDates: null,
   data: [],
   input: '',
   query: [],
@@ -65,7 +64,11 @@ const initialState = {
     UrlSearch: 'UrlSearch',
     timelineResults: 'timeline',
   },
-  routes: { Home: 'Home', SearchResults: 'Search Results' },
+  routes: {
+    Home: 'Home',
+    SearchResults: 'Search Results',
+    PropertyDetails: 'Property Details',
+  },
 }
 class Main extends Component {
   state = initialState
@@ -173,7 +176,7 @@ class Main extends Component {
 
   retrieveDbReports = () => {
     const { routes } = this.state
-    const { Home, SearchResults } = routes
+    const { Home, SearchResults, PropertyDetails } = routes
     const db = firebase.database()
     const ref = db.ref(`lighthouseReports`)
 
@@ -181,7 +184,7 @@ class Main extends Component {
       'value',
       snapshot => {
         const data = snapshot.val()
-        const routes = [Home, SearchResults]
+        const routes = [Home, SearchResults, PropertyDetails]
         const databaseData = {}
         const databaseDataDates = {}
 
@@ -195,7 +198,6 @@ class Main extends Component {
         })
         this.setState(() => ({
           databaseData,
-          databaseDataDates,
           fetching: false,
           query: [],
           searchEnabled: false,
