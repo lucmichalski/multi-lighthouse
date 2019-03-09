@@ -38,7 +38,6 @@ const config = {
 }
 
 firebase.initializeApp(config)
-const db = firebase.database()
 
 const initialState = {
   reportHtml: null,
@@ -174,6 +173,7 @@ class Main extends Component {
     this.setState(state => ({ query: state.query.filter(url => url !== item) }))
 
   retrieveDbReport = (URL, date) => {
+    const db = firebase.database()
     const encodedDate = base64.encode(date)
     console.log(URL, date)
     const ref = db.ref(`report/${URL}/${encodedDate}`)
@@ -190,6 +190,7 @@ class Main extends Component {
   }
 
   retrieveDbLHR = () => {
+    const db = firebase.database()
     const ref = db.ref(`lhr`)
     ref.once(
       'value',
