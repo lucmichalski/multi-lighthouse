@@ -26,9 +26,9 @@ async function launchPuppeteerRunLighthouse(url) {
     const port = browser._connection._url.slice(15, 20)
     console.log(port, 'port')
 
-    const { lhr } = await lighthouse(url, {
+    const { lhr, report } = await lighthouse(url, {
       port,
-      output: 'json',
+      output: 'html',
       onlyCategories: ['performance'],
       logLevel: 'debug',
     })
@@ -37,8 +37,8 @@ async function launchPuppeteerRunLighthouse(url) {
     if (lhr.runtimeError) {
       console.log(lhr.runtimeError.code, lhr.requestedUrl)
     }
-
-    return lhr
+    // send report and lhr
+    return { report, lhr }
   } catch (error) {
     console.log(error)
   }
@@ -62,7 +62,10 @@ app.use(function(req, res, next) {
 app.get('/urlsearch', async function(req, res) {
   const urls = req.query.q
   try {
-    res.send(await concurrentPuppeteerandLighthouses(urls))
+    // only send lhr
+    const lighthouses = await concurrentPuppeteerandLighthouses(urls)
+    const lhrs = lighthouses.map(lighthouse => lighthouse.lhr)
+    res.send(lhrs)
   } catch (error) {
     console.log(error)
   }
@@ -78,12 +81,15 @@ app.get('/topfivesearch', async function(req, res) {
     .catch(error => console.log(error))
   const query = googleSearchResults.items.map(({ link }) => link)
   try {
-    res.send(await concurrentPuppeteerandLighthouses(query))
+    // only send lhr
+    const lighthouses = await concurrentPuppeteerandLighthouses(query)
+    const lhrs = lighthouses.map(lighthouse => lighthouse.lhr)
+    res.send(lhrs)
   } catch (error) {
     console.log(error)
   }
 })
-
+//belongs in utils
 function getDefinedData(data) {
   let lighthouseReports = {}
 
@@ -108,7 +114,17 @@ app.get('/setLighthouseReport', async function(req, res) {
   const lighthouses = await concurrentPuppeteerandLighthouses(query)
 
   lighthouses.forEach((lighthouse, index) => {
-    const { fetchTime, audits, categories, runtimeError, finalUrl } = lighthouse
+    //different functions for storing lhr vs report
+    //const {lhr, report} = lighthouses;
+    //setRealTimeData(lhr)
+    //setStorageBucketFile(report, lhr.fetchTime)
+    const {
+      fetchTime,
+      audits,
+      categories,
+      runtimeError,
+      finalUrl,
+    } = lighthouse.lhr
     const { performance } = categories
     const {
       interactive,
