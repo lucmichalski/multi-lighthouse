@@ -1,4 +1,5 @@
 const express = require('express')
+const base64 = require('base-64')
 
 const app = express()
 const lighthouse = require('lighthouse')
@@ -109,8 +110,10 @@ app.get('/setLighthouseReport', async function(req, res) {
   const query = [
     'https://www-dev.landsofamerica.com',
     'https://www-dev.landsofamerica.com/United-States/all-land/',
+    `https://www-dev.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090/`,
   ]
-  const routes = ['Home', 'Search Results']
+  const encodedQuery = query.map(url => base64.encode(url))
+  const routes = encodedQuery
   const lighthouses = await concurrentPuppeteerandLighthouses(query)
 
   lighthouses.forEach((lighthouse, index) => {
@@ -135,11 +138,7 @@ app.get('/setLighthouseReport', async function(req, res) {
       'speed-index': speedIndex,
     } = audits
 
-    const date = fetchTime
-      .split(':')
-      .join('')
-      .split('.')
-      .join('')
+    const date = base64.encode(fetchTime)
 
     const data = {
       'first-contentful-paint': getDefinedData(firstContentfulPaint),

@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react'
 import axios from 'axios'
+import base64 from 'base-64'
 import firebase from 'firebase/app'
 import 'firebase/database'
 import isUrl from 'is-url'
@@ -63,11 +64,6 @@ const initialState = {
     topFiveSearch: 'topFive',
     UrlSearch: 'UrlSearch',
     timelineResults: 'timeline',
-  },
-  routes: {
-    Home: 'Home',
-    SearchResults: 'Search Results',
-    PropertyDetails: 'Property Details',
   },
 }
 class Main extends Component {
@@ -175,8 +171,6 @@ class Main extends Component {
     this.setState(state => ({ query: state.query.filter(url => url !== item) }))
 
   retrieveDbReports = () => {
-    const { routes } = this.state
-    const { Home, SearchResults, PropertyDetails } = routes
     const db = firebase.database()
     const ref = db.ref(`lighthouseReports`)
 
@@ -184,17 +178,14 @@ class Main extends Component {
       'value',
       snapshot => {
         const data = snapshot.val()
-        const routes = [Home, SearchResults, PropertyDetails]
+        const routes = Object.keys(data)
         const databaseData = {}
-        const databaseDataDates = {}
 
         routes.forEach(route => {
           const values = Object.entries(data[route]).map(
             ([key, value]) => value
           )
-          const keys = Object.entries(data[route]).map(([key, value]) => key)
           databaseData[route] = values
-          databaseDataDates[route] = keys
         })
         this.setState(() => ({
           databaseData,
@@ -372,7 +363,7 @@ class Main extends Component {
           databaseData &&
           Object.entries(databaseData).map(([key, value], index) => (
             <Fragment key={key}>
-              <h2>{key}</h2>
+              <h2>{base64.decode(key)}</h2>
               <BarGraphTimelineContainer>
                 {metrics.map(metric => (
                   <BarGraphTimeline
