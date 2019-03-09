@@ -6,6 +6,7 @@ const serviceAccount =
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: 'https://multi-lighthouse.firebaseio.com/',
+  storageBucket: 'multi-lighthouse.appspot.com',
 })
 
 const db = admin.database()
