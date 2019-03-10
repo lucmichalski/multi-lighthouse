@@ -26,6 +26,8 @@ import {
   SearchTerm,
   BarGraphTimelineContainer,
   IFrameContainer,
+  CloseIFrame,
+  InnerWrapper,
 } from './MainStyles'
 
 const config = {
@@ -175,7 +177,6 @@ class Main extends Component {
   retrieveDbReport = (URL, date) => {
     const db = firebase.database()
     const encodedDate = base64.encode(date)
-    console.log(URL, date)
     const ref = db.ref(`report/${URL}/${encodedDate}`)
     ref.once(
       'value',
@@ -190,6 +191,10 @@ class Main extends Component {
   }
 
   retrieveDbLHR = () => {
+    this.setState(() => ({
+      fetching: true,
+      searchEnabled: false,
+    }))
     const db = firebase.database()
     const ref = db.ref(`lhr`)
     ref.once(
@@ -279,10 +284,14 @@ class Main extends Component {
         <span>{` ${categories.performance.score.toString().slice(2)}`}</span>
       </span>
     ))
+    const bodyLock =
+      typeof window !== 'undefined' && window.innerwidth <= 1366
+        ? `body{position:fixed} html{position:fixed}`
+        : `body{overflow: hidden} html{overflow: hidden}`
     return (
       <MainWrapper style={{ overflow: reportHtml ? 'hidden' : 'auto' }}>
         {searchEnabled && (
-          <div>
+          <InnerWrapper>
             <H2>Compare performance scores for multiple sites</H2>
             <RadioGroupWrapper>
               <RadioGroup
@@ -337,9 +346,9 @@ class Main extends Component {
                 Run Lighthouse
               </RunLighthouseButton>
             )}
-          </div>
+          </InnerWrapper>
         )}
-        {!searchEnabled && !fetching && (
+        {!searchEnabled && !fetching && !timelineResults && (
           <Fragment>
             <RunAnotherAuditButton onClick={() => this.reset()} type="button">
               Perform Another Audit
@@ -362,7 +371,9 @@ class Main extends Component {
         {!error && data.length === 0 && fetching === true && (
           <Loading
             showLoading={!error && data.length === 0 && fetching === true}
-            loadingMessage="Headless Chrome is running!"
+            loadingMessage={
+              timelineResults ? 'Getting Data' : 'Headless Chrome is running!'
+            }
           />
         )}
         {!error &&
@@ -382,7 +393,7 @@ class Main extends Component {
           databaseData &&
           Object.entries(databaseData).map(([key, value], index) => (
             <Fragment key={key}>
-              <h2>{base64.decode(key)}</h2>
+              <H2>{base64.decode(key)}</H2>
               <BarGraphTimelineContainer>
                 {metrics.map(metric => (
                   <BarGraphTimeline
@@ -401,6 +412,8 @@ class Main extends Component {
           <IFrameContainer
             onClick={() => this.setState(() => ({ reportHtml: null }))}
           >
+            <CloseIFrame>Close</CloseIFrame>
+
             <iframe
               style={{
                 width: '100%',
@@ -411,7 +424,7 @@ class Main extends Component {
             />
             <style
               dangerouslySetInnerHTML={{
-                __html: `body{overflow: hidden} html{overflow: hidden}`,
+                __html: bodyLock,
               }}
             />
           </IFrameContainer>

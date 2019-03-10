@@ -7,18 +7,28 @@ export const MainWrapper = styled.div`
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
-  padding: 0 40px;
+  padding: 0 15px;
 `
-
+export const InnerWrapper = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+`
 export const H2 = styled.h2`
   font-family: Noto Naskh Arabic, Roboto Slab, Helvetica Neue, Helvetica, Arial;
   font-weight: lighter;
-  font-size: 2.5rem;
+  font-size: 1rem;
   letter-spacing: 4px;
   line-height: 1;
-  width: 460px;
+  width: 100%;
+  text-align: center;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
   margin-bottom: 50px;
+  @media (min-width: 900px) {
+    font-size: 2rem;
+  }
 `
 
 const Button = styled.button`
@@ -62,10 +72,9 @@ export const RunAnotherAuditButton = styled(Button)`
 export const RadioGroupWrapper = styled.div`
   box-sizing: border-box;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   align-items: center;
-  width: 460px;
-  height: 75px;
+  width: 100%;
   margin-bottom: 25px;
 `
 export const RadioGroupStyles = styled.div`
@@ -76,10 +85,7 @@ export const RadioGroupStyles = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  height: 100%;
-  border: 1px solid #757575;
-  padding: 10px 0;
-  width: 40%;
+  padding: 25px;
 `
 
 export const UL = styled.ul`
@@ -121,6 +127,8 @@ export const BarGraphTimelineContainer = styled.div`
   justify-content: space-evenly;
   flex-wrap: wrap;
   width: 100%;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  margin-bottom: 25px;
 `
 
 export const IFrameContainer = styled.div`
@@ -134,5 +142,17 @@ export const IFrameContainer = styled.div`
   right: 0;
   bottom: 0;
   z-index: 1;
-  padding: 3em;
+  padding: 5em;
+`
+
+export const CloseIFrame = styled.button`
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  color: white;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-weight: 100;
+  text-decoration: underline;
 `
