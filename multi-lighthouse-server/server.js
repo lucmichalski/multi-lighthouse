@@ -140,12 +140,15 @@ app.get('/db/set/', async function(req, res) {
     categories: { performance: { score: performance.score } },
   }
 
-  const lhrRef = db.ref(`lhr/${encodedQuery}/${date}`)
-  const reportRef = db.ref(`report/${encodedQuery}/${date}`)
-  reportRef.set(report)
-  lhrRef.set(dbData)
-
-  res.send(`${url} ${fetchTime} OK`)
+  if (runtimeError && runtimeError.code === 'NO_ERROR') {
+    const lhrRef = db.ref(`lhr/${encodedQuery}/${date}`)
+    const reportRef = db.ref(`report/${encodedQuery}/${date}`)
+    reportRef.set(report)
+    lhrRef.set(dbData)
+    res.send(`${url} ${fetchTime} OK`)
+  } else {
+    res.send(`${url} ${fetchTime} Not OK`)
+  }
 })
 
 const server = app.listen(process.env.PORT || 8080, err => {
