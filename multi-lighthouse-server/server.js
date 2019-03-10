@@ -106,54 +106,46 @@ function getDefinedData(data) {
   return lighthouseReports
 }
 
-app.get('/setLighthouseReport', async function(req, res) {
-  const query = [
-    'https://www-dev.landsofamerica.com',
-    'https://www-dev.landsofamerica.com/United-States/all-land/',
-    `https://www-dev.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090/`,
-  ]
-  const encodedQuery = query.map(url => base64.encode(url))
-  const routes = encodedQuery
-  const lighthouses = await concurrentPuppeteerandLighthouses(query)
+app.get('/db/set/', async function(req, res) {
+  const { url } = req.query
+  const encodedQuery = base64.encode(url)
+  const lighthouse = await launchPuppeteerRunLighthouse(url)
+  const { lhr, report } = lighthouse
+  const { fetchTime, audits, categories, runtimeError, finalUrl } = lhr
+  const { performance } = categories
+  const date = base64.encode(fetchTime)
+  const {
+    interactive,
+    'first-contentful-paint': firstContentfulPaint,
+    'first-meaningful-paint': firstMeaningfulPaint,
+    'estimated-input-latency': estimatedInputLatency,
+    'first-cpu-idle': firstCpuIdle,
+    'speed-index': speedIndex,
+  } = audits
 
-  lighthouses.forEach((lighthouse, index) => {
-    const { lhr, report } = lighthouse
-    const { fetchTime, audits, categories, runtimeError, finalUrl } = lhr
-    const { performance } = categories
-    const date = base64.encode(fetchTime)
-    const {
-      interactive,
-      'first-contentful-paint': firstContentfulPaint,
-      'first-meaningful-paint': firstMeaningfulPaint,
-      'estimated-input-latency': estimatedInputLatency,
-      'first-cpu-idle': firstCpuIdle,
-      'speed-index': speedIndex,
-    } = audits
+  const data = {
+    'first-contentful-paint': getDefinedData(firstContentfulPaint),
+    'first-meaningful-paint': getDefinedData(firstMeaningfulPaint),
+    interactive: getDefinedData(interactive),
+    'first-cpu-idle': getDefinedData(firstCpuIdle),
+    'estimated-input-latency': getDefinedData(estimatedInputLatency),
+    'speed-index': getDefinedData(speedIndex),
+  }
 
-    const data = {
-      'first-contentful-paint': getDefinedData(firstContentfulPaint),
-      'first-meaningful-paint': getDefinedData(firstMeaningfulPaint),
-      interactive: getDefinedData(interactive),
-      'first-cpu-idle': getDefinedData(firstCpuIdle),
-      'estimated-input-latency': getDefinedData(estimatedInputLatency),
-      'speed-index': getDefinedData(speedIndex),
-    }
+  const dbData = {
+    finalUrl,
+    fetchTime,
+    runtimeError,
+    audits: data,
+    categories: { performance: { score: performance.score } },
+  }
 
-    const dbData = {
-      finalUrl,
-      fetchTime,
-      runtimeError,
-      audits: data,
-      categories: { performance: { score: performance.score } },
-    }
+  const lhrRef = db.ref(`lhr/${encodedQuery}/${date}`)
+  const reportRef = db.ref(`report/${encodedQuery}/${date}`)
+  reportRef.set(report)
+  lhrRef.set(dbData)
 
-    const lhrRef = db.ref(`lhr/${routes[index]}/${date}`)
-    const reportRef = db.ref(`report/${routes[index]}/${date}`)
-    reportRef.set(report)
-    lhrRef.set(dbData)
-  })
-
-  res.send('OK')
+  res.send(`${url} ${fetchTime} OK`)
 })
 
 const server = app.listen(process.env.PORT || 8080, err => {

@@ -5,10 +5,12 @@ export const Form = styled.form`
   justify-content: center;
   align-items: center;
   margin-bottom: 25px;
+  width: 100%;
 `
 
 export const InputWrapper = styled.div`
-  width: 430px;
+  max-width: 430px;
+  width: 100%;
   height: 74px;
   display: flex;
   justify-content: space-between;
@@ -17,7 +19,7 @@ export const InputWrapper = styled.div`
   border-radius: 2px;
   border: none;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
-  box-sizing: content-box;
+  box-sizing: border-box;
   padding: 0 15px;
 `
 
