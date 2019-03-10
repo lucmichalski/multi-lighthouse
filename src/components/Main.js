@@ -285,9 +285,10 @@ class Main extends Component {
       </span>
     ))
     const bodyLock =
-      typeof window !== 'undefined' && window.innerwidth <= 1366
+      typeof window !== 'undefined' && window.innerWidth <= 1366
         ? `body{position:fixed} html{position:fixed}`
         : `body{overflow: hidden} html{overflow: hidden}`
+
     return (
       <MainWrapper style={{ overflow: reportHtml ? 'hidden' : 'auto' }}>
         {searchEnabled && (

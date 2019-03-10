@@ -142,7 +142,10 @@ export const IFrameContainer = styled.div`
   right: 0;
   bottom: 0;
   z-index: 1;
-  padding: 5em;
+  padding: 70px 0 20px 0;
+  @media (min-width: 600px) {
+    padding: 5rem;
+  }
 `
 
 export const CloseIFrame = styled.button`
