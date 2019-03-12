@@ -419,6 +419,9 @@ class Main extends Component {
               style={{
                 width: '100%',
                 height: '100%',
+                overflowScrolling: 'touch',
+                WebkitOverflowScrolling: 'touch',
+                overflow: 'scroll',
               }}
               title="Lighthouse Report"
               srcDoc={reportHtml}
