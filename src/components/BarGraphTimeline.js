@@ -48,7 +48,7 @@ const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
             onValueClick={datapoint => onClick(dbKey, datapoint.x)}
             onValueMouseOver={handleMouseOver}
             onValueMouseOut={handleMouseOut}
-            barWidth={0.1}
+            barWidth={0.8}
             color={color}
             data={data.map(item => ({
               x: item.fetchTime,
