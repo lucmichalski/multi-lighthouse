@@ -50,10 +50,12 @@ const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
             onValueMouseOut={handleMouseOut}
             barWidth={0.8}
             color={color}
-            data={data.map(item => ({
-              x: item.fetchTime,
-              y: item.audits[metric].rawValue,
-            }))}
+            data={[...data]
+              .sort((a, b) => new Date(a.fetchTime) - new Date(b.fetchTime))
+              .map(item => ({
+                x: item.fetchTime,
+                y: item.audits[metric].rawValue,
+              }))}
           />
           {isTooltip && <Hint value={tooltipValue} />}
         </FlexibleXYPlot>

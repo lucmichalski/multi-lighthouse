@@ -208,6 +208,7 @@ class Main extends Component {
           const values = Object.entries(data[route]).map(
             ([key, value]) => value
           )
+
           databaseData[route] = values
         })
         this.setState(() => ({
