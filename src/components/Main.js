@@ -256,18 +256,18 @@ class Main extends Component {
     } = this.state
 
     const radioIdentifiers = [
-      {
-        value: 'URL Search',
-        id: radioIds.UrlSearch,
-        checked: UrlSearch,
-        onClick: () => null,
-      },
-      {
-        value: 'Top Five Search',
-        id: radioIds.topFiveSearch,
-        checked: topFiveSearch,
-        onClick: () => null,
-      },
+      // {
+      //   value: 'URL Search',
+      //   id: radioIds.UrlSearch,
+      //   checked: UrlSearch,
+      //   onClick: () => null,
+      // },
+      // {
+      //   value: 'Top Five Search',
+      //   id: radioIds.topFiveSearch,
+      //   checked: topFiveSearch,
+      //   onClick: () => null,
+      // },
       {
         value: 'Timeline Results',
         id: radioIds.timelineResults,
@@ -294,7 +294,7 @@ class Main extends Component {
       <MainWrapper style={{ overflow: reportHtml ? 'hidden' : 'auto' }}>
         {searchEnabled && (
           <InnerWrapper>
-            <H2>Compare performance scores for multiple sites</H2>
+            <H2>Track Performance of Your Site</H2>
             <RadioGroupWrapper>
               <RadioGroup
                 onChange={this.onChangeRadio}
@@ -305,17 +305,19 @@ class Main extends Component {
               />
             </RadioGroupWrapper>
 
-            <Search
-              placeholder={UrlSearch ? 'Enter URL(s)' : 'Enter a Search Term'}
-              input={input}
-              onSubmit={
-                UrlSearch
-                  ? this.onClickAddUrl
-                  : this.addSearchTermRunTopFiveSearch
-              }
-              UrlSearch={UrlSearch}
-              onChange={this.onChangeSearchInput}
-            />
+            {false && (
+              <Search
+                placeholder={UrlSearch ? 'Enter URL(s)' : 'Enter a Search Term'}
+                input={input}
+                onSubmit={
+                  UrlSearch
+                    ? this.onClickAddUrl
+                    : this.addSearchTermRunTopFiveSearch
+                }
+                UrlSearch={UrlSearch}
+                onChange={this.onChangeSearchInput}
+              />
+            )}
             <UL>
               {data.length === 0 &&
                 query.length >= 1 &&
