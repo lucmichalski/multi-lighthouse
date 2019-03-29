@@ -17,26 +17,26 @@ export const InnerWrapper = styled.div`
   width: 100%;
 `
 export const H2 = styled.h2`
-  font-family: Noto Naskh Arabic, Roboto Slab, Helvetica Neue, Helvetica, Arial;
-  font-weight: lighter;
+  font-weight: 600;
   font-size: 1rem;
-  letter-spacing: 4px;
-  line-height: 1;
+
   width: 100%;
   text-align: center;
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+
   margin-bottom: 50px;
   @media (min-width: 900px) {
     font-size: 2rem;
   }
 `
 export const GraphH2 = styled(H2)`
-  border: 1px solid rgba(0, 0, 0, 0.5);
-  padding: 20px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 4px;
+  min-height: 50px;
   display: flex;
+  padding: 0 20px;
   justify-content: space-between;
+  align-items: center;
   cursor: pointer;
-  background: linear-gradient(to right, #ffffff, #bdc3c7);
+  background: rgb(255, 255, 255);
   :hover {
     filter: brightness(98%);
   }
@@ -92,8 +92,8 @@ export const RadioGroupWrapper = styled.div`
   margin-bottom: 25px;
 `
 export const RadioGroupStyles = styled.div`
-  font-family: Noto Naskh Arabic, Roboto Slab, Helvetica Neue, Helvetica, Arial;
-  font-weight: lighter;
+  font-weight: normal;
+  opacity: 0.8;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -141,7 +141,6 @@ export const BarGraphTimelineContainer = styled.div`
   justify-content: flex-start;
   flex-wrap: wrap;
   width: 100%;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
   margin-bottom: 25px;
 `
 
@@ -178,8 +177,9 @@ export const Arrow = styled.span`
   border: solid rgba(0, 0, 0, 0.5);
   border-width: 0 1px 1px 0;
   display: inline-block;
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
+
   transform: ${props => (props.isOpen ? `rotate(-135deg)` : 'rotate(45deg)')};
-  transition: all 0.2s ease;
+  transition: all 0.1s ease;
 `

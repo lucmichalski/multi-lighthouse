@@ -5,7 +5,7 @@ export const OuterGraph = styled.div`
   width: 100%;
   height: 75vw;
   padding: 0 15px;
-  margin-bottom: 25px;
+  margin-bottom: 50px;
 
   @media (min-width: 900px) {
     width: 50%;
