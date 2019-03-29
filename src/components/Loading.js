@@ -6,7 +6,7 @@ const Loading = ({ loadingMessage, showLoading }) =>
   showLoading && (
     <Fragment>
       <LoadingMessage>{loadingMessage}</LoadingMessage>
-      <ReactLoading type="bars" color="#757575" height="20%" width="20%" />
+      <ReactLoading type="spin" color="#757575" height="20%" width="20%" />
     </Fragment>
   )
 

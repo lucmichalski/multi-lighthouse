@@ -4,6 +4,7 @@ import base64 from 'base-64'
 import firebase from 'firebase/app'
 import 'firebase/database'
 import isUrl from 'is-url'
+import URLGraphSection from './URLGraphSection'
 import BarGraph from './BarGraph'
 import Legend from './Legend'
 import Search from './Search'
@@ -11,7 +12,7 @@ import RadioGroup from './RadioGroup'
 import Error from './Error'
 import Loading from './Loading'
 import closeImg from '../images/baseline_close_black_18dp.png'
-import BarGraphTimeline from './BarGraphTimeline'
+
 import {
   MainWrapper,
   RunLighthouseButton,
@@ -24,7 +25,6 @@ import {
   H2,
   SearchTermDescription,
   SearchTerm,
-  BarGraphTimelineContainer,
   IFrameContainer,
   CloseIFrame,
   InnerWrapper,
@@ -201,6 +201,7 @@ class Main extends Component {
       'value',
       snapshot => {
         const data = snapshot.val()
+        console.log(data)
         const routes = Object.keys(data)
         const databaseData = {}
 
@@ -396,21 +397,7 @@ class Main extends Component {
           timelineResults &&
           databaseData &&
           Object.entries(databaseData).map(([key, value], index) => (
-            <Fragment key={key}>
-              <H2>{base64.decode(key)}</H2>
-              <BarGraphTimelineContainer>
-                {metrics.map(metric => (
-                  <BarGraphTimeline
-                    onClick={this.retrieveDbReport}
-                    color={colors[index]}
-                    dbKey={key}
-                    key={metric}
-                    data={value}
-                    metric={metric}
-                  />
-                ))}
-              </BarGraphTimelineContainer>
-            </Fragment>
+            <URLGraphSection key={key} onClick={this.retrieveDbReport} colors={colors} metrics={metrics} url={key} data={value} index={index} />
           ))}
         {reportHtml && (
           <IFrameContainer

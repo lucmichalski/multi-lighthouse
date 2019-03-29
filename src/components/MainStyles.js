@@ -30,8 +30,23 @@ export const H2 = styled.h2`
     font-size: 2rem;
   }
 `
+export const GraphH2 = styled(H2)`
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  background: linear-gradient(to right, #ffffff, #bdc3c7);
+  :hover {
+    filter: brightness(98%);
+  }
+  border-radius: 4px;
+  @media (min-width: 900px) {
+    font-size: 1rem;
+  }
+`
 
-const Button = styled.button`
+export const Button = styled.button`
   opacity: ${props => (props.disabled ? '.7' : '1.0')};
   font-weight: 300;
   width: auto;
@@ -68,7 +83,6 @@ export const RunLighthouseButton = styled(Button)`
 export const RunAnotherAuditButton = styled(Button)`
   margin: 20px 0 60px 0;
 `
-
 export const RadioGroupWrapper = styled.div`
   box-sizing: border-box;
   display: flex;
@@ -124,7 +138,7 @@ export const SearchTerm = styled.div`
 
 export const BarGraphTimelineContainer = styled.div`
   display: flex;
-  justify-content: space-evenly;
+  justify-content: flex-start;
   flex-wrap: wrap;
   width: 100%;
   border-bottom: 1px solid rgba(0, 0, 0, 0.5);
@@ -158,4 +172,14 @@ export const CloseIFrame = styled.button`
   cursor: pointer;
   font-weight: 100;
   text-decoration: underline;
+`
+
+export const Arrow = styled.span`
+  border: solid rgba(0, 0, 0, 0.5);
+  border-width: 0 1px 1px 0;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  transform: ${props => (props.isOpen ? `rotate(-135deg)` : 'rotate(45deg)')};
+  transition: all 0.2s ease;
 `

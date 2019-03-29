@@ -19,6 +19,7 @@ const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
   }
   const [tooltip, setTooltip] = useState(defaultState)
   const { isTooltip, tooltipValue } = tooltip
+  const isOverall = metric === 'Overall'
 
   const handleMouseOver = value => {
     setTooltip({ isTooltip: true, tooltipValue: value })
@@ -42,7 +43,7 @@ const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
           <VerticalGridLines />
           <HorizontalGridLines />
           <XAxis />
-          <YAxis title="ms" />
+          <YAxis title={isOverall ? 'points' : 'ms'} />
           <VerticalBarSeries
             className="bar"
             onValueClick={datapoint => onClick(dbKey, datapoint.x)}
@@ -54,7 +55,9 @@ const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
               .sort((a, b) => new Date(a.fetchTime) - new Date(b.fetchTime))
               .map(item => ({
                 x: item.fetchTime,
-                y: item.audits[metric].rawValue,
+                y: isOverall
+                  ? item.categories.performance.score * 100
+                  : item.audits[metric].rawValue,
               }))}
           />
           {isTooltip && <Hint value={tooltipValue} />}
