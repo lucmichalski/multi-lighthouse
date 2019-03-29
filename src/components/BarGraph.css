@@ -2,7 +2,9 @@ svg:not(:root) {
   overflow: visible;
 }
 .rv-xy-plot {
+  padding: 0 5px;
   margin: 0 auto;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 4px;
 }
 
 .bar {
