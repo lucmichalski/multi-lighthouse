@@ -201,7 +201,6 @@ class Main extends Component {
       'value',
       snapshot => {
         const data = snapshot.val()
-        console.log(data)
         const routes = Object.keys(data)
         const databaseData = {}
 
@@ -396,9 +395,19 @@ class Main extends Component {
           !fetching &&
           timelineResults &&
           databaseData &&
-          Object.entries(databaseData).map(([key, value], index) => (
-            <URLGraphSection key={key} onClick={this.retrieveDbReport} colors={colors} metrics={metrics} url={key} data={value} index={index} />
-          ))}
+          Object.entries(databaseData)
+            .sort((a, b) => b[1].length - a[1].length)
+            .map(([key, value], index) => (
+              <URLGraphSection
+                key={key}
+                onClick={this.retrieveDbReport}
+                colors={colors}
+                metrics={metrics}
+                url={key}
+                data={value}
+                index={index}
+              />
+            ))}
         {reportHtml && (
           <IFrameContainer
             onClick={() => this.setState(() => ({ reportHtml: null }))}
