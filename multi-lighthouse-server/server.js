@@ -107,9 +107,11 @@ function getDefinedData(data) {
 }
 
 app.get('/db/set/', async function(req, res) {
+  const uid = 'ChqBqCMRh1R2g8cAMjIezSabGMl2'
   const { url } = req.query
-  const encodedQuery = base64.encode(url)
-  const lighthouse = await launchPuppeteerRunLighthouse(url)
+  const formatURL = url[url.length - 1] === '/' ? url.slice(0, -1) : url
+  const encodedQuery = base64.encode(formatURL)
+  const lighthouse = await launchPuppeteerRunLighthouse(formatURL)
   const { lhr, report } = lighthouse
   const { fetchTime, audits, categories, runtimeError, finalUrl } = lhr
   const { performance } = categories
@@ -141,13 +143,13 @@ app.get('/db/set/', async function(req, res) {
   }
 
   if (runtimeError && runtimeError.code === 'NO_ERROR') {
-    const lhrRef = db.ref(`lhr/${encodedQuery}/${date}`)
-    const reportRef = db.ref(`report/${encodedQuery}/${date}`)
+    const lhrRef = db.ref(`${uid}/lhr/${encodedQuery}/${date}`)
+    const reportRef = db.ref(`${uid}/report/${encodedQuery}/${date}`)
     reportRef.set(report)
     lhrRef.set(dbData)
-    res.send(`${url} ${fetchTime} OK`)
+    res.send(`${formatURL} ${fetchTime} OK`)
   } else {
-    res.send(`${url} ${fetchTime} Not OK`)
+    res.send(`${formatURL} ${fetchTime} Not OK`)
   }
 })
 

@@ -26,6 +26,7 @@ svg:not(:root) {
   position: relative;
   text-align: left;
   width: 100%;
+  cursor: pointer;
 }
 
 .firebaseui-page-provider-sign-in {
@@ -34,4 +35,23 @@ svg:not(:root) {
 
 .firebaseui-card-content {
   padding: 0 24px;
+}
+
+.firebaseui-idp-list {
+  list-style: none;
+}
+
+.firebaseui-idp-icon {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+
+.firebaseui-idp-button {
+  border: none;
+  background: white;
+}
+
+.firebaseui-idp-text-long {
+  display: none;
 }

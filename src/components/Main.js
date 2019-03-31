@@ -24,11 +24,13 @@ import {
   LI,
   IMG,
   H2,
+  AuthContainer,
   SearchTermDescription,
   SearchTerm,
   IFrameContainer,
   CloseIFrame,
   InnerWrapper,
+  SignOut,
 } from './MainStyles'
 
 const config = {
@@ -45,7 +47,7 @@ const auth = firebase.auth()
 const ui = new firebaseui.auth.AuthUI(auth)
 
 const initialState = {
-  user: {},
+  user: { uid: 'ChqBqCMRh1R2g8cAMjIezSabGMl2' },
   reportHtml: null,
   databaseData: null,
   data: [],
@@ -102,9 +104,7 @@ class Main extends Component {
   // }
 
   componentDidMount() {
-    console.log('mount')
-
-    this.initApp()
+    this.initAuth()
   }
 
   reset = () => this.setState(() => initialState)
@@ -185,9 +185,10 @@ class Main extends Component {
   //   this.setState(state => ({ query: state.query.filter(url => url !== item) }))
 
   retrieveDbReport = (URL, date) => {
+    const { user } = this.state
     const db = firebase.database()
     const encodedDate = base64.encode(date)
-    const ref = db.ref(`report/${URL}/${encodedDate}`)
+    const ref = db.ref(`${user.uid}/report/${URL}/${encodedDate}`)
     ref.once(
       'value',
       snapshot => {
@@ -201,12 +202,13 @@ class Main extends Component {
   }
 
   retrieveDbLHR = () => {
+    const { user } = this.state
     this.setState(() => ({
       fetching: true,
       searchEnabled: false,
     }))
     const db = firebase.database()
-    const ref = db.ref(`lhr`)
+    const ref = db.ref(`${user.uid}/lhr`)
     ref.once(
       'value',
       snapshot => {
@@ -245,7 +247,12 @@ class Main extends Component {
       () => onClick()
     )
 
-  initApp = () => {
+  signOut = () => {
+    auth.signOut()
+    this.reset()
+  }
+
+  initAuth = () => {
     firebase.auth().onAuthStateChanged(
       user => {
         if (user) {
@@ -307,6 +314,7 @@ class Main extends Component {
       radioIds,
       databaseData,
       reportHtml,
+      user,
     } = this.state
 
     const radioIdentifiers = [
@@ -346,8 +354,16 @@ class Main extends Component {
 
     return (
       <MainWrapper style={{ overflow: reportHtml ? 'hidden' : 'auto' }}>
-        <div id="firebaseui-auth-container" />
-        <button onClick={() => auth.signOut()} />
+        <AuthContainer>
+          {user.accessToken ? (
+            <SignOut type="button" onClick={this.signOut}>
+              Sign Out
+            </SignOut>
+          ) : (
+            <div id="firebaseui-auth-container" />
+          )}
+        </AuthContainer>
+
         {searchEnabled && (
           <InnerWrapper>
             <H2>Track Performance of Your Site</H2>
@@ -488,7 +504,6 @@ class Main extends Component {
             />
           </IFrameContainer>
         )}
-
         {error && !searchEnabled && (
           <Error
             showError={error && !searchEnabled}
