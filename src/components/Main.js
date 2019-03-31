@@ -2,7 +2,6 @@ import React, { Component, Fragment } from 'react'
 import axios from 'axios'
 import base64 from 'base-64'
 import firebase from 'firebase/app'
-import * as firebaseui from 'firebaseui'
 import 'firebase/database'
 import isUrl from 'is-url'
 import URLGraphSection from './URLGraphSection'
@@ -42,9 +41,15 @@ const config = {
   messagingSenderId: process.env.GATSBY_FIREBASE_MESSAGING_SENDER_ID,
 }
 
+let firebaseui
+let auth
+let ui
 firebase.initializeApp(config)
-const auth = firebase.auth()
-const ui = new firebaseui.auth.AuthUI(auth)
+if (typeof window !== `undefined`) {
+  firebaseui = require('firebaseui')
+  auth = firebase.auth()
+  ui = new firebaseui.auth.AuthUI(auth)
+}
 
 const initialState = {
   user: { uid: 'ChqBqCMRh1R2g8cAMjIezSabGMl2' },
