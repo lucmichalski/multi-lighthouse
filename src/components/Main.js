@@ -41,8 +41,11 @@ const config = {
 }
 
 firebase.initializeApp(config)
+const auth = firebase.auth()
+const ui = new firebaseui.auth.AuthUI(auth)
 
 const initialState = {
+  user: {},
   reportHtml: null,
   databaseData: null,
   data: [],
@@ -74,164 +77,112 @@ const initialState = {
 class Main extends Component {
   state = initialState
 
-  reset = () => this.setState(() => initialState)
+  // UrlSearch = () => {
+  //   const { query } = this.state
+  //   this.setState(() => ({ fetching: true, searchEnabled: false }))
+  //   this.runLighthouse(query)
+  // }
 
-  UrlSearch = () => {
-    const { query } = this.state
-    this.setState(() => ({ fetching: true, searchEnabled: false }))
-    this.runLighthouse(query)
-  }
+  // runLighthouse = query => {
+  //   const Url = `${process.env.GATSBY_SERVER}urlsearch`
 
-  runLighthouse = query => {
-    const Url = `${process.env.GATSBY_SERVER}urlsearch`
-
-    return axios
-      .get(Url, {
-        params: {
-          q: query,
-        },
-      })
-      .then(response => {
-        console.log(response.data)
-        this.setState(() => this.handleResponse(response.data))
-      })
-      .catch(error => {
-        console.log(error)
-      })
-  }
+  //   return axios
+  //     .get(Url, {
+  //       params: {
+  //         q: query,
+  //       },
+  //     })
+  //     .then(response => {
+  //       console.log(response.data)
+  //       this.setState(() => this.handleResponse(response.data))
+  //     })
+  //     .catch(error => {
+  //       console.log(error)
+  //     })
+  // }
 
   componentDidMount() {
-    const initApp = function() {
-      firebase.auth().onAuthStateChanged(
-        function(user) {
-          if (user) {
-            // User is signed in.
-            const displayName = user.displayName
-            const email = user.email
-            const emailVerified = user.emailVerified
-            const photoURL = user.photoURL
-            const uid = user.uid
-            const phoneNumber = user.phoneNumber
-            const providerData = user.providerData
-            user.getIdToken().then(function(accessToken) {
-              console.log(
-                JSON.stringify({
-                  displayName: displayName,
-                  email: email,
-                  emailVerified: emailVerified,
-                  phoneNumber: phoneNumber,
-                  photoURL: photoURL,
-                  uid: uid,
-                  accessToken: accessToken,
-                  providerData: providerData,
-                })
-              )
-            })
-          } else {
-            const uiConfig = {
-              signInSuccessUrl: 'http://localhost:8000/',
-              signInOptions: [
-                // Leave the lines as is for the providers you want to offer your users.
-                firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-              ],
-              // // tosUrl and privacyPolicyUrl accept either url string or a callback
-              // // function.
-              // // Terms of service url/callback.
-              // tosUrl: '<your-tos-url>',
-              // // Privacy policy url/callback.
-              // privacyPolicyUrl: function() {
-              //   window.location.assign('<your-privacy-policy-url>');
-              // }
-            }
+    console.log('mount')
 
-            // Initialize the FirebaseUI Widget using Firebase.
-            const ui = new firebaseui.auth.AuthUI(firebase.auth())
-            // The start method will wait until the DOM is loaded.
-            ui.start('#firebaseui-auth-container', uiConfig)
-          }
-        },
-        function(error) {
-          console.log(error)
-        }
-      )
-    }
-    initApp()
+    this.initApp()
   }
 
-  handleResponse = response => {
-    for (let i = 0; i < response.length; i++) {
-      if (response[i].runtimeError.code !== 'NO_ERROR') {
-        return {
-          error: true,
-          errorMessage: response[i].runtimeError.message,
-          errorUrl: response[i].finalUrl,
-          fetching: false,
-          query: [],
-          searchEnabled: false,
-        }
-      }
-    }
-    return { data: response, fetching: false, query: [], searchEnabled: false }
-  }
+  reset = () => this.setState(() => initialState)
 
-  onChangeSearchInput = event => {
-    event.persist()
-    this.setState(() => ({
-      input: `${event.target.value}`,
-    }))
-  }
+  // handleResponse = response => {
+  //   for (let i = 0; i < response.length; i++) {
+  //     if (response[i].runtimeError.code !== 'NO_ERROR') {
+  //       return {
+  //         error: true,
+  //         errorMessage: response[i].runtimeError.message,
+  //         errorUrl: response[i].finalUrl,
+  //         fetching: false,
+  //         query: [],
+  //         searchEnabled: false,
+  //       }
+  //     }
+  //   }
+  //   return { data: response, fetching: false, query: [], searchEnabled: false }
+  // }
 
-  onClickAddUrl = e => {
-    if (e) {
-      e.preventDefault()
-    }
-    this.setState(state => {
-      if (isUrl(state.input)) {
-        if (!state.query.includes(state.input)) {
-          return { query: [...state.query, state.input], input: `` }
-        } else {
-          alert('You have already entered this URL')
-        }
-      } else {
-        alert('URL is not valid. Please enter a valid URL.')
-      }
-    })
-  }
+  // onChangeSearchInput = event => {
+  //   event.persist()
+  //   this.setState(() => ({
+  //     input: `${event.target.value}`,
+  //   }))
+  // }
 
-  addSearchTermRunTopFiveSearch = e => {
-    if (e) {
-      e.preventDefault()
-    }
-    this.setState(
-      state => ({
-        query: [state.input],
-        googleSearchTerm: state.input,
-        input: ``,
-        fetching: true,
-        searchEnabled: false,
-      }),
-      () => this.topFiveSearch()
-    )
-  }
+  // onClickAddUrl = e => {
+  //   if (e) {
+  //     e.preventDefault()
+  //   }
+  //   this.setState(state => {
+  //     if (isUrl(state.input)) {
+  //       if (!state.query.includes(state.input)) {
+  //         return { query: [...state.query, state.input], input: `` }
+  //       } else {
+  //         alert('You have already entered this URL')
+  //       }
+  //     } else {
+  //       alert('URL is not valid. Please enter a valid URL.')
+  //     }
+  //   })
+  // }
 
-  topFiveSearch = () => {
-    const { query } = this.state
-    const Url = `${process.env.GATSBY_SERVER}topfivesearch`
+  // addSearchTermRunTopFiveSearch = e => {
+  //   if (e) {
+  //     e.preventDefault()
+  //   }
+  //   this.setState(
+  //     state => ({
+  //       query: [state.input],
+  //       googleSearchTerm: state.input,
+  //       input: ``,
+  //       fetching: true,
+  //       searchEnabled: false,
+  //     }),
+  //     () => this.topFiveSearch()
+  //   )
+  // }
 
-    return axios
-      .get(Url, {
-        params: {
-          q: query,
-        },
-      })
-      .then(response => {
-        this.setState(() => this.handleResponse(response.data))
-      })
-      .catch(error => console.log(error))
-  }
+  // topFiveSearch = () => {
+  //   const { query } = this.state
+  //   const Url = `${process.env.GATSBY_SERVER}topfivesearch`
 
-  removeQueryItem = item =>
-    this.setState(state => ({ query: state.query.filter(url => url !== item) }))
+  //   return axios
+  //     .get(Url, {
+  //       params: {
+  //         q: query,
+  //       },
+  //     })
+  //     .then(response => {
+  //       this.setState(() => this.handleResponse(response.data))
+  //     })
+  //     .catch(error => console.log(error))
+  // }
+
+  // removeQueryItem = item =>
+  //   this.setState(state => ({ query: state.query.filter(url => url !== item) }))
 
   retrieveDbReport = (URL, date) => {
     const db = firebase.database()
@@ -294,6 +245,50 @@ class Main extends Component {
       () => onClick()
     )
 
+  initApp = () => {
+    firebase.auth().onAuthStateChanged(
+      user => {
+        if (user) {
+          const displayName = user.displayName
+          const email = user.email
+          const emailVerified = user.emailVerified
+          const photoURL = user.photoURL
+          const uid = user.uid
+          const phoneNumber = user.phoneNumber
+          const providerData = user.providerData
+          user.getIdToken().then(accessToken => {
+            const user = {
+              displayName: displayName,
+              email: email,
+              emailVerified: emailVerified,
+              phoneNumber: phoneNumber,
+              photoURL: photoURL,
+              uid: uid,
+              accessToken: accessToken,
+              providerData: providerData,
+            }
+            console.log(user)
+            this.setState(() => ({ user }))
+          })
+        } else {
+          console.log('not signed in')
+          const uiConfig = {
+            callbacks: {
+              signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+                return false
+              },
+            },
+            signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
+          }
+          ui.start('#firebaseui-auth-container', uiConfig)
+        }
+      },
+      function(error) {
+        console.log(error)
+      }
+    )
+  }
+
   render() {
     const {
       input,
@@ -335,15 +330,15 @@ class Main extends Component {
       },
     ]
     const colors = ['#448aff', '#ffde03', `#6200ee`, `#03dac5`, '#e30425']
-    const legendItems = data.map(({ finalUrl, categories }) => (
-      <span key={finalUrl}>
-        <span>{finalUrl}</span> 
-        {' '}
-        <span> | </span>
-        <span>Performance Score</span>
-        <span>{` ${categories.performance.score.toString().slice(2)}`}</span>
-      </span>
-    ))
+    // const legendItems = data.map(({ finalUrl, categories }) => (
+    //   <span key={finalUrl}>
+    //     <span>{finalUrl}</span>
+    //     {' '}
+    //     <span> | </span>
+    //     <span>Performance Score</span>
+    //     <span>{` ${categories.performance.score.toString().slice(2)}`}</span>
+    //   </span>
+    // ))
     const bodyLock =
       typeof window !== 'undefined' && window.innerWidth <= 1366
         ? `body{position:fixed} html{position:fixed}`
@@ -352,7 +347,7 @@ class Main extends Component {
     return (
       <MainWrapper style={{ overflow: reportHtml ? 'hidden' : 'auto' }}>
         <div id="firebaseui-auth-container" />
-        <button onClick={() => firebase.auth().signOut()}></button>
+        <button onClick={() => auth.signOut()} />
         {searchEnabled && (
           <InnerWrapper>
             <H2>Track Performance of Your Site</H2>
@@ -366,7 +361,7 @@ class Main extends Component {
               />
             </RadioGroupWrapper>
 
-            {false && (
+            {/* {false && (
               <Search
                 placeholder={UrlSearch ? 'Enter URL(s)' : 'Enter a Search Term'}
                 input={input}
@@ -378,8 +373,8 @@ class Main extends Component {
                 UrlSearch={UrlSearch}
                 onChange={this.onChangeSearchInput}
               />
-            )}
-            <UL>
+            )} */}
+            {/* <UL>
               {data.length === 0 &&
                 query.length >= 1 &&
                 query.map(item => {
@@ -395,8 +390,8 @@ class Main extends Component {
                     </LI>
                   )
                 })}
-            </UL>
-            {UrlSearch && query.length >= 1 && (
+            </UL> */}
+            {/* {UrlSearch && query.length >= 1 && (
               <RunLighthouseButton
                 type="button"
                 disabled={query.length === 0}
@@ -410,10 +405,10 @@ class Main extends Component {
               >
                 Run Lighthouse
               </RunLighthouseButton>
-            )}
+            )}*/}
           </InnerWrapper>
         )}
-        {!searchEnabled && !fetching && !timelineResults && (
+        {/* {!searchEnabled && !fetching && !timelineResults && (
           <Fragment>
             <RunAnotherAuditButton onClick={() => this.reset()} type="button">
               Perform Another Audit
@@ -432,7 +427,7 @@ class Main extends Component {
               </SearchTermDescription>
             )}
           </Fragment>
-        )}
+        )} */}
         {!error && data.length === 0 && fetching === true && (
           <Loading
             showLoading={!error && data.length === 0 && fetching === true}
@@ -441,7 +436,7 @@ class Main extends Component {
             }
           />
         )}
-        {!error &&
+        {/* {!error &&
           !searchEnabled &&
           !fetching &&
           !timelineResults &&
@@ -450,7 +445,7 @@ class Main extends Component {
               <Legend legendItems={legendItems} colors={colors} />
               <BarGraph colors={colors} metrics={metrics} data={data} />
             </Fragment>
-          )}
+          )} */}
         {!error &&
           !searchEnabled &&
           !fetching &&
