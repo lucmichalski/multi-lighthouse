@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react'
 import axios from 'axios'
 import base64 from 'base-64'
 import firebase from 'firebase/app'
+import * as firebaseui from 'firebaseui'
 import 'firebase/database'
 import isUrl from 'is-url'
 import URLGraphSection from './URLGraphSection'
@@ -97,6 +98,64 @@ class Main extends Component {
       .catch(error => {
         console.log(error)
       })
+  }
+
+  componentDidMount() {
+    const initApp = function() {
+      firebase.auth().onAuthStateChanged(
+        function(user) {
+          if (user) {
+            // User is signed in.
+            const displayName = user.displayName
+            const email = user.email
+            const emailVerified = user.emailVerified
+            const photoURL = user.photoURL
+            const uid = user.uid
+            const phoneNumber = user.phoneNumber
+            const providerData = user.providerData
+            user.getIdToken().then(function(accessToken) {
+              console.log(
+                JSON.stringify({
+                  displayName: displayName,
+                  email: email,
+                  emailVerified: emailVerified,
+                  phoneNumber: phoneNumber,
+                  photoURL: photoURL,
+                  uid: uid,
+                  accessToken: accessToken,
+                  providerData: providerData,
+                })
+              )
+            })
+          } else {
+            const uiConfig = {
+              signInSuccessUrl: 'http://localhost:8000/',
+              signInOptions: [
+                // Leave the lines as is for the providers you want to offer your users.
+                firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+              ],
+              // // tosUrl and privacyPolicyUrl accept either url string or a callback
+              // // function.
+              // // Terms of service url/callback.
+              // tosUrl: '<your-tos-url>',
+              // // Privacy policy url/callback.
+              // privacyPolicyUrl: function() {
+              //   window.location.assign('<your-privacy-policy-url>');
+              // }
+            }
+
+            // Initialize the FirebaseUI Widget using Firebase.
+            const ui = new firebaseui.auth.AuthUI(firebase.auth())
+            // The start method will wait until the DOM is loaded.
+            ui.start('#firebaseui-auth-container', uiConfig)
+          }
+        },
+        function(error) {
+          console.log(error)
+        }
+      )
+    }
+    initApp()
   }
 
   handleResponse = response => {
@@ -292,6 +351,8 @@ class Main extends Component {
 
     return (
       <MainWrapper style={{ overflow: reportHtml ? 'hidden' : 'auto' }}>
+        <div id="firebaseui-auth-container" />
+        <button onClick={() => firebase.auth().signOut()}></button>
         {searchEnabled && (
           <InnerWrapper>
             <H2>Track Performance of Your Site</H2>
