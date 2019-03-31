@@ -23,11 +23,13 @@ import {
   LI,
   IMG,
   H2,
+  AuthContainer,
   SearchTermDescription,
   SearchTerm,
   IFrameContainer,
   CloseIFrame,
   InnerWrapper,
+  SignOut,
 } from './MainStyles'
 
 const config = {
@@ -39,9 +41,18 @@ const config = {
   messagingSenderId: process.env.GATSBY_FIREBASE_MESSAGING_SENDER_ID,
 }
 
+let firebaseui
+let auth
+let ui
 firebase.initializeApp(config)
+if (typeof window !== `undefined`) {
+  firebaseui = require('firebaseui')
+  auth = firebase.auth()
+  ui = new firebaseui.auth.AuthUI(auth)
+}
 
 const initialState = {
+  user: { uid: 'ChqBqCMRh1R2g8cAMjIezSabGMl2' },
   reportHtml: null,
   databaseData: null,
   data: [],
@@ -73,111 +84,116 @@ const initialState = {
 class Main extends Component {
   state = initialState
 
+  // UrlSearch = () => {
+  //   const { query } = this.state
+  //   this.setState(() => ({ fetching: true, searchEnabled: false }))
+  //   this.runLighthouse(query)
+  // }
+
+  // runLighthouse = query => {
+  //   const Url = `${process.env.GATSBY_SERVER}urlsearch`
+
+  //   return axios
+  //     .get(Url, {
+  //       params: {
+  //         q: query,
+  //       },
+  //     })
+  //     .then(response => {
+  //       console.log(response.data)
+  //       this.setState(() => this.handleResponse(response.data))
+  //     })
+  //     .catch(error => {
+  //       console.log(error)
+  //     })
+  // }
+
+  componentDidMount() {
+    this.initAuth()
+  }
+
   reset = () => this.setState(() => initialState)
 
-  UrlSearch = () => {
-    const { query } = this.state
-    this.setState(() => ({ fetching: true, searchEnabled: false }))
-    this.runLighthouse(query)
-  }
+  // handleResponse = response => {
+  //   for (let i = 0; i < response.length; i++) {
+  //     if (response[i].runtimeError.code !== 'NO_ERROR') {
+  //       return {
+  //         error: true,
+  //         errorMessage: response[i].runtimeError.message,
+  //         errorUrl: response[i].finalUrl,
+  //         fetching: false,
+  //         query: [],
+  //         searchEnabled: false,
+  //       }
+  //     }
+  //   }
+  //   return { data: response, fetching: false, query: [], searchEnabled: false }
+  // }
 
-  runLighthouse = query => {
-    const Url = `${process.env.GATSBY_SERVER}urlsearch`
+  // onChangeSearchInput = event => {
+  //   event.persist()
+  //   this.setState(() => ({
+  //     input: `${event.target.value}`,
+  //   }))
+  // }
 
-    return axios
-      .get(Url, {
-        params: {
-          q: query,
-        },
-      })
-      .then(response => {
-        console.log(response.data)
-        this.setState(() => this.handleResponse(response.data))
-      })
-      .catch(error => {
-        console.log(error)
-      })
-  }
+  // onClickAddUrl = e => {
+  //   if (e) {
+  //     e.preventDefault()
+  //   }
+  //   this.setState(state => {
+  //     if (isUrl(state.input)) {
+  //       if (!state.query.includes(state.input)) {
+  //         return { query: [...state.query, state.input], input: `` }
+  //       } else {
+  //         alert('You have already entered this URL')
+  //       }
+  //     } else {
+  //       alert('URL is not valid. Please enter a valid URL.')
+  //     }
+  //   })
+  // }
 
-  handleResponse = response => {
-    for (let i = 0; i < response.length; i++) {
-      if (response[i].runtimeError.code !== 'NO_ERROR') {
-        return {
-          error: true,
-          errorMessage: response[i].runtimeError.message,
-          errorUrl: response[i].finalUrl,
-          fetching: false,
-          query: [],
-          searchEnabled: false,
-        }
-      }
-    }
-    return { data: response, fetching: false, query: [], searchEnabled: false }
-  }
+  // addSearchTermRunTopFiveSearch = e => {
+  //   if (e) {
+  //     e.preventDefault()
+  //   }
+  //   this.setState(
+  //     state => ({
+  //       query: [state.input],
+  //       googleSearchTerm: state.input,
+  //       input: ``,
+  //       fetching: true,
+  //       searchEnabled: false,
+  //     }),
+  //     () => this.topFiveSearch()
+  //   )
+  // }
 
-  onChangeSearchInput = event => {
-    event.persist()
-    this.setState(() => ({
-      input: `${event.target.value}`,
-    }))
-  }
+  // topFiveSearch = () => {
+  //   const { query } = this.state
+  //   const Url = `${process.env.GATSBY_SERVER}topfivesearch`
 
-  onClickAddUrl = e => {
-    if (e) {
-      e.preventDefault()
-    }
-    this.setState(state => {
-      if (isUrl(state.input)) {
-        if (!state.query.includes(state.input)) {
-          return { query: [...state.query, state.input], input: `` }
-        } else {
-          alert('You have already entered this URL')
-        }
-      } else {
-        alert('URL is not valid. Please enter a valid URL.')
-      }
-    })
-  }
+  //   return axios
+  //     .get(Url, {
+  //       params: {
+  //         q: query,
+  //       },
+  //     })
+  //     .then(response => {
+  //       this.setState(() => this.handleResponse(response.data))
+  //     })
+  //     .catch(error => console.log(error))
+  // }
 
-  addSearchTermRunTopFiveSearch = e => {
-    if (e) {
-      e.preventDefault()
-    }
-    this.setState(
-      state => ({
-        query: [state.input],
-        googleSearchTerm: state.input,
-        input: ``,
-        fetching: true,
-        searchEnabled: false,
-      }),
-      () => this.topFiveSearch()
-    )
-  }
-
-  topFiveSearch = () => {
-    const { query } = this.state
-    const Url = `${process.env.GATSBY_SERVER}topfivesearch`
-
-    return axios
-      .get(Url, {
-        params: {
-          q: query,
-        },
-      })
-      .then(response => {
-        this.setState(() => this.handleResponse(response.data))
-      })
-      .catch(error => console.log(error))
-  }
-
-  removeQueryItem = item =>
-    this.setState(state => ({ query: state.query.filter(url => url !== item) }))
+  // removeQueryItem = item =>
+  //   this.setState(state => ({ query: state.query.filter(url => url !== item) }))
 
   retrieveDbReport = (URL, date) => {
+    const { user } = this.state
     const db = firebase.database()
     const encodedDate = base64.encode(date)
-    const ref = db.ref(`report/${URL}/${encodedDate}`)
+    const ref = db.ref(`${user.uid}/report/${URL}/${encodedDate}`)
     ref.once(
       'value',
       snapshot => {
@@ -191,12 +207,13 @@ class Main extends Component {
   }
 
   retrieveDbLHR = () => {
+    const { user } = this.state
     this.setState(() => ({
       fetching: true,
       searchEnabled: false,
     }))
     const db = firebase.database()
-    const ref = db.ref(`lhr`)
+    const ref = db.ref(`${user.uid}/lhr`)
     ref.once(
       'value',
       snapshot => {
@@ -235,6 +252,55 @@ class Main extends Component {
       () => onClick()
     )
 
+  signOut = () => {
+    auth.signOut()
+    this.reset()
+  }
+
+  initAuth = () => {
+    firebase.auth().onAuthStateChanged(
+      user => {
+        if (user) {
+          const displayName = user.displayName
+          const email = user.email
+          const emailVerified = user.emailVerified
+          const photoURL = user.photoURL
+          const uid = user.uid
+          const phoneNumber = user.phoneNumber
+          const providerData = user.providerData
+          user.getIdToken().then(accessToken => {
+            const user = {
+              displayName: displayName,
+              email: email,
+              emailVerified: emailVerified,
+              phoneNumber: phoneNumber,
+              photoURL: photoURL,
+              uid: uid,
+              accessToken: accessToken,
+              providerData: providerData,
+            }
+            console.log(user)
+            this.setState(() => ({ user }))
+          })
+        } else {
+          console.log('not signed in')
+          const uiConfig = {
+            callbacks: {
+              signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+                return false
+              },
+            },
+            signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
+          }
+          ui.start('#firebaseui-auth-container', uiConfig)
+        }
+      },
+      function(error) {
+        console.log(error)
+      }
+    )
+  }
+
   render() {
     const {
       input,
@@ -253,6 +319,7 @@ class Main extends Component {
       radioIds,
       databaseData,
       reportHtml,
+      user,
     } = this.state
 
     const radioIdentifiers = [
@@ -276,15 +343,15 @@ class Main extends Component {
       },
     ]
     const colors = ['#448aff', '#ffde03', `#6200ee`, `#03dac5`, '#e30425']
-    const legendItems = data.map(({ finalUrl, categories }) => (
-      <span key={finalUrl}>
-        <span>{finalUrl}</span> 
-        {' '}
-        <span> | </span>
-        <span>Performance Score</span>
-        <span>{` ${categories.performance.score.toString().slice(2)}`}</span>
-      </span>
-    ))
+    // const legendItems = data.map(({ finalUrl, categories }) => (
+    //   <span key={finalUrl}>
+    //     <span>{finalUrl}</span>
+    //     {' '}
+    //     <span> | </span>
+    //     <span>Performance Score</span>
+    //     <span>{` ${categories.performance.score.toString().slice(2)}`}</span>
+    //   </span>
+    // ))
     const bodyLock =
       typeof window !== 'undefined' && window.innerWidth <= 1366
         ? `body{position:fixed} html{position:fixed}`
@@ -292,6 +359,16 @@ class Main extends Component {
 
     return (
       <MainWrapper style={{ overflow: reportHtml ? 'hidden' : 'auto' }}>
+        <AuthContainer>
+          {user.accessToken ? (
+            <SignOut type="button" onClick={this.signOut}>
+              Sign Out
+            </SignOut>
+          ) : (
+            <div id="firebaseui-auth-container" />
+          )}
+        </AuthContainer>
+
         {searchEnabled && (
           <InnerWrapper>
             <H2>Track Performance of Your Site</H2>
@@ -305,7 +382,7 @@ class Main extends Component {
               />
             </RadioGroupWrapper>
 
-            {false && (
+            {/* {false && (
               <Search
                 placeholder={UrlSearch ? 'Enter URL(s)' : 'Enter a Search Term'}
                 input={input}
@@ -317,8 +394,8 @@ class Main extends Component {
                 UrlSearch={UrlSearch}
                 onChange={this.onChangeSearchInput}
               />
-            )}
-            <UL>
+            )} */}
+            {/* <UL>
               {data.length === 0 &&
                 query.length >= 1 &&
                 query.map(item => {
@@ -334,8 +411,8 @@ class Main extends Component {
                     </LI>
                   )
                 })}
-            </UL>
-            {UrlSearch && query.length >= 1 && (
+            </UL> */}
+            {/* {UrlSearch && query.length >= 1 && (
               <RunLighthouseButton
                 type="button"
                 disabled={query.length === 0}
@@ -349,10 +426,10 @@ class Main extends Component {
               >
                 Run Lighthouse
               </RunLighthouseButton>
-            )}
+            )}*/}
           </InnerWrapper>
         )}
-        {!searchEnabled && !fetching && !timelineResults && (
+        {/* {!searchEnabled && !fetching && !timelineResults && (
           <Fragment>
             <RunAnotherAuditButton onClick={() => this.reset()} type="button">
               Perform Another Audit
@@ -371,7 +448,7 @@ class Main extends Component {
               </SearchTermDescription>
             )}
           </Fragment>
-        )}
+        )} */}
         {!error && data.length === 0 && fetching === true && (
           <Loading
             showLoading={!error && data.length === 0 && fetching === true}
@@ -380,7 +457,7 @@ class Main extends Component {
             }
           />
         )}
-        {!error &&
+        {/* {!error &&
           !searchEnabled &&
           !fetching &&
           !timelineResults &&
@@ -389,7 +466,7 @@ class Main extends Component {
               <Legend legendItems={legendItems} colors={colors} />
               <BarGraph colors={colors} metrics={metrics} data={data} />
             </Fragment>
-          )}
+          )} */}
         {!error &&
           !searchEnabled &&
           !fetching &&
@@ -432,7 +509,6 @@ class Main extends Component {
             />
           </IFrameContainer>
         )}
-
         {error && !searchEnabled && (
           <Error
             showError={error && !searchEnabled}

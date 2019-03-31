@@ -183,3 +183,17 @@ export const Arrow = styled.span`
   transform: ${props => (props.isOpen ? `rotate(-135deg)` : 'rotate(45deg)')};
   transition: all 0.1s ease;
 `
+export const AuthContainer = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 10px 10px 0 0;
+`
+
+export const SignOut = styled.button`
+  border: none;
+  background: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+`
