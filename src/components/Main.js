@@ -49,6 +49,8 @@ if (typeof window !== `undefined`) {
   firebaseui = require('firebaseui')
   auth = firebase.auth()
   ui = new firebaseui.auth.AuthUI(auth)
+
+  //return the let's as an object instead
 }
 
 const initialState = {
@@ -82,7 +84,7 @@ const initialState = {
   },
 }
 class Main extends Component {
-  state = initialState
+  state = { ...initialState }
 
   // UrlSearch = () => {
   //   const { query } = this.state
