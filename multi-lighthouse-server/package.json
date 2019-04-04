@@ -19,5 +19,8 @@
     "node-fetch": "^2.3.0",
     "puppeteer": "^1.11.0",
     "puppeteer-core": "^1.14.0"
+  },
+  "engines": {
+    "node": ">=8"
   }
 }
