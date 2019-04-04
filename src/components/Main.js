@@ -28,17 +28,17 @@ const config = {
   messagingSenderId: process.env.GATSBY_FIREBASE_MESSAGING_SENDER_ID,
 }
 
-let firebaseui
-let auth
-let ui
 firebase.initializeApp(config)
-if (typeof window !== `undefined`) {
-  firebaseui = require('firebaseui')
-  auth = firebase.auth()
-  ui = new firebaseui.auth.AuthUI(auth)
+function setGlobals() {
+  if (typeof window !== `undefined`) {
+    const firebaseui = require('firebaseui')
+    const auth = firebase.auth()
+    const ui = new firebaseui.auth.AuthUI(auth)
 
-  //return the let's as an object instead
+    return { auth, ui }
+  }
 }
+const globals = setGlobals()
 
 const initialState = {
   user: { uid: 'ChqBqCMRh1R2g8cAMjIezSabGMl2' },
@@ -97,21 +97,30 @@ class Main extends Component {
     ref.once(
       'value',
       snapshot => {
-        const data = snapshot.val()
-        const routes = Object.keys(data)
-        const databaseData = {}
+        const exists = snapshot.exists()
+        if (exists) {
+          const data = snapshot.val()
+          const routes = Object.keys(data)
+          const databaseData = {}
 
-        routes.forEach(route => {
-          const values = Object.entries(data[route]).map(
-            ([key, value]) => value
-          )
+          routes.forEach(route => {
+            const values = Object.entries(data[route]).map(
+              ([key, value]) => value
+            )
 
-          databaseData[route] = values
-        })
-        this.setState(() => ({
-          databaseData,
-          fetching: false,
-        }))
+            databaseData[route] = values
+          })
+          this.setState(() => ({
+            databaseData,
+            fetching: false,
+          }))
+        } else {
+          this.setState(() => ({
+            error: true,
+            fetching: false,
+            errorMessage: 'Sorry, no data for this user',
+          }))
+        }
       },
       errorObject => {
         console.log('The read failed: ' + errorObject.code)
@@ -128,12 +137,14 @@ class Main extends Component {
     )
 
   signOut = () => {
+    const { auth } = globals
     auth.signOut()
     this.reset()
   }
 
   initAuth = () => {
-    firebase.auth().onAuthStateChanged(
+    const { auth, ui } = globals
+    auth.onAuthStateChanged(
       user => {
         if (user) {
           const displayName = user.displayName
@@ -234,9 +245,7 @@ class Main extends Component {
         {!error && fetching === true && (
           <Loading
             showLoading={!error && fetching === true}
-            loadingMessage={
-              timelineResults ? 'Getting Data' : 'Headless Chrome is running!'
-            }
+            loadingMessage="Getting Data"
           />
         )}
 
