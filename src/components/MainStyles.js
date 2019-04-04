@@ -19,10 +19,8 @@ export const InnerWrapper = styled.div`
 export const H2 = styled.h2`
   font-weight: 600;
   font-size: 1rem;
-
   width: 100%;
   text-align: center;
-
   margin-bottom: 50px;
   @media (min-width: 900px) {
     font-size: 2rem;
@@ -45,7 +43,6 @@ export const GraphH2 = styled(H2)`
     font-size: 1rem;
   }
 `
-
 export const Button = styled.button`
   opacity: ${props => (props.disabled ? '.7' : '1.0')};
   font-weight: 300;
@@ -77,9 +74,6 @@ export const Button = styled.button`
         box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
 `
 
-export const RunLighthouseButton = styled(Button)`
-  margin-bottom: 25px;
-`
 export const RunAnotherAuditButton = styled(Button)`
   margin: 20px 0 60px 0;
 `
@@ -101,41 +95,6 @@ export const RadioGroupStyles = styled.div`
   align-items: center;
   padding: 25px;
 `
-
-export const UL = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 20px 0;
-  width: 100%;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  display: flex;
-`
-
-export const LI = styled.li`
-  justify-content: space-between;
-  align-items: center;
-  display: flex;
-  width: 100%;
-`
-export const IMG = styled.img`
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-`
-
-export const SearchTermDescription = styled.div`
-  font-family: Noto Naskh Arabic, Roboto Slab, Helvetica Neue, Helvetica, Arial;
-  font-weight: lighter;
-  margin-bottom: 25px;
-`
-export const SearchTerm = styled.div`
-  font-size: 1.5rem;
-  text-align: center;
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-`
-
 export const BarGraphTimelineContainer = styled.div`
   display: flex;
   justify-content: flex-start;
@@ -143,7 +102,6 @@ export const BarGraphTimelineContainer = styled.div`
   width: 100%;
   margin-bottom: 25px;
 `
-
 export const IFrameContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -160,7 +118,6 @@ export const IFrameContainer = styled.div`
     padding: 5rem;
   }
 `
-
 export const CloseIFrame = styled.button`
   position: absolute;
   top: 1em;
@@ -172,14 +129,12 @@ export const CloseIFrame = styled.button`
   font-weight: 100;
   text-decoration: underline;
 `
-
 export const Arrow = styled.span`
   border: solid rgba(0, 0, 0, 0.5);
   border-width: 0 1px 1px 0;
   display: inline-block;
   width: 15px;
   height: 15px;
-
   transform: ${props => (props.isOpen ? `rotate(-135deg)` : 'rotate(45deg)')};
   transition: all 0.1s ease;
 `
@@ -189,7 +144,6 @@ export const AuthContainer = styled.div`
   right: 0;
   padding: 10px 10px 0 0;
 `
-
 export const SignOut = styled.button`
   border: none;
   background: #fff;

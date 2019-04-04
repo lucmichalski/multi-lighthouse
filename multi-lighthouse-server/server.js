@@ -4,7 +4,7 @@ const base64 = require('base-64')
 const app = express()
 const lighthouse = require('lighthouse')
 const puppeteer = require('puppeteer')
-//const fetch = require('node-fetch')
+
 const dotenv = require('dotenv')
 const { db } = require('./firebase')
 
@@ -45,6 +45,7 @@ async function launchPuppeteerRunLighthouse(url) {
 }
 
 //belongs in utils
+//all functions file and routes file
 function getDefinedData(data) {
   let lighthouseReports = {}
 
@@ -129,51 +130,15 @@ app.get('/db/retrieve/set', async function(req, res) {
   console.log(urls)
   res.send(urls)
 })
-// function concurrentPuppeteerandLighthouses(urls) {
-//   return Promise.all(urls.map(url => launchPuppeteerRunLighthouse(url)))
-//     .then(results => results)
-//     .catch(error => console.log(error))
-// }
 
-// app.use(function(req, res, next) {
-//   res.header('Access-Control-Allow-Origin', '*')
-//   res.header(
-//     'Access-Control-Allow-Headers',
-//     'Origin, X-Requested-With, Content-Type, Accept'
-//   )
-//   next()
-// })
-
-// app.get('/urlsearch', async function(req, res) {
-//   const urls = req.query.q
-//   try {
-//     // only send lhr
-//     const lighthouses = await concurrentPuppeteerandLighthouses(urls)
-//     const lhrs = lighthouses.map(lighthouse => lighthouse.lhr)
-//     res.send(lhrs)
-//   } catch (error) {
-//     console.log(error)
-//   }
-// })
-
-// app.get('/topfivesearch', async function(req, res) {
-//   const googleSearchResults = await fetch(
-//     `https://www.googleapis.com/customsearch/v1?key=${process.env.API_KEY}&cx=${
-//       process.env.SEARCH_ENGINE
-//     }&start=1&num=5&q=${req.query.q}`
-//   )
-//     .then(res => res.json())
-//     .catch(error => console.log(error))
-//   const query = googleSearchResults.items.map(({ link }) => link)
-//   try {
-//     // only send lhr
-//     const lighthouses = await concurrentPuppeteerandLighthouses(query)
-//     const lhrs = lighthouses.map(lighthouse => lighthouse.lhr)
-//     res.send(lhrs)
-//   } catch (error) {
-//     console.log(error)
-//   }
-// })
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  )
+  next()
+})
 
 const server = app.listen(process.env.PORT || 8080, err => {
   if (err) return console.error(err)
