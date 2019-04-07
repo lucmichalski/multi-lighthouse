@@ -23,15 +23,11 @@ async function launchPuppeteerRunLighthouse(url) {
         '--no-zygote',
       ],
     })
-
     const port = browser._connection._url.slice(15, 20)
-    console.log(port, 'port')
-
     const { lhr, report } = await lighthouse(url, {
       port,
       output: 'html',
       onlyCategories: ['performance'],
-      logLevel: 'debug',
     })
     browser.close()
 
@@ -91,21 +87,36 @@ async function runLighthouseSetDBData(url) {
   const dbData = {
     finalUrl,
     fetchTime,
-    runtimeError,
     audits: data,
+    runtimeError: runtimeError || 'Runtime Error is Undefined',
     categories: { performance: { score: performance.score } },
   }
 
-  if (runtimeError && runtimeError.code === 'NO_ERROR') {
+  if ((runtimeError && runtimeError.code === 'NO_ERROR') || !runtimeError) {
     const lhrRef = db.ref(`${uid}/lhr/${encodedQuery}/${date}`)
     const reportRef = db.ref(`${uid}/report/${encodedQuery}/${date}`)
-    reportRef.set(report)
-    lhrRef.set(dbData)
+
+    try {
+      console.log(
+        `Setting DB Data for ${finalUrl}. The total score is ${
+          performance.score
+        }`
+      )
+      reportRef.set(report, error => error && console.log(error))
+      lhrRef.set(dbData, error => error && console.log(error))
+    } catch (error) {
+      console.log(error)
+    }
+
     return { message: `${formatURL} ${fetchTime} OK` }
   } else {
     return { message: `${formatURL} ${fetchTime} Not OK` }
   }
 }
+
+app.get('/', async function(req, res) {
+  res.send('hello world')
+})
 
 app.get('/db/set/', async function(req, res) {
   const { url } = req.query
@@ -117,19 +128,15 @@ app.get('/db/retrieve/set', async function(req, res) {
   const ref = await db.ref(`${uid}/urls`)
   const urlsSnapshot = await ref.once('value')
   const urls = Object.values(urlsSnapshot.val())
-  // const urlRef = db.ref(`${uid}/urls`)
-  // urlRef.set({
-  //   [urls[0]]: 'https://www-dev.landsofamerica.com',
-  //   [urls[1]]: 'https://www-dev.landsofamerica.com/United-States/all-land',
-  //   [urls[2]]:
-  //     'https://www-dev.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
-  // })
+
   for (const url of urls) {
     await runLighthouseSetDBData(url)
   }
-  console.log(urls)
   res.send(urls)
 })
+function timeout(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
