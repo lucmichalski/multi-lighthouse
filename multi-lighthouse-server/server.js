@@ -56,7 +56,7 @@ function getDefinedData(data) {
   })
   return lighthouseReports
 }
-//Break this function up
+
 async function runLighthouseSetDBData(url) {
   const uid = 'ChqBqCMRh1R2g8cAMjIezSabGMl2'
   const formatURL = url[url.length - 1] === '/' ? url.slice(0, -1) : url
@@ -123,20 +123,10 @@ app.get('/db/set/', async function(req, res) {
   const { message } = await runLighthouseSetDBData(url)
   res.send(message)
 })
-app.get('/db/retrieve/set', async function(req, res) {
-  const uid = 'ChqBqCMRh1R2g8cAMjIezSabGMl2'
-  const ref = await db.ref(`${uid}/urls`)
-  const urlsSnapshot = await ref.once('value')
-  const urls = Object.values(urlsSnapshot.val())
-
-  for (const url of urls) {
-    await runLighthouseSetDBData(url)
-  }
+app.get('/db/get/set', async function(req, res) {
+  const urls = await getSetLHData()
   res.send(urls)
 })
-function timeout(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
@@ -146,6 +136,24 @@ app.use(function(req, res, next) {
   )
   next()
 })
+
+async function getSetLHData() {
+  const uid = 'ChqBqCMRh1R2g8cAMjIezSabGMl2'
+  const ref = await db.ref(`${uid}/urls`)
+  const urlsSnapshot = await ref.once('value')
+  const urls = Object.values(urlsSnapshot.val())
+
+  for (const url of urls) {
+    await runLighthouseSetDBData(url)
+  }
+  return urls
+}
+
+(async function onStartup() {
+  for (let i = 0; i <= 2; i++) {
+    await getSetLHData()
+  }
+})()
 
 const server = app.listen(process.env.PORT || 8080, err => {
   if (err) return console.error(err)
