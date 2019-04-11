@@ -143,6 +143,12 @@ async function getSetLHData() {
   const urlsSnapshot = await ref.once('value')
   const urls = Object.values(urlsSnapshot.val())
 
+  // Trying to account for cold starts
+  for (const url of urls) {
+    await launchPuppeteerRunLighthouse(url)
+  }
+
+  //The real deal
   for (const url of urls) {
     await runLighthouseSetDBData(url)
   }
