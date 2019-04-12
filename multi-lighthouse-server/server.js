@@ -32,7 +32,11 @@ async function launchPuppeteerRunLighthouse(url) {
     browser.close()
 
     if (lhr.runtimeError) {
-      console.log(lhr.runtimeError.code, lhr.requestedUrl)
+      console.log(
+        lhr.runtimeError.code,
+        lhr.requestedUrl,
+        lhr.categories.performance.score
+      )
     }
     return { report, lhr }
   } catch (error) {
@@ -115,26 +119,17 @@ async function runLighthouseSetDBData(
     performance,
   } = transformData(lighthouse)
 
-  if ((runtimeError && runtimeError.code === 'NO_ERROR') || !runtimeError) {
-    const lhrRef = db.ref(`${uid}/lhr/${encodedQuery}/${date}`)
-    const reportRef = db.ref(`${uid}/report/${encodedQuery}/${date}`)
+  const lhrRef = db.ref(`${uid}/lhr/${encodedQuery}/${date}`)
+  const reportRef = db.ref(`${uid}/report/${encodedQuery}/${date}`)
 
-    try {
-      console.log(
-        `Setting DB Data for ${finalUrl}. The total score is ${
-          performance.score
-        }`
-      )
-      reportRef.set(report, error => error && console.log(error))
-      lhrRef.set(dbData, error => error && console.log(error))
-    } catch (error) {
-      console.log(error)
-    }
+  console.log(
+    runtimeError,
+    `Setting DB Data for ${finalUrl}. The total score is ${performance.score}`
+  )
+  reportRef.set(report, error => error && console.log(error))
+  lhrRef.set(dbData, error => error && console.log(error))
 
-    return { message: `${formatURL} ${fetchTime} OK` }
-  } else {
-    return { message: `${formatURL} ${fetchTime} Not OK` }
-  }
+  return { message: `${formatURL} ${fetchTime} OK` }
 }
 
 app.get('/', async function(req, res) {
@@ -179,25 +174,15 @@ async function getSetLHData(uid) {
 
 //Utility function to set data
 async function setData() {
-  try {
-    const usersRef = db.ref().child('UTpDxze52nQZsp2dBlux8eSQ8oJ2')
-    const redfin = 'https://www.redfin.com'
-    const homeaway = 'https://www.homeaway.com'
-    const landwatch = 'https://www.landwatch.com'
-    const realtor = 'https://www.realtor.com'
-    const apartments = 'https://www.apartments.com'
-    usersRef.update({
-      urls: {
-        [base64.encode(redfin)]: redfin,
-        [base64.encode(homeaway)]: homeaway,
-        [base64.encode(landwatch)]: landwatch,
-        [base64.encode(realtor)]: realtor,
-        [base64.encode(apartments)]: apartments,
-      },
-    })
-  } catch (error) {
-    console.log(error)
-  }
+  const usersRef = db
+    .ref()
+    .child('UTpDxze52nQZsp2dBlux8eSQ8oJ2')
+    .child('urls')
+  const trulia = 'https://www.trulia.com/'
+
+  usersRef.update({
+    [base64.encode(trulia)]: trulia,
+  })
 }
 
 async function getUsers() {
@@ -214,12 +199,13 @@ async function runLHSetDataForAllUsersUrls() {
   }
 }
 
-//runLHSetDataForAllUsersUrls()
-// setData()
-
 // (async function onStartup() {
 //   for (let i = 0; i <= 4; i++) {
-//     await getSetLHData()
+//     try {
+//       await runLHSetDataForAllUsersUrls()
+//     } catch (error) {
+//       console.log(error)
+//     }
 //   }
 // })()
 
