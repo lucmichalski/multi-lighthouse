@@ -32,7 +32,11 @@ async function launchPuppeteerRunLighthouse(url) {
     browser.close()
 
     if (lhr.runtimeError) {
-      console.log(lhr.runtimeError.code, lhr.requestedUrl)
+      console.log(
+        lhr.runtimeError.code,
+        lhr.requestedUrl,
+        lhr.categories.performance.score
+      )
     }
     return { report, lhr }
   } catch (error) {
@@ -57,11 +61,7 @@ function getDefinedData(data) {
   return lighthouseReports
 }
 
-async function runLighthouseSetDBData(url) {
-  const uid = 'ChqBqCMRh1R2g8cAMjIezSabGMl2'
-  const formatURL = url[url.length - 1] === '/' ? url.slice(0, -1) : url
-  const encodedQuery = base64.encode(formatURL)
-  const lighthouse = await launchPuppeteerRunLighthouse(formatURL)
+function transformData(lighthouse) {
   const { lhr, report } = lighthouse
   const { fetchTime, audits, categories, runtimeError, finalUrl } = lhr
   const { performance } = categories
@@ -91,27 +91,45 @@ async function runLighthouseSetDBData(url) {
     runtimeError: runtimeError || 'Runtime Error is Undefined',
     categories: { performance: { score: performance.score } },
   }
-
-  if ((runtimeError && runtimeError.code === 'NO_ERROR') || !runtimeError) {
-    const lhrRef = db.ref(`${uid}/lhr/${encodedQuery}/${date}`)
-    const reportRef = db.ref(`${uid}/report/${encodedQuery}/${date}`)
-
-    try {
-      console.log(
-        `Setting DB Data for ${finalUrl}. The total score is ${
-          performance.score
-        }`
-      )
-      reportRef.set(report, error => error && console.log(error))
-      lhrRef.set(dbData, error => error && console.log(error))
-    } catch (error) {
-      console.log(error)
-    }
-
-    return { message: `${formatURL} ${fetchTime} OK` }
-  } else {
-    return { message: `${formatURL} ${fetchTime} Not OK` }
+  return {
+    fetchTime,
+    dbData,
+    date,
+    finalUrl,
+    runtimeError,
+    report,
+    performance,
   }
+}
+
+async function runLighthouseSetDBData(
+  url,
+  uid = 'ChqBqCMRh1R2g8cAMjIezSabGMl2'
+) {
+  const formatURL = url[url.length - 1] === '/' ? url.slice(0, -1) : url
+  const encodedQuery = base64.encode(formatURL)
+  const lighthouse = await launchPuppeteerRunLighthouse(formatURL)
+  const {
+    fetchTime,
+    runtimeError,
+    finalUrl,
+    date,
+    dbData,
+    report,
+    performance,
+  } = transformData(lighthouse)
+
+  const lhrRef = db.ref(`${uid}/lhr/${encodedQuery}/${date}`)
+  const reportRef = db.ref(`${uid}/report/${encodedQuery}/${date}`)
+
+  console.log(
+    runtimeError,
+    `Setting DB Data for ${finalUrl}. The total score is ${performance.score}`
+  )
+  reportRef.set(report, error => error && console.log(error))
+  lhrRef.set(dbData, error => error && console.log(error))
+
+  return { message: `${formatURL} ${fetchTime} OK` }
 }
 
 app.get('/', async function(req, res) {
@@ -137,23 +155,59 @@ app.use(function(req, res, next) {
   next()
 })
 
-async function getSetLHData() {
-  const uid = 'ChqBqCMRh1R2g8cAMjIezSabGMl2'
+async function getSetLHData(uid) {
   const ref = await db.ref(`${uid}/urls`)
   const urlsSnapshot = await ref.once('value')
   const urls = Object.values(urlsSnapshot.val())
 
+  // Trying to account for cold starts
   for (const url of urls) {
-    await runLighthouseSetDBData(url)
+    await launchPuppeteerRunLighthouse(url)
+  }
+
+  //The real deal
+  for (const url of urls) {
+    await runLighthouseSetDBData(url, uid)
   }
   return urls
 }
 
-(async function onStartup() {
-  for (let i = 0; i <= 2; i++) {
-    await getSetLHData()
+//Utility function to set data
+async function setData() {
+  const usersRef = db
+    .ref()
+    .child('UTpDxze52nQZsp2dBlux8eSQ8oJ2')
+    .child('urls')
+  const trulia = 'https://www.trulia.com/'
+
+  usersRef.update({
+    [base64.encode(trulia)]: trulia,
+  })
+}
+
+async function getUsers() {
+  const userRef = db.ref().child('users')
+  const userSnapshot = await userRef.once('value')
+  const users = Object.keys(userSnapshot.val())
+  console.log(users)
+  return users
+}
+async function runLHSetDataForAllUsersUrls() {
+  const users = await getUsers()
+  for (const user of users) {
+    await getSetLHData(user)
   }
-})()
+}
+
+// (async function onStartup() {
+//   for (let i = 0; i <= 4; i++) {
+//     try {
+//       await runLHSetDataForAllUsersUrls()
+//     } catch (error) {
+//       console.log(error)
+//     }
+//   }
+// })()
 
 const server = app.listen(process.env.PORT || 8080, err => {
   if (err) return console.error(err)
