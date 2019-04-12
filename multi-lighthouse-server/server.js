@@ -31,16 +31,24 @@ async function launchPuppeteerRunLighthouse(url) {
     })
     browser.close()
 
-    if (lhr.runtimeError) {
+    if (
+      (lhr && lhr.runtimeError && lhr.runtimeError.code === 'NO_ERROR') ||
+      (lhr && !lhr.runtimeError)
+    ) {
       console.log(
         lhr.runtimeError.code,
         lhr.requestedUrl,
         lhr.categories.performance.score
       )
+
+      return { report, lhr }
     }
-    return { report, lhr }
+    //Is this handling the error correctly and just moving on to the next url?
+    //or should I return an error and then throw from another function?
+    throw 'No Lighthouse Report Generated'
   } catch (error) {
     console.log(error)
+    throw error
   }
 }
 
@@ -126,7 +134,9 @@ async function runLighthouseSetDBData(
     runtimeError,
     `Setting DB Data for ${finalUrl}. The total score is ${performance.score}`
   )
+
   reportRef.set(report, error => error && console.log(error))
+
   lhrRef.set(dbData, error => error && console.log(error))
 
   return { message: `${formatURL} ${fetchTime} OK` }
@@ -199,15 +209,15 @@ async function runLHSetDataForAllUsersUrls() {
   }
 }
 
-// (async function onStartup() {
-//   for (let i = 0; i <= 4; i++) {
-//     try {
-//       await runLHSetDataForAllUsersUrls()
-//     } catch (error) {
-//       console.log(error)
-//     }
-//   }
-// })()
+(async function onStartup() {
+  for (let i = 0; i <= 4; i++) {
+    try {
+      await runLHSetDataForAllUsersUrls()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+})()
 
 const server = app.listen(process.env.PORT || 8080, err => {
   if (err) return console.error(err)
