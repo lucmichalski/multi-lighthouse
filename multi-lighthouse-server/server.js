@@ -35,11 +35,7 @@ async function launchPuppeteerRunLighthouse(url) {
       (lhr && lhr.runtimeError && lhr.runtimeError.code === 'NO_ERROR') ||
       (lhr && !lhr.runtimeError)
     ) {
-      console.log(
-        lhr.runtimeError.code,
-        lhr.requestedUrl,
-        lhr.categories.performance.score
-      )
+      console.log(lhr.requestedUrl, lhr.categories.performance.score)
 
       return { report, lhr }
     }
@@ -104,7 +100,6 @@ function transformData(lighthouse) {
     dbData,
     date,
     finalUrl,
-    runtimeError,
     report,
     performance,
   }
@@ -119,7 +114,6 @@ async function runLighthouseSetDBData(
   const lighthouse = await launchPuppeteerRunLighthouse(formatURL)
   const {
     fetchTime,
-    runtimeError,
     finalUrl,
     date,
     dbData,
@@ -131,13 +125,14 @@ async function runLighthouseSetDBData(
   const reportRef = db.ref(`${uid}/report/${encodedQuery}/${date}`)
 
   console.log(
-    runtimeError,
     `Setting DB Data for ${finalUrl}. The total score is ${performance.score}`
   )
-
-  reportRef.set(report, error => error && console.log(error))
-
-  lhrRef.set(dbData, error => error && console.log(error))
+  if (report) {
+    reportRef.set(report, error => error && console.log(error))
+  }
+  if (dbData) {
+    lhrRef.set(dbData, error => error && console.log(error))
+  }
 
   return { message: `${formatURL} ${fetchTime} OK` }
 }
@@ -184,14 +179,24 @@ async function getSetLHData(uid) {
 
 //Utility function to set data
 async function setData() {
-  const usersRef = db
+  const Ref = db
     .ref()
-    .child('UTpDxze52nQZsp2dBlux8eSQ8oJ2')
+    .child('showcase')
     .child('urls')
-  const trulia = 'https://www.trulia.com/'
+  const google = 'https://www.google.com/'
+  const amazon = 'https://www.amazon.com/'
+  const netflix = 'https://www.netflix.com/'
+  const airbnb = 'https://www.airbnb.com/'
+  const youtube = 'https://www.youtube.com/'
+  const wikipedia = 'https://www.wikipedia.org/'
 
-  usersRef.update({
-    [base64.encode(trulia)]: trulia,
+  Ref.set({
+    [base64.encode(google)]: google,
+    [base64.encode(amazon)]: amazon,
+    [base64.encode(netflix)]: netflix,
+    [base64.encode(airbnb)]: airbnb,
+    [base64.encode(youtube)]: youtube,
+    [base64.encode(wikipedia)]: wikipedia,
   })
 }
 
@@ -202,6 +207,17 @@ async function getUsers() {
   console.log(users)
   return users
 }
+
+async function getShowcaseUrls() {
+  const showcaseRef = db
+    .ref()
+    .child('showcase')
+    .child('urls')
+  const showcaseSnapshot = await showcaseRef.once('value')
+  const showcaseUrls = Object.keys(showcaseSnapshot.val())
+  console.log(showcaseUrls)
+  return showcaseUrls
+}
 async function runLHSetDataForAllUsersUrls() {
   const users = await getUsers()
   for (const user of users) {
@@ -209,10 +225,43 @@ async function runLHSetDataForAllUsersUrls() {
   }
 }
 
+async function getShowcaseUrlsRunLighthouseSetDbData() {
+  const showcaseUrls = await getShowcaseUrls()
+  //Account for cold start
+  for (const url of showcaseUrls) {
+    const decodedUrl = base64.decode(url)
+    await launchPuppeteerRunLighthouse(decodedUrl)
+  }
+
+  //Real Deal
+  for (const url of showcaseUrls) {
+    const decodedUrl = base64.decode(url)
+    const lighthouse = await launchPuppeteerRunLighthouse(decodedUrl)
+    const { finalUrl, date, dbData, report, performance } = transformData(
+      lighthouse
+    )
+    const lhrRef = db.ref(`showcase/${url}/lhr/${date}`)
+    const reportRef = db.ref(`showcase/${url}/report/${date}`)
+
+    console.log(
+      `Setting DB Data for ${finalUrl}. The total score is ${performance.score}`
+    )
+    if (report) {
+      reportRef.set(report, error => error && console.log(error))
+    }
+    if (dbData) {
+      lhrRef.set(dbData, error => error && console.log(error))
+    }
+  }
+  console.log('showcases are set')
+  return
+}
+
 (async function onStartup() {
   for (let i = 0; i <= 4; i++) {
     try {
       await runLHSetDataForAllUsersUrls()
+      await getShowcaseUrlsRunLighthouseSetDbData()
     } catch (error) {
       console.log(error)
     }
