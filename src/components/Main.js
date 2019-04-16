@@ -41,7 +41,7 @@ function setGlobals() {
 const globals = setGlobals()
 
 const initialState = {
-  user: { uid: 'ChqBqCMRh1R2g8cAMjIezSabGMl2' },
+  user: {},
   reportHtml: null,
   databaseData: null,
   metrics: [
@@ -60,12 +60,35 @@ const initialState = {
   radioIds: {
     timelineResults: 'timeline',
   },
+  showcaseData: null,
 }
 class Main extends Component {
   state = { ...initialState }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.initAuth()
+    this.setState({ showcaseData: await this.getShowcaseData() })
+  }
+
+  async getShowcaseData() {
+    //Can this averaging calculation be done on the server to save time? YES
+    const db = firebase.database()
+    const ref = db.ref(`showcase/urls`)
+    const urlsSnapshot = await ref.once('value')
+    const urls = Object.keys(await urlsSnapshot.val())
+    const showcaseDataPromises = urls.map(async url => {
+      const ref = db
+        .ref('showcase')
+        .child(url)
+        .child('lhr')
+      const urlReportSnapshot = await ref.once('value')
+      const urlReports = await urlReportSnapshot.val()
+
+      return { urlReports, url }
+    })
+    const showcaseData = await Promise.all(showcaseDataPromises)
+    //should only return the encoded url, average scores for all metrics and overall. I can get the whole report on button click if I need it
+    return showcaseData
   }
 
   reset = () => this.setState(() => initialState)
@@ -199,6 +222,7 @@ class Main extends Component {
       databaseData,
       reportHtml,
       user,
+      showcaseData,
     } = this.state
 
     const radioIdentifiers = [
@@ -230,15 +254,18 @@ class Main extends Component {
         {!error && !timelineResults && (
           <InnerWrapper>
             <H2>Track Performance of Your Site</H2>
-            <RadioGroupWrapper>
-              <RadioGroup
-                onChange={this.onChangeRadio}
-                identifiers={radioIdentifiers}
-                groupName="searchType"
-                className="radio-group"
-                styles={RadioGroupStyles}
-              />
-            </RadioGroupWrapper>
+
+            {user && user.uid && (
+              <RadioGroupWrapper>
+                <RadioGroup
+                  onChange={this.onChangeRadio}
+                  identifiers={radioIdentifiers}
+                  groupName="searchType"
+                  className="radio-group"
+                  styles={RadioGroupStyles}
+                />
+              </RadioGroupWrapper>
+            )}
           </InnerWrapper>
         )}
 
