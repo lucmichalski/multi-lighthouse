@@ -6,6 +6,7 @@ import URLGraphSection from './URLGraphSection'
 import RadioGroup from './RadioGroup'
 import Error from './Error'
 import Loading from './Loading'
+import Guage from './Guage'
 
 import {
   MainWrapper,
@@ -17,6 +18,8 @@ import {
   CloseIFrame,
   InnerWrapper,
   SignOut,
+  ShowcaseContainer,
+  Showcase,
 } from './MainStyles'
 
 const config = {
@@ -41,7 +44,7 @@ function setGlobals() {
 const globals = setGlobals()
 
 const initialState = {
-  user: { uid: 'ChqBqCMRh1R2g8cAMjIezSabGMl2' },
+  user: {},
   reportHtml: null,
   databaseData: null,
   metrics: [
@@ -60,15 +63,40 @@ const initialState = {
   radioIds: {
     timelineResults: 'timeline',
   },
+  showcaseData: null,
 }
 class Main extends Component {
   state = { ...initialState }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.initAuth()
+    this.setState({ showcaseData: await this.getShowcaseData() })
   }
 
-  reset = () => this.setState(() => initialState)
+  async getShowcaseData() {
+    const db = firebase.database()
+    const ref = db.ref(`showcase/urls`)
+    const URLsSnapshot = await ref.once('value')
+    const URLs = Object.entries(await URLsSnapshot.val())
+    const showcaseDataPromises = URLs.map(async ([key, value]) => {
+      const ref = db
+        .ref('showcase')
+        .child(key)
+        .child('avg')
+      const URLAveragesSnapshot = await ref.once('value')
+      const URLAverageScore = await URLAveragesSnapshot.val()
+
+      return { URLAverageScore, encodedURL: key, decodedURL: value }
+    })
+    const showcaseData = await Promise.all(showcaseDataPromises)
+    return showcaseData
+  }
+
+  reset = () =>
+    this.setState(state => ({
+      ...initialState,
+      showcaseData: state.showcaseData,
+    }))
 
   retrieveDbReport = (URL, date) => {
     const { user } = this.state
@@ -199,6 +227,7 @@ class Main extends Component {
       databaseData,
       reportHtml,
       user,
+      showcaseData,
     } = this.state
 
     const radioIdentifiers = [
@@ -230,15 +259,27 @@ class Main extends Component {
         {!error && !timelineResults && (
           <InnerWrapper>
             <H2>Track Performance of Your Site</H2>
-            <RadioGroupWrapper>
-              <RadioGroup
-                onChange={this.onChangeRadio}
-                identifiers={radioIdentifiers}
-                groupName="searchType"
-                className="radio-group"
-                styles={RadioGroupStyles}
-              />
-            </RadioGroupWrapper>
+            {showcaseData && !user.uid && (
+              <ShowcaseContainer>
+                {showcaseData.map(({ URLAverageScore, decodedURL }) => (
+                  <Showcase key={decodedURL}>
+                    <h3>{decodedURL}</h3>
+                    <Guage value={URLAverageScore} />
+                  </Showcase>
+                ))}
+              </ShowcaseContainer>
+            )}
+            {user && user.uid && (
+              <RadioGroupWrapper>
+                <RadioGroup
+                  onChange={this.onChangeRadio}
+                  identifiers={radioIdentifiers}
+                  groupName="searchType"
+                  className="radio-group"
+                  styles={RadioGroupStyles}
+                />
+              </RadioGroupWrapper>
+            )}
           </InnerWrapper>
         )}
 

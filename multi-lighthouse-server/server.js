@@ -1,7 +1,5 @@
-const express = require('express')
 const base64 = require('base-64')
 
-const app = express()
 const lighthouse = require('lighthouse')
 const puppeteer = require('puppeteer')
 
@@ -31,16 +29,20 @@ async function launchPuppeteerRunLighthouse(url) {
     })
     browser.close()
 
-    if (lhr.runtimeError) {
-      console.log(
-        lhr.runtimeError.code,
-        lhr.requestedUrl,
-        lhr.categories.performance.score
-      )
+    if (
+      (lhr && lhr.runtimeError && lhr.runtimeError.code === 'NO_ERROR') ||
+      (lhr && !lhr.runtimeError)
+    ) {
+      console.log(lhr.requestedUrl, lhr.categories.performance.score)
+
+      return { report, lhr }
     }
-    return { report, lhr }
+    //Is this handling the error correctly and just moving on to the next url?
+    //or should I return an error and then throw from another function?
+    throw 'No Lighthouse Report Generated'
   } catch (error) {
     console.log(error)
+    throw error
   }
 }
 
@@ -96,7 +98,6 @@ function transformData(lighthouse) {
     dbData,
     date,
     finalUrl,
-    runtimeError,
     report,
     performance,
   }
@@ -111,7 +112,6 @@ async function runLighthouseSetDBData(
   const lighthouse = await launchPuppeteerRunLighthouse(formatURL)
   const {
     fetchTime,
-    runtimeError,
     finalUrl,
     date,
     dbData,
@@ -123,37 +123,17 @@ async function runLighthouseSetDBData(
   const reportRef = db.ref(`${uid}/report/${encodedQuery}/${date}`)
 
   console.log(
-    runtimeError,
     `Setting DB Data for ${finalUrl}. The total score is ${performance.score}`
   )
-  reportRef.set(report, error => error && console.log(error))
-  lhrRef.set(dbData, error => error && console.log(error))
+  if (report) {
+    reportRef.set(report, error => error && console.log(error))
+  }
+  if (dbData) {
+    lhrRef.set(dbData, error => error && console.log(error))
+  }
 
   return { message: `${formatURL} ${fetchTime} OK` }
 }
-
-app.get('/', async function(req, res) {
-  res.send('hello world')
-})
-
-app.get('/db/set/', async function(req, res) {
-  const { url } = req.query
-  const { message } = await runLighthouseSetDBData(url)
-  res.send(message)
-})
-app.get('/db/get/set', async function(req, res) {
-  const urls = await getSetLHData()
-  res.send(urls)
-})
-
-app.use(function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*')
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept'
-  )
-  next()
-})
 
 async function getSetLHData(uid) {
   const ref = await db.ref(`${uid}/urls`)
@@ -174,14 +154,24 @@ async function getSetLHData(uid) {
 
 //Utility function to set data
 async function setData() {
-  const usersRef = db
+  const Ref = db
     .ref()
-    .child('UTpDxze52nQZsp2dBlux8eSQ8oJ2')
+    .child('showcase')
     .child('urls')
-  const trulia = 'https://www.trulia.com/'
+  const google = 'https://www.google.com/'
+  const amazon = 'https://www.amazon.com/'
+  const netflix = 'https://www.netflix.com/'
+  const airbnb = 'https://www.airbnb.com/'
+  const youtube = 'https://www.youtube.com/'
+  const wikipedia = 'https://www.wikipedia.org/'
 
-  usersRef.update({
-    [base64.encode(trulia)]: trulia,
+  Ref.set({
+    [base64.encode(google)]: google,
+    [base64.encode(amazon)]: amazon,
+    [base64.encode(netflix)]: netflix,
+    [base64.encode(airbnb)]: airbnb,
+    [base64.encode(youtube)]: youtube,
+    [base64.encode(wikipedia)]: wikipedia,
   })
 }
 
@@ -192,6 +182,34 @@ async function getUsers() {
   console.log(users)
   return users
 }
+
+//Utility function to delete data
+async function deleteData() {
+  const users = await getUsers()
+  for (const user of users) {
+    const lhrRef = db
+      .ref()
+      .child(user)
+      .child('lhr')
+    lhrRef.remove()
+    const reportRef = db
+      .ref()
+      .child(user)
+      .child('report')
+    reportRef.remove()
+  }
+}
+
+async function getShowcaseUrls() {
+  const showcaseRef = db
+    .ref()
+    .child('showcase')
+    .child('urls')
+  const showcaseSnapshot = await showcaseRef.once('value')
+  const showcaseUrls = Object.keys(showcaseSnapshot.val())
+  console.log(showcaseUrls)
+  return showcaseUrls
+}
 async function runLHSetDataForAllUsersUrls() {
   const users = await getUsers()
   for (const user of users) {
@@ -199,18 +217,77 @@ async function runLHSetDataForAllUsersUrls() {
   }
 }
 
-// (async function onStartup() {
-//   for (let i = 0; i <= 4; i++) {
-//     try {
-//       await runLHSetDataForAllUsersUrls()
-//     } catch (error) {
-//       console.log(error)
-//     }
-//   }
-// })()
+async function getShowcaseUrlsRunLighthouseSetDbData() {
+  const showcaseUrls = await getShowcaseUrls()
+  //Account for cold start
+  for (const url of showcaseUrls) {
+    const decodedUrl = base64.decode(url)
+    await launchPuppeteerRunLighthouse(decodedUrl)
+  }
 
-const server = app.listen(process.env.PORT || 8080, err => {
-  if (err) return console.error(err)
-  const port = server.address().port
-  console.info(`App listening on port ${port}`)
-})
+  //Real Deal
+  for (const url of showcaseUrls) {
+    const decodedUrl = base64.decode(url)
+    const lighthouse = await launchPuppeteerRunLighthouse(decodedUrl)
+    const { finalUrl, date, dbData, report, performance } = transformData(
+      lighthouse
+    )
+    const lhrRef = db.ref(`showcase/${url}/lhr/${date}`)
+    const reportRef = db.ref(`showcase/${url}/report/${date}`)
+
+    console.log(
+      `Setting DB Data for ${finalUrl}. The total score is ${performance.score}`
+    )
+    if (report) {
+      reportRef.set(report, error => error && console.log(error))
+    }
+    if (dbData) {
+      lhrRef.set(dbData, error => error && console.log(error))
+    }
+  }
+  console.log('showcases are set')
+  return
+}
+
+async function averageShowcaseOverallScores() {
+  const showcaseUrls = await getShowcaseUrls()
+  for (const url of showcaseUrls) {
+    const showcaseRef = db
+      .ref()
+      .child('showcase')
+      .child(url)
+      .child('lhr')
+
+    const showcaseSnapshot = await showcaseRef.once('value')
+    const showcaseLHRReportsByDate = Object.values(await showcaseSnapshot.val())
+    const averagePerformanceScores = average(
+      showcaseLHRReportsByDate,
+      (accumlator, nextReport) =>
+        accumlator + nextReport.categories.performance.score
+    )
+    console.log(averagePerformanceScores, base64.decode(url))
+    db.ref()
+      .child('showcase')
+      .child(url)
+      .update({ avg: Math.round(averagePerformanceScores) })
+  }
+  return
+}
+
+function average(arr, callback) {
+  const average = Math.round((arr.reduce(callback, 0) / arr.length) * 100)
+  return average
+}
+
+(async function onStartup() {
+  await averageShowcaseOverallScores()
+
+  for (let i = 0; i <= 1; i++) {
+    try {
+      await runLHSetDataForAllUsersUrls()
+      await getShowcaseUrlsRunLighthouseSetDbData()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+})()
