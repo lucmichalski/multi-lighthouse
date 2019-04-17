@@ -6,6 +6,7 @@ import URLGraphSection from './URLGraphSection'
 import RadioGroup from './RadioGroup'
 import Error from './Error'
 import Loading from './Loading'
+import Guage from './Guage'
 
 import {
   MainWrapper,
@@ -17,6 +18,8 @@ import {
   CloseIFrame,
   InnerWrapper,
   SignOut,
+  ShowcaseContainer,
+  Showcase,
 } from './MainStyles'
 
 const config = {
@@ -71,27 +74,29 @@ class Main extends Component {
   }
 
   async getShowcaseData() {
-    //Can this averaging calculation be done on the server to save time? YES
     const db = firebase.database()
     const ref = db.ref(`showcase/urls`)
-    const urlsSnapshot = await ref.once('value')
-    const urls = Object.keys(await urlsSnapshot.val())
-    const showcaseDataPromises = urls.map(async url => {
+    const URLsSnapshot = await ref.once('value')
+    const URLs = Object.entries(await URLsSnapshot.val())
+    const showcaseDataPromises = URLs.map(async ([key, value]) => {
       const ref = db
         .ref('showcase')
-        .child(url)
-        .child('lhr')
-      const urlReportSnapshot = await ref.once('value')
-      const urlReports = await urlReportSnapshot.val()
+        .child(key)
+        .child('avg')
+      const URLAveragesSnapshot = await ref.once('value')
+      const URLAverageScore = await URLAveragesSnapshot.val()
 
-      return { urlReports, url }
+      return { URLAverageScore, encodedURL: key, decodedURL: value }
     })
     const showcaseData = await Promise.all(showcaseDataPromises)
-    //should only return the encoded url, average scores for all metrics and overall. I can get the whole report on button click if I need it
     return showcaseData
   }
 
-  reset = () => this.setState(() => initialState)
+  reset = () =>
+    this.setState(state => ({
+      ...initialState,
+      showcaseData: state.showcaseData,
+    }))
 
   retrieveDbReport = (URL, date) => {
     const { user } = this.state
@@ -254,7 +259,16 @@ class Main extends Component {
         {!error && !timelineResults && (
           <InnerWrapper>
             <H2>Track Performance of Your Site</H2>
-
+            {showcaseData && !user.uid && (
+              <ShowcaseContainer>
+                {showcaseData.map(({ URLAverageScore, decodedURL }) => (
+                  <Showcase key={decodedURL}>
+                    <h3>{decodedURL}</h3>
+                    <Guage value={URLAverageScore} />
+                  </Showcase>
+                ))}
+              </ShowcaseContainer>
+            )}
             {user && user.uid && (
               <RadioGroupWrapper>
                 <RadioGroup

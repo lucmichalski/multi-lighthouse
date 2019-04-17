@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 const FooterWrapper = styled.footer`
-  background: #448aff;
+  background: rgb(0, 0, 28);
   color: #ffffff;
 `
 const Logo = styled.h3`

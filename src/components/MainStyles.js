@@ -151,3 +151,15 @@ export const SignOut = styled.button`
   font-size: 1rem;
   cursor: pointer;
 `
+
+export const ShowcaseContainer = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-wrap: wrap;
+`
+
+export const Showcase = styled.div`
+  width: 30%;
+  text-align: center;
+`
