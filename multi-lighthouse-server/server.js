@@ -1,7 +1,5 @@
-const express = require('express')
 const base64 = require('base-64')
 
-const app = express()
 const lighthouse = require('lighthouse')
 const puppeteer = require('puppeteer')
 
@@ -137,29 +135,6 @@ async function runLighthouseSetDBData(
   return { message: `${formatURL} ${fetchTime} OK` }
 }
 
-app.get('/', async function(req, res) {
-  res.send('hello world')
-})
-
-app.get('/db/set/', async function(req, res) {
-  const { url } = req.query
-  const { message } = await runLighthouseSetDBData(url)
-  res.send(message)
-})
-app.get('/db/get/set', async function(req, res) {
-  const urls = await getSetLHData()
-  res.send(urls)
-})
-
-app.use(function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*')
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept'
-  )
-  next()
-})
-
 async function getSetLHData(uid) {
   const ref = await db.ref(`${uid}/urls`)
   const urlsSnapshot = await ref.once('value')
@@ -206,6 +181,23 @@ async function getUsers() {
   const users = Object.keys(userSnapshot.val())
   console.log(users)
   return users
+}
+
+//Utility function to delete data
+async function deleteData() {
+  const users = await getUsers()
+  for (const user of users) {
+    const lhrRef = db
+      .ref()
+      .child(user)
+      .child('lhr')
+    lhrRef.remove()
+    const reportRef = db
+      .ref()
+      .child(user)
+      .child('report')
+    reportRef.remove()
+  }
 }
 
 async function getShowcaseUrls() {
@@ -257,8 +249,40 @@ async function getShowcaseUrlsRunLighthouseSetDbData() {
   return
 }
 
+async function averageShowcaseOverallScores() {
+  const showcaseUrls = await getShowcaseUrls()
+  for (const url of showcaseUrls) {
+    const showcaseRef = db
+      .ref()
+      .child('showcase')
+      .child(url)
+      .child('lhr')
+
+    const showcaseSnapshot = await showcaseRef.once('value')
+    const showcaseLHRReportsByDate = Object.values(await showcaseSnapshot.val())
+    const averagePerformanceScores = average(
+      showcaseLHRReportsByDate,
+      (accumlator, nextReport) =>
+        accumlator + nextReport.categories.performance.score
+    )
+    console.log(averagePerformanceScores, base64.decode(url))
+    db.ref()
+      .child('showcase')
+      .child(url)
+      .update({ avg: Math.round(averagePerformanceScores) })
+  }
+  return
+}
+
+function average(arr, callback) {
+  const average = Math.round((arr.reduce(callback, 0) / arr.length) * 100)
+  return average
+}
+
 (async function onStartup() {
-  for (let i = 0; i <= 4; i++) {
+  await averageShowcaseOverallScores()
+
+  for (let i = 0; i <= 1; i++) {
     try {
       await runLHSetDataForAllUsersUrls()
       await getShowcaseUrlsRunLighthouseSetDbData()
@@ -267,9 +291,3 @@ async function getShowcaseUrlsRunLighthouseSetDbData() {
     }
   }
 })()
-
-const server = app.listen(process.env.PORT || 8080, err => {
-  if (err) return console.error(err)
-  const port = server.address().port
-  console.info(`App listening on port ${port}`)
-})
