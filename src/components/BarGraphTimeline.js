@@ -19,7 +19,7 @@ const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
   }
   const [tooltip, setTooltip] = useState(defaultState)
   const { isTooltip, tooltipValue } = tooltip
-  const isOverall = metric === 'Overall'
+  const isOverall = metric === 'perf'
 
   const handleMouseOver = value => {
     setTooltip({ isTooltip: true, tooltipValue: value })
@@ -52,12 +52,10 @@ const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
             barWidth={0.8}
             color={color}
             data={[...data]
-              .sort((a, b) => new Date(a.fetchTime) - new Date(b.fetchTime))
+              .sort((a, b) => new Date(a.ft) - new Date(b.ft))
               .map(item => ({
-                x: item.fetchTime,
-                y: isOverall
-                  ? item.categories.performance.score * 100
-                  : item.audits[metric].rawValue,
+                x: item.ft,
+                y: item[metric] && item[metric].val ? item[metric].val : 0,
               }))}
           />
           {isTooltip && <Hint value={tooltipValue} />}

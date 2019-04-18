@@ -36,13 +36,6 @@ export default function URLGraphSection({
       {areGraphsVisible && (
         <BarGraphTimelineContainer>
           <Fragment>
-            <BarGraphTimeline
-              onClick={onClick}
-              color={colors[index]}
-              data={data}
-              dbKey={url}
-              metric="Overall"
-            />
             {metrics.map(metric => (
               <BarGraphTimeline
                 onClick={onClick}

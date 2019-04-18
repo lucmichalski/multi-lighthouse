@@ -77,21 +77,21 @@ function transformData(lighthouse) {
     'speed-index': speedIndex,
   } = audits
 
-  const data = {
-    'first-contentful-paint': getDefinedData(firstContentfulPaint),
-    'first-meaningful-paint': getDefinedData(firstMeaningfulPaint),
-    interactive: getDefinedData(interactive),
-    'first-cpu-idle': getDefinedData(firstCpuIdle),
-    'estimated-input-latency': getDefinedData(estimatedInputLatency),
-    'speed-index': getDefinedData(speedIndex),
+  const auditData = {
+    fcp: { val: firstContentfulPaint.rawValue },
+    fmp: { val: firstMeaningfulPaint.rawValue },
+    i: { val: interactive.rawValue },
+    fci: { val: firstCpuIdle.rawValue },
+    eil: { val: estimatedInputLatency.rawValue },
+    si: { val: speedIndex.rawValue },
+    perf: { val: performance.score * 100 },
   }
 
   const dbData = {
-    finalUrl,
-    fetchTime,
-    audits: data,
-    runtimeError: runtimeError || 'Runtime Error is Undefined',
-    categories: { performance: { score: performance.score } },
+    fu: finalUrl,
+    ft: fetchTime,
+    re: runtimeError.code || 'Runtime Error is Undefined',
+    ...auditData,
   }
   return {
     fetchTime,
@@ -252,42 +252,48 @@ async function getShowcaseUrlsRunLighthouseSetDbData() {
 async function averageShowcaseOverallScores() {
   const showcaseUrls = await getShowcaseUrls()
   for (const url of showcaseUrls) {
-    const showcaseRef = db
-      .ref()
-      .child('showcase')
-      .child(url)
-      .child('lhr')
+    try {
+      const showcaseRef = db
+        .ref()
+        .child('showcase')
+        .child(url)
+        .child('lhr')
 
-    const showcaseSnapshot = await showcaseRef.once('value')
-    const showcaseLHRReportsByDate = Object.values(await showcaseSnapshot.val())
-    const averagePerformanceScores = average(
-      showcaseLHRReportsByDate,
-      (accumlator, nextReport) =>
-        accumlator + nextReport.categories.performance.score
-    )
-    console.log(averagePerformanceScores, base64.decode(url))
-    db.ref()
-      .child('showcase')
-      .child(url)
-      .update({ avg: Math.round(averagePerformanceScores) })
+      if (!showcaseRef) {
+        continue
+      }
+
+      const showcaseSnapshot = await showcaseRef.once('value')
+      const showcaseLHRReportsByDate = Object.values(
+        await showcaseSnapshot.val()
+      )
+      const averagePerformanceScores = average(
+        showcaseLHRReportsByDate,
+        (accumlator, nextReport) => accumlator + nextReport.perf.val
+      )
+      console.log(averagePerformanceScores, base64.decode(url))
+      db.ref()
+        .child('showcase')
+        .child(url)
+        .update({ avg: averagePerformanceScores })
+    } catch (error) {
+      console.log(error)
+    }
   }
   return
 }
 
 function average(arr, callback) {
-  const average = Math.round((arr.reduce(callback, 0) / arr.length) * 100)
+  const average = arr.reduce(callback, 0) / arr.length
   return average
 }
 
 (async function onStartup() {
-  await averageShowcaseOverallScores()
-
-  for (let i = 0; i <= 1; i++) {
-    try {
-      await runLHSetDataForAllUsersUrls()
-      await getShowcaseUrlsRunLighthouseSetDbData()
-    } catch (error) {
-      console.log(error)
-    }
+  try {
+    await runLHSetDataForAllUsersUrls()
+    await getShowcaseUrlsRunLighthouseSetDbData()
+    await averageShowcaseOverallScores()
+  } catch (error) {
+    console.log(error)
   }
 })()
