@@ -102,7 +102,7 @@ export const BarGraphTimelineContainer = styled.div`
   width: 100%;
   margin-bottom: 25px;
 `
-export const IFrameContainer = styled.div`
+export const Modal = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -118,7 +118,22 @@ export const IFrameContainer = styled.div`
     padding: 5rem;
   }
 `
-export const CloseIFrame = styled.button`
+export const ModalContent = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+`
+
+export const ModalMetric = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-direction: column;
+  width: 30%;
+`
+export const CloseModal = styled.button`
   position: absolute;
   top: 1em;
   right: 1em;

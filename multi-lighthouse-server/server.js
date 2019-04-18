@@ -78,19 +78,28 @@ function transformData(lighthouse) {
   } = audits
 
   const auditData = {
-    fcp: { val: firstContentfulPaint.rawValue },
-    fmp: { val: firstMeaningfulPaint.rawValue },
-    i: { val: interactive.rawValue },
-    fci: { val: firstCpuIdle.rawValue },
-    eil: { val: estimatedInputLatency.rawValue },
-    si: { val: speedIndex.rawValue },
-    perf: { val: performance.score * 100 },
+    fcp: {
+      val: firstContentfulPaint.rawValue,
+      score: firstContentfulPaint.score * 100,
+    },
+    fmp: {
+      val: firstMeaningfulPaint.rawValue,
+      score: firstMeaningfulPaint.score * 100,
+    },
+    i: { val: interactive.rawValue, score: interactive.score * 100 },
+    fci: { val: firstCpuIdle.rawValue, score: firstCpuIdle.score * 100 },
+    eil: {
+      val: estimatedInputLatency.rawValue,
+      score: estimatedInputLatency.score * 100,
+    },
+    si: { val: speedIndex.rawValue, score: speedIndex.score * 100 },
+    perf: { val: performance.score * 100, score: performance.score * 100 },
   }
 
   const dbData = {
     fu: finalUrl,
     ft: fetchTime,
-    re: runtimeError.code || 'Runtime Error is Undefined',
+    re: runtimeError ? runtimeError.code : 'Runtime Error is Undefined',
     ...auditData,
   }
   return {
@@ -110,26 +119,16 @@ async function runLighthouseSetDBData(
   const formatURL = url[url.length - 1] === '/' ? url.slice(0, -1) : url
   const encodedQuery = base64.encode(formatURL)
   const lighthouse = await launchPuppeteerRunLighthouse(formatURL)
-  const {
-    fetchTime,
-    finalUrl,
-    date,
-    dbData,
-    report,
-    performance,
-  } = transformData(lighthouse)
-
-  const lhrRef = db.ref(`${uid}/lhr/${encodedQuery}/${date}`)
-  const reportRef = db.ref(`${uid}/report/${encodedQuery}/${date}`)
-
-  console.log(
-    `Setting DB Data for ${finalUrl}. The total score is ${performance.score}`
+  const { fetchTime, finalUrl, date, dbData, performance } = transformData(
+    lighthouse
   )
-  if (report) {
-    reportRef.set(report, error => error && console.log(error))
-  }
+
   if (dbData) {
+    const lhrRef = db.ref(`${uid}/lhr/${encodedQuery}/${date}`)
     lhrRef.set(dbData, error => error && console.log(error))
+    console.log(
+      `Setting DB Data for ${finalUrl}. The total score is ${performance.score}`
+    )
   }
 
   return { message: `${formatURL} ${fetchTime} OK` }
@@ -198,6 +197,15 @@ async function deleteData() {
       .child('report')
     reportRef.remove()
   }
+  const showcaseUrls = await getShowcaseUrls()
+  for (const url of showcaseUrls) {
+    const urlRef = db
+      .ref()
+      .child('showcase')
+      .child(url)
+    urlRef.remove()
+  }
+  return
 }
 
 async function getShowcaseUrls() {
@@ -229,20 +237,16 @@ async function getShowcaseUrlsRunLighthouseSetDbData() {
   for (const url of showcaseUrls) {
     const decodedUrl = base64.decode(url)
     const lighthouse = await launchPuppeteerRunLighthouse(decodedUrl)
-    const { finalUrl, date, dbData, report, performance } = transformData(
-      lighthouse
-    )
-    const lhrRef = db.ref(`showcase/${url}/lhr/${date}`)
-    const reportRef = db.ref(`showcase/${url}/report/${date}`)
+    const { finalUrl, date, dbData, performance } = transformData(lighthouse)
 
-    console.log(
-      `Setting DB Data for ${finalUrl}. The total score is ${performance.score}`
-    )
-    if (report) {
-      reportRef.set(report, error => error && console.log(error))
-    }
     if (dbData) {
+      const lhrRef = db.ref(`showcase/${url}/lhr/${date}`)
       lhrRef.set(dbData, error => error && console.log(error))
+      console.log(
+        `Setting DB Data for ${finalUrl}. The total score is ${
+          performance.score
+        }`
+      )
     }
   }
   console.log('showcases are set')

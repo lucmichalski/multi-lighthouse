@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import base64 from 'base-64'
+//import base64 from 'base-64'
 import firebase from 'firebase/app'
 import 'firebase/database'
 import URLGraphSection from './URLGraphSection'
@@ -14,8 +14,10 @@ import {
   RadioGroupStyles,
   H2,
   AuthContainer,
-  IFrameContainer,
-  CloseIFrame,
+  Modal,
+  ModalContent,
+  ModalMetric,
+  CloseModal,
   InnerWrapper,
   SignOut,
   ShowcaseContainer,
@@ -45,9 +47,18 @@ const globals = setGlobals()
 
 const initialState = {
   user: {},
-  reportHtml: null,
+  detailedLHRByDate: null,
   databaseData: null,
   metrics: ['perf', 'fcp', 'fmp', 'si', 'fci', 'i', 'eil'],
+  metricsDisplayNames: Object.freeze({
+    perf: 'Overall Performance',
+    fcp: 'First Contentful Paint',
+    fmp: 'First Meaningful Paint',
+    si: 'Speed Index',
+    fci: 'First CPU Idle',
+    i: 'Time to Interactive',
+    eil: 'Estimated Input Latency',
+  }),
   errorUrl: '',
   error: false,
   errorMessage: '',
@@ -92,20 +103,26 @@ class Main extends Component {
     }))
 
   retrieveDbReport = (URL, date) => {
-    const { user } = this.state
-    const db = firebase.database()
-    const encodedDate = base64.encode(date)
-    const ref = db.ref(`${user.uid}/report/${URL}/${encodedDate}`)
-    ref.once(
-      'value',
-      snapshot => {
-        const reportHtml = snapshot.val()
-        this.setState(() => ({ reportHtml }))
-      },
-      errorObject => {
-        console.log('The read failed: ' + errorObject.code)
+    const { databaseData } = this.state
+    const userURLData = [...databaseData[URL]]
+    const lhr = userURLData.filter(({ ft }) => ft === date)[0]
+
+    for (const prop of Object.keys(lhr)) {
+      if (lhr[prop].val) {
+        if (prop === 'eil') {
+          lhr[prop].displayVal = `${lhr[prop].val.toFixed()}ms`
+        } else if (prop === 'perf') {
+          lhr[prop].displayVal = `${lhr[prop].val.toString()}/100`
+        } else {
+          lhr[prop].displayVal = `${this.msToSeconds(lhr[prop].val).toFixed(
+            2
+          )}s`
+        }
       }
-    )
+    }
+    const detailedLHRByDate = lhr
+
+    this.setState(() => ({ detailedLHRByDate }))
   }
 
   retrieveDbLHR = () => {
@@ -186,11 +203,9 @@ class Main extends Component {
               accessToken: accessToken,
               providerData: providerData,
             }
-            console.log(user)
             this.setState(() => ({ user }))
           })
         } else {
-          console.log('not signed in')
           const uiConfig = {
             callbacks: {
               signInSuccessWithAuthResult: function(authResult, redirectUrl) {
@@ -208,9 +223,14 @@ class Main extends Component {
     )
   }
 
+  msToSeconds(num) {
+    return num / 1000
+  }
+
   render() {
     const {
       metrics,
+      metricsDisplayNames,
       error,
       errorMessage,
       errorUrl,
@@ -218,7 +238,7 @@ class Main extends Component {
       timelineResults,
       radioIds,
       databaseData,
-      reportHtml,
+      detailedLHRByDate,
       user,
       showcaseData,
     } = this.state
@@ -239,7 +259,7 @@ class Main extends Component {
         : `body{overflow: hidden} html{overflow: hidden}`
 
     return (
-      <MainWrapper style={{ overflow: reportHtml ? 'hidden' : 'auto' }}>
+      <MainWrapper style={{ overflow: detailedLHRByDate ? 'hidden' : 'auto' }}>
         <AuthContainer>
           {user.accessToken ? (
             <SignOut type="button" onClick={this.signOut}>
@@ -300,13 +320,13 @@ class Main extends Component {
                 index={index}
               />
             ))}
-        {reportHtml && (
-          <IFrameContainer
-            onClick={() => this.setState(() => ({ reportHtml: null }))}
+        {detailedLHRByDate && (
+          <Modal
+            onClick={() => this.setState(() => ({ detailedLHRByDate: null }))}
           >
-            <CloseIFrame>Close</CloseIFrame>
+            <CloseModal>Close</CloseModal>
 
-            <iframe
+            <div
               style={{
                 width: '100%',
                 height: '100%',
@@ -314,15 +334,27 @@ class Main extends Component {
                 WebkitOverflowScrolling: 'touch',
                 overflow: 'scroll',
               }}
-              title="Lighthouse Report"
-              srcDoc={reportHtml}
-            />
+            >
+              <ModalContent
+                style={{
+                  background: 'white',
+                }}
+              >
+                {metrics.map(metric => (
+                  <ModalMetric key={metric}>
+                    <h5>{metricsDisplayNames[metric]}</h5>
+                    <Guage value={detailedLHRByDate[metric].score} />
+                    <h6>{detailedLHRByDate[metric].displayVal}</h6>
+                  </ModalMetric>
+                ))}
+              </ModalContent>
+            </div>
             <style
               dangerouslySetInnerHTML={{
                 __html: bodyLock,
               }}
             />
-          </IFrameContainer>
+          </Modal>
         )}
         {error && (
           <Error

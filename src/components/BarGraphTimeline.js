@@ -28,6 +28,10 @@ const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
     setTooltip(defaultState)
   }
 
+  const handleClick = datapoint => {
+    onClick(dbKey, datapoint.x)
+  }
+
   return (
     <OuterGraph>
       <style
@@ -46,7 +50,7 @@ const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
           <YAxis title={isOverall ? 'points' : 'ms'} />
           <VerticalBarSeries
             className="bar"
-            onValueClick={datapoint => onClick(dbKey, datapoint.x)}
+            onValueClick={handleClick}
             onValueMouseOver={handleMouseOver}
             onValueMouseOut={handleMouseOut}
             barWidth={0.8}
