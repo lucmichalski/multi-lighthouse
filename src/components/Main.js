@@ -16,6 +16,7 @@ import {
   AuthContainer,
   Modal,
   ModalContent,
+  ModalTitle,
   ModalMetric,
   CloseModal,
   InnerWrapper,
@@ -325,7 +326,7 @@ class Main extends Component {
             onClick={() => this.setState(() => ({ detailedLHRByDate: null }))}
           >
             <CloseModal>Close</CloseModal>
-
+            {/* {modal scroll styles} */}
             <div
               style={{
                 width: '100%',
@@ -335,14 +336,10 @@ class Main extends Component {
                 overflow: 'scroll',
               }}
             >
-              <ModalContent
-                style={{
-                  background: 'white',
-                }}
-              >
+              <ModalContent>
                 {metrics.map(metric => (
                   <ModalMetric key={metric}>
-                    <h5>{metricsDisplayNames[metric]}</h5>
+                    <ModalTitle>{metricsDisplayNames[metric]}</ModalTitle>
                     <Guage value={detailedLHRByDate[metric].score} />
                     <h6>{detailedLHRByDate[metric].displayVal}</h6>
                   </ModalMetric>
