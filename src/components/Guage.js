@@ -5,7 +5,7 @@ import './Guage.css'
 const defaultOptions = {
   animDuration: 1,
   showValue: true,
-  max: 100,
+  max: 100, //this needs to be set for every metric
   // Put any other defaults you want. e.g. dialStartAngle, dialEndAngle, radius, etc.
 }
 

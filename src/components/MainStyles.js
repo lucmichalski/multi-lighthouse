@@ -102,7 +102,7 @@ export const BarGraphTimelineContainer = styled.div`
   width: 100%;
   margin-bottom: 25px;
 `
-export const IFrameContainer = styled.div`
+export const Modal = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -115,14 +115,38 @@ export const IFrameContainer = styled.div`
   z-index: 1;
   padding: 70px 0 20px 0;
   @media (min-width: 600px) {
-    padding: 5rem;
+    padding: 1rem;
   }
 `
-export const CloseIFrame = styled.button`
+export const ModalContent = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  background: #fff;
+  padding: 30px 30px 0 30px;
+`
+export const ModalTitle = styled.h5`
+  margin: 0;
+`
+export const ModalMetric = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-direction: column;
+  width: 30vw;
+  height: 30vw;
+  margin-bottom: 20px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 4px;
+`
+export const CloseModal = styled.button`
   position: absolute;
   top: 1em;
   right: 1em;
-  color: white;
+  z-index: 2;
+  color: black;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -159,7 +183,4 @@ export const ShowcaseContainer = styled.div`
   flex-wrap: wrap;
 `
 
-export const Showcase = styled.div`
-  width: 30%;
-  text-align: center;
-`
+export const Showcase = styled(ModalMetric)``
