@@ -95,6 +95,7 @@ class Main extends Component {
         URLAverageScore,
         encodedURL: key,
         decodedURL: base64.decode(key),
+        category: value.cat,
       }
     })
     const showcaseData = await Promise.all(showcaseDataPromises)

@@ -256,6 +256,14 @@ async function getShowcaseUrlsRunLighthouseSetDbData() {
   return
 }
 
+async function setShowcaseCategories() {
+  const showcaseUrls = await getShowcaseUrls()
+  for (const [url, val] of showcaseUrls) {
+    const categoriesRef = db.ref().child('categories')
+    categoriesRef.update({ [val.cat]: { urls: { [url]: url } } })
+  }
+}
+
 async function averageShowcaseOverallScores() {
   const showcaseUrls = await getShowcaseUrls()
   console.log(showcaseUrls)
@@ -299,8 +307,9 @@ function average(arr, callback) {
 (async function onStartup() {
   try {
     // await runLHSetDataForAllUsersUrls()
-    await getShowcaseUrlsRunLighthouseSetDbData()
-    await averageShowcaseOverallScores()
+    // await getShowcaseUrlsRunLighthouseSetDbData()
+    // await averageShowcaseOverallScores()
+    setShowcaseCategories()
   } catch (error) {
     console.log(error)
   }
