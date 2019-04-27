@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-//import base64 from 'base-64'
+import base64 from 'base-64'
 import firebase from 'firebase/app'
 import 'firebase/database'
 import URLGraphSection from './URLGraphSection'
@@ -91,7 +91,11 @@ class Main extends Component {
       const URLAveragesSnapshot = await ref.once('value')
       const URLAverageScore = await URLAveragesSnapshot.val()
 
-      return { URLAverageScore, encodedURL: key, decodedURL: value }
+      return {
+        URLAverageScore,
+        encodedURL: key,
+        decodedURL: base64.decode(key),
+      }
     })
     const showcaseData = await Promise.all(showcaseDataPromises)
     return showcaseData
