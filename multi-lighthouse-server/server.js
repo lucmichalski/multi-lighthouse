@@ -152,26 +152,28 @@ async function getSetLHData(uid) {
 }
 
 //Utility function to set data
-async function setData() {
+async function setShowcaseURLData() {
   const Ref = db
     .ref()
     .child('showcase')
     .child('urls')
-  const google = 'https://www.google.com/'
-  const amazon = 'https://www.amazon.com/'
-  const netflix = 'https://www.netflix.com/'
-  const airbnb = 'https://www.airbnb.com/'
-  const youtube = 'https://www.youtube.com/'
-  const wikipedia = 'https://www.wikipedia.org/'
 
-  Ref.set({
-    [base64.encode(google)]: google,
-    [base64.encode(amazon)]: amazon,
-    [base64.encode(netflix)]: netflix,
-    [base64.encode(airbnb)]: airbnb,
-    [base64.encode(youtube)]: youtube,
-    [base64.encode(wikipedia)]: wikipedia,
-  })
+  const urls = [
+    { domain: 'https://www.bing.com/', cat: 'Search Engines' },
+    { domain: 'https://www.google.com/', cat: 'Search Engines' },
+    { domain: 'https://www.amazon.com/', cat: 'Shopping' },
+    { domain: 'https://www.netflix.com/', cat: 'Streaming Video' },
+    { domain: 'https://www.airbnb.com/', cat: 'Travel' },
+    { domain: 'https://www.youtube.com/', cat: 'Streaming Video' },
+    { domain: 'https://www.wikipedia.org/', cat: 'Information' },
+    { domain: 'https://www.kayak.com/', cat: 'Travel' },
+  ]
+  const urlObj = urls.reduce((obj, item) => {
+    obj[base64.encode(item.domain)] = { cat: item.cat }
+    return obj
+  }, {})
+
+  Ref.set(urlObj)
 }
 
 async function getUsers() {
@@ -184,21 +186,21 @@ async function getUsers() {
 
 //Utility function to delete data
 async function deleteData() {
-  const users = await getUsers()
-  for (const user of users) {
-    const lhrRef = db
-      .ref()
-      .child(user)
-      .child('lhr')
-    lhrRef.remove()
-    const reportRef = db
-      .ref()
-      .child(user)
-      .child('report')
-    reportRef.remove()
-  }
+  // const users = await getUsers()
+  // for (const user of users) {
+  //   const lhrRef = db
+  //     .ref()
+  //     .child(user)
+  //     .child('lhr')
+  //   lhrRef.remove()
+  //   const reportRef = db
+  //     .ref()
+  //     .child(user)
+  //     .child('report')
+  //   reportRef.remove()
+  // }
   const showcaseUrls = await getShowcaseUrls()
-  for (const url of showcaseUrls) {
+  for (const [url, val] of showcaseUrls) {
     const urlRef = db
       .ref()
       .child('showcase')
@@ -214,10 +216,11 @@ async function getShowcaseUrls() {
     .child('showcase')
     .child('urls')
   const showcaseSnapshot = await showcaseRef.once('value')
-  const showcaseUrls = Object.keys(showcaseSnapshot.val())
-  console.log(showcaseUrls)
+  const showcaseUrls = Object.entries(showcaseSnapshot.val())
+
   return showcaseUrls
 }
+
 async function runLHSetDataForAllUsersUrls() {
   const users = await getUsers()
   for (const user of users) {
@@ -228,13 +231,13 @@ async function runLHSetDataForAllUsersUrls() {
 async function getShowcaseUrlsRunLighthouseSetDbData() {
   const showcaseUrls = await getShowcaseUrls()
   //Account for cold start
-  for (const url of showcaseUrls) {
+  for (const [url, val] of showcaseUrls) {
     const decodedUrl = base64.decode(url)
     await launchPuppeteerRunLighthouse(decodedUrl)
   }
 
   //Real Deal
-  for (const url of showcaseUrls) {
+  for (const [url, val] of showcaseUrls) {
     const decodedUrl = base64.decode(url)
     const lighthouse = await launchPuppeteerRunLighthouse(decodedUrl)
     const { finalUrl, date, dbData, performance } = transformData(lighthouse)
@@ -253,9 +256,27 @@ async function getShowcaseUrlsRunLighthouseSetDbData() {
   return
 }
 
+async function setShowcaseCategories() {
+  const showcaseUrls = await getShowcaseUrls()
+  for (const [url, val] of showcaseUrls) {
+    const categoriesRef = db.ref().child('categories')
+    const categoryNode = await categoriesRef.child(val.cat).once('value')
+
+    if (!categoryNode.exists()) {
+      categoriesRef.update({ [val.cat]: { urls: { [url]: url } } })
+    } else {
+      //check if url exists here maybe?
+      const urlRef = categoriesRef.child(val.cat).child('urls')
+
+      urlRef.update({ [url]: url })
+    }
+  }
+}
+
 async function averageShowcaseOverallScores() {
   const showcaseUrls = await getShowcaseUrls()
-  for (const url of showcaseUrls) {
+  console.log(showcaseUrls)
+  for (const [url, val] of showcaseUrls) {
     try {
       const showcaseRef = db
         .ref()
@@ -275,11 +296,11 @@ async function averageShowcaseOverallScores() {
         showcaseLHRReportsByDate,
         (accumlator, nextReport) => accumlator + nextReport.perf.val
       )
-      console.log(averagePerformanceScores, base64.decode(url))
+      console.log(averagePerformanceScores, base64.decode(url), val.cat)
       db.ref()
         .child('showcase')
         .child(url)
-        .update({ avg: averagePerformanceScores })
+        .update({ avg: averagePerformanceScores, cat: val.cat })
     } catch (error) {
       console.log(error)
     }
@@ -294,9 +315,10 @@ function average(arr, callback) {
 
 (async function onStartup() {
   try {
-    await runLHSetDataForAllUsersUrls()
-    await getShowcaseUrlsRunLighthouseSetDbData()
-    await averageShowcaseOverallScores()
+    // await runLHSetDataForAllUsersUrls()
+    // await getShowcaseUrlsRunLighthouseSetDbData()
+    // await averageShowcaseOverallScores()
+    setShowcaseCategories()
   } catch (error) {
     console.log(error)
   }
