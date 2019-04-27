@@ -7,7 +7,6 @@ export const MainWrapper = styled.div`
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
-  padding: 0 15px;
 `
 export const InnerWrapper = styled.div`
   display: flex;
@@ -21,10 +20,23 @@ export const H2 = styled.h2`
   font-size: 1rem;
   width: 100%;
   text-align: center;
-  margin-bottom: 50px;
   @media (min-width: 900px) {
     font-size: 2rem;
   }
+`
+
+export const Hero = styled.header`
+  border-bottom: 1px solid #f2f2f2;
+  background-color: hsl(0, 0%, 97%);
+  width: 100%;
+  height: 35vh;
+  padding: 1rem;
+`
+export const H3 = styled.h3`
+  font-weight: 600;
+  font-size: 1rem;
+  width: 300px;
+  margin: 0;
 `
 export const GraphH2 = styled(H2)`
   box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 4px;
@@ -46,20 +58,23 @@ export const GraphH2 = styled(H2)`
 export const Button = styled.button`
   opacity: ${props => (props.disabled ? '.7' : '1.0')};
   font-weight: 300;
-  width: auto;
   text-transform: none;
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto;
+  align-self: flex-start;
   cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
   :focus {outline: 0;}
-  :hover {  filter: brightness(90%);}
+  :hover {  
+    opacity: .7; 
+    filter: brightness(90%);
+  }
   font-size: .9rem;
     height: 52px;
-        text-decoration: none;
-    color: #fff;
-    background-color: #448aff;
+    text-decoration: none;
+    color: ${props => (props.color ? props.color : `rgb(0, 0, 28)`)};;
+    background-color: ${props =>
+      props.background ? props.background : `rgb(0, 0, 28)`};
     text-align: center;
     letter-spacing: .5px;
     transition: .2s ease-out;
@@ -178,9 +193,35 @@ export const SignOut = styled.button`
 
 export const ShowcaseContainer = styled.div`
   display: flex;
-  justify-content: space-evenly;
-  align-items: center;
+  flex-direction: column;
+  justify-content: flex-start;
   flex-wrap: wrap;
 `
 
-export const Showcase = styled(ModalMetric)``
+export const Showcase = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 4px;
+  padding: 0 20px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  background: rgb(255, 255, 255);
+  :hover {
+    filter: brightness(98%);
+  }
+  border-radius: 4px;
+  @media (min-width: 900px) {
+    font-size: 1rem;
+  }
+`
+export const Average = styled.div`
+  width: 100px;
+  height: 100px;
+`
+export const Categories = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+`

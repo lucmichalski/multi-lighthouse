@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import base64 from 'base-64'
 import firebase from 'firebase/app'
 import 'firebase/database'
@@ -12,7 +12,9 @@ import {
   MainWrapper,
   RadioGroupWrapper,
   RadioGroupStyles,
+  Hero,
   H2,
+  H3,
   AuthContainer,
   Modal,
   ModalContent,
@@ -23,6 +25,9 @@ import {
   SignOut,
   ShowcaseContainer,
   Showcase,
+  Categories,
+  Button,
+  Average,
 } from './MainStyles'
 
 const config = {
@@ -68,38 +73,63 @@ const initialState = {
   radioIds: {
     timelineResults: 'timeline',
   },
-  showcaseData: null,
+  showcaseData: {},
+  categories: [
+    'Information',
+    'Search Engines',
+    'Shopping',
+    'Streaming Video',
+    'Travel',
+  ],
 }
 class Main extends Component {
   state = { ...initialState }
 
   async componentDidMount() {
     this.initAuth()
-    this.setState({ showcaseData: await this.getShowcaseData() })
   }
 
-  async getShowcaseData() {
-    const db = firebase.database()
-    const ref = db.ref(`showcase/urls`)
-    const URLsSnapshot = await ref.once('value')
-    const URLs = Object.entries(await URLsSnapshot.val())
-    const showcaseDataPromises = URLs.map(async ([key, value]) => {
-      const ref = db
-        .ref('showcase')
-        .child(key)
-        .child('avg')
-      const URLAveragesSnapshot = await ref.once('value')
-      const URLAverageScore = await URLAveragesSnapshot.val()
+  async getShowcaseData(category) {
+    const { showcaseData } = this.state
+    if (showcaseData[category]) {
+      return
+    } else {
+      const URLs = await this.getCategoryURLs(category)
+      const db = firebase.database()
+      const showcaseDataPromises = URLs.map(async URL => {
+        const ref = db
+          .ref('showcase')
+          .child(URL)
+          .child('avg')
+        const URLAveragesSnapshot = await ref.once('value')
+        const URLAverageScore = await URLAveragesSnapshot.val()
 
-      return {
-        URLAverageScore,
-        encodedURL: key,
-        decodedURL: base64.decode(key),
-        category: value.cat,
-      }
-    })
-    const showcaseData = await Promise.all(showcaseDataPromises)
-    return showcaseData
+        return {
+          URLAverageScore,
+          encodedURL: URL,
+          decodedURL: base64.decode(URL),
+        }
+      })
+      const rawData = await Promise.all(showcaseDataPromises)
+      const showcaseData = rawData.sort(
+        (a, b) => b.URLAverageScore - a.URLAverageScore
+      )
+      this.setState(state => ({
+        showcaseData: { ...state.showcaseData, [category]: showcaseData },
+      }))
+      return showcaseData
+    }
+  }
+
+  async getCategoryURLs(category) {
+    const db = firebase.database()
+    const ref = db
+      .ref(`categories`)
+      .child(category)
+      .child('urls')
+    const URLsSnapshot = await ref.once('value')
+    const URLs = Object.keys(await URLsSnapshot.val())
+    return URLs
   }
 
   reset = () =>
@@ -247,6 +277,7 @@ class Main extends Component {
       detailedLHRByDate,
       user,
       showcaseData,
+      categories,
     } = this.state
 
     const radioIdentifiers = [
@@ -276,30 +307,50 @@ class Main extends Component {
           )}
         </AuthContainer>
         {!error && !timelineResults && (
-          <InnerWrapper>
-            <H2>Track Performance of Your Site</H2>
-            {showcaseData && !user.uid && (
-              <ShowcaseContainer>
-                {showcaseData.map(({ URLAverageScore, decodedURL }) => (
-                  <Showcase key={decodedURL}>
-                    <h3>{decodedURL}</h3>
-                    <Guage value={URLAverageScore} />
-                  </Showcase>
-                ))}
-              </ShowcaseContainer>
-            )}
-            {user && user.uid && (
-              <RadioGroupWrapper>
-                <RadioGroup
-                  onChange={this.onChangeRadio}
-                  identifiers={radioIdentifiers}
-                  groupName="searchType"
-                  className="radio-group"
-                  styles={RadioGroupStyles}
-                />
-              </RadioGroupWrapper>
-            )}
-          </InnerWrapper>
+          <Fragment>
+            <Hero>
+              <H2>Track Performance of Your Site</H2>
+            </Hero>
+            <InnerWrapper>
+              {categories.map(category => (
+                <Categories key={category}>
+                  <Button
+                    background="#fff"
+                    color="#2c2c2c"
+                    onClick={() => this.getShowcaseData(category)}
+                  >
+                    {category}
+                  </Button>
+                  {showcaseData[category] && !user.uid && (
+                    <ShowcaseContainer>
+                      {showcaseData[category].map(
+                        ({ URLAverageScore, decodedURL }) => (
+                          <Showcase key={decodedURL}>
+                            <H3>{decodedURL}</H3>
+                            <Average>
+                              <Guage value={URLAverageScore} />
+                            </Average>
+                          </Showcase>
+                        )
+                      )}
+                    </ShowcaseContainer>
+                  )}
+                </Categories>
+              ))}
+
+              {user && user.uid && (
+                <RadioGroupWrapper>
+                  <RadioGroup
+                    onChange={this.onChangeRadio}
+                    identifiers={radioIdentifiers}
+                    groupName="searchType"
+                    className="radio-group"
+                    styles={RadioGroupStyles}
+                  />
+                </RadioGroupWrapper>
+              )}
+            </InnerWrapper>
+          </Fragment>
         )}
 
         {!error && fetching === true && (

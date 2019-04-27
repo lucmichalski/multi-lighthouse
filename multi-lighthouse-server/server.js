@@ -217,7 +217,7 @@ async function getShowcaseUrls() {
     .child('urls')
   const showcaseSnapshot = await showcaseRef.once('value')
   const showcaseUrls = Object.entries(showcaseSnapshot.val())
-  console.log(showcaseUrls)
+
   return showcaseUrls
 }
 
@@ -260,7 +260,16 @@ async function setShowcaseCategories() {
   const showcaseUrls = await getShowcaseUrls()
   for (const [url, val] of showcaseUrls) {
     const categoriesRef = db.ref().child('categories')
-    categoriesRef.update({ [val.cat]: { urls: { [url]: url } } })
+    const categoryNode = await categoriesRef.child(val.cat).once('value')
+
+    if (!categoryNode.exists()) {
+      categoriesRef.update({ [val.cat]: { urls: { [url]: url } } })
+    } else {
+      //check if url exists here maybe?
+      const urlRef = categoriesRef.child(val.cat).child('urls')
+
+      urlRef.update({ [url]: url })
+    }
   }
 }
 
