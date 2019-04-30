@@ -79,20 +79,23 @@ function transformData(lighthouse) {
 
   const auditData = {
     fcp: {
-      val: firstContentfulPaint.rawValue,
+      val: firstContentfulPaint.rawValue.toFixed(2),
       score: firstContentfulPaint.score * 100,
     },
     fmp: {
-      val: firstMeaningfulPaint.rawValue,
+      val: firstMeaningfulPaint.rawValue.toFixed(2),
       score: firstMeaningfulPaint.score * 100,
     },
-    i: { val: interactive.rawValue, score: interactive.score * 100 },
-    fci: { val: firstCpuIdle.rawValue, score: firstCpuIdle.score * 100 },
+    i: { val: interactive.rawValue.toFixed(2), score: interactive.score * 100 },
+    fci: {
+      val: firstCpuIdle.rawValue.toFixed(2),
+      score: firstCpuIdle.score * 100,
+    },
     eil: {
-      val: estimatedInputLatency.rawValue,
+      val: estimatedInputLatency.rawValue.toFixed(2),
       score: estimatedInputLatency.score * 100,
     },
-    si: { val: speedIndex.rawValue, score: speedIndex.score * 100 },
+    si: { val: speedIndex.rawValue.toFixed(2), score: speedIndex.score * 100 },
     perf: { val: performance.score * 100, score: performance.score * 100 },
   }
 
@@ -243,8 +246,11 @@ async function getShowcaseUrlsRunLighthouseSetDbData() {
     const { finalUrl, date, dbData, performance } = transformData(lighthouse)
 
     if (dbData) {
-      const lhrRef = db.ref(`showcase/${url}/lhr/${date}`)
+      const urlRef = db.ref(`showcase/${url}`)
+      const currentRef = urlRef.child(`current`)
+      const lhrRef = urlRef.child(`/lhr/${date}`)
       lhrRef.set(dbData, error => error && console.log(error))
+      currentRef.set(dbData, error => error && console.log(error))
       console.log(
         `Setting DB Data for ${finalUrl}. The total score is ${
           performance.score
@@ -316,9 +322,9 @@ function average(arr, callback) {
 (async function onStartup() {
   try {
     // await runLHSetDataForAllUsersUrls()
-    // await getShowcaseUrlsRunLighthouseSetDbData()
+    await getShowcaseUrlsRunLighthouseSetDbData()
     // await averageShowcaseOverallScores()
-    setShowcaseCategories()
+    // setShowcaseCategories()
   } catch (error) {
     console.log(error)
   }
