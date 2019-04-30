@@ -7,14 +7,14 @@ import RadioGroup from './RadioGroup'
 import Error from './Error'
 import Loading from './Loading'
 import Guage from './Guage'
+import ShowCaseSection from './ShowcaseSection'
 
 import {
   MainWrapper,
   RadioGroupWrapper,
   RadioGroupStyles,
-  Hero,
-  H2,
-  H3,
+  // Hero,
+  // H2,
   AuthContainer,
   Modal,
   ModalContent,
@@ -23,11 +23,6 @@ import {
   CloseModal,
   InnerWrapper,
   SignOut,
-  ShowcaseContainer,
-  Showcase,
-  Categories,
-  Button,
-  Average,
 } from './MainStyles'
 
 const config = {
@@ -89,7 +84,7 @@ class Main extends Component {
     this.initAuth()
   }
 
-  async getShowcaseData(category) {
+  getShowcaseData = async category => {
     const { showcaseData } = this.state
     if (showcaseData[category]) {
       return
@@ -146,13 +141,11 @@ class Main extends Component {
     for (const prop of Object.keys(lhr)) {
       if (lhr[prop].val) {
         if (prop === 'eil') {
-          lhr[prop].displayVal = `${lhr[prop].val.toFixed()}ms`
+          lhr[prop].displayVal = `${lhr[prop].val}ms`
         } else if (prop === 'perf') {
           lhr[prop].displayVal = `${lhr[prop].val.toString()}/100`
         } else {
-          lhr[prop].displayVal = `${this.msToSeconds(lhr[prop].val).toFixed(
-            2
-          )}s`
+          lhr[prop].displayVal = `${this.msToSeconds(lhr[prop].val)}s`
         }
       }
     }
@@ -308,34 +301,17 @@ class Main extends Component {
         </AuthContainer>
         {!error && !timelineResults && (
           <Fragment>
-            <Hero>
+            {/* <Hero>
               <H2>Track Performance of Your Site</H2>
-            </Hero>
+            </Hero> */}
             <InnerWrapper>
               {categories.map(category => (
-                <Categories key={category}>
-                  <Button
-                    background="#fff"
-                    color="#2c2c2c"
-                    onClick={() => this.getShowcaseData(category)}
-                  >
-                    {category}
-                  </Button>
-                  {showcaseData[category] && !user.uid && (
-                    <ShowcaseContainer>
-                      {showcaseData[category].map(
-                        ({ URLAverageScore, decodedURL }) => (
-                          <Showcase key={decodedURL}>
-                            <H3>{decodedURL}</H3>
-                            <Average>
-                              <Guage value={URLAverageScore} />
-                            </Average>
-                          </Showcase>
-                        )
-                      )}
-                    </ShowcaseContainer>
-                  )}
-                </Categories>
+                <ShowCaseSection
+                  key={category}
+                  getShowcaseData={this.getShowcaseData}
+                  showcaseData={showcaseData}
+                  category={category}
+                />
               ))}
 
               {user && user.uid && (

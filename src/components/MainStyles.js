@@ -37,6 +37,7 @@ export const H3 = styled.h3`
   font-size: 1rem;
   width: 300px;
   margin: 0;
+  text-transform: capitalize;
 `
 export const GraphH2 = styled(H2)`
   box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 4px;
