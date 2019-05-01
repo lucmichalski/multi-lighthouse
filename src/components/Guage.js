@@ -30,8 +30,19 @@ class ScoreGuage extends Component {
   }
 
   render() {
-    return <div className="gauge-container" ref={el => (this.gaugeEl = el)} />
+    const { height, width } = this.props
+    return (
+      <div
+        style={{ height, width }}
+        className="gauge-container"
+        ref={el => (this.gaugeEl = el)}
+      />
+    )
   }
+}
+ScoreGuage.defaultProps = {
+  height: '100%',
+  width: '100%',
 }
 
 export default ScoreGuage

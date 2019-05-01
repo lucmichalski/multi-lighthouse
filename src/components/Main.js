@@ -92,14 +92,15 @@ class Main extends Component {
       const URLs = await this.getCategoryURLs(category)
       const db = firebase.database()
       const showcaseDataPromises = URLs.map(async URL => {
-        const ref = db
-          .ref('showcase')
-          .child(URL)
-          .child('avg')
-        const URLAveragesSnapshot = await ref.once('value')
+        const showCaseRef = db.ref('showcase').child(URL)
+
+        const URLAveragesSnapshot = await showCaseRef.child('avg').once('value')
+        const currentSnapshot = await showCaseRef.child('current').once('value')
         const URLAverageScore = await URLAveragesSnapshot.val()
+        const currentScore = await currentSnapshot.val()
 
         return {
+          currentScore,
           URLAverageScore,
           encodedURL: URL,
           decodedURL: base64.decode(URL),
