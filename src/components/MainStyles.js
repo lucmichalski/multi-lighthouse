@@ -191,38 +191,3 @@ export const SignOut = styled.button`
   font-size: 1rem;
   cursor: pointer;
 `
-
-export const ShowcaseContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-`
-
-export const Showcase = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 4px;
-  padding: 0 20px;
-  cursor: pointer;
-  margin-bottom: 15px;
-  background: rgb(255, 255, 255);
-  :hover {
-    filter: brightness(98%);
-  }
-  border-radius: 4px;
-  @media (min-width: 900px) {
-    font-size: 1rem;
-  }
-`
-export const Average = styled.div`
-  width: 100px;
-  height: 100px;
-`
-export const Categories = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: flex-start;
-  flex-direction: column;
-`

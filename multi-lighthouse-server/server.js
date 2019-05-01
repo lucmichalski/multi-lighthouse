@@ -96,7 +96,10 @@ function transformData(lighthouse) {
       score: estimatedInputLatency.score * 100,
     },
     si: { val: speedIndex.rawValue.toFixed(2), score: speedIndex.score * 100 },
-    perf: { val: performance.score * 100, score: performance.score * 100 },
+    perf: {
+      val: performance.score * 100,
+      score: Math.round(performance.score * 100),
+    },
   }
 
   const dbData = {
