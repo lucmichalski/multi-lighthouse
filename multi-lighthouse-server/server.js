@@ -79,25 +79,31 @@ function transformData(lighthouse) {
 
   const auditData = {
     fcp: {
-      val: firstContentfulPaint.rawValue.toFixed(2),
+      val: parseFloat(firstContentfulPaint.rawValue.toFixed(2)),
       score: firstContentfulPaint.score * 100,
     },
     fmp: {
-      val: firstMeaningfulPaint.rawValue.toFixed(2),
+      val: parseFloat(firstMeaningfulPaint.rawValue.toFixed(2)),
       score: firstMeaningfulPaint.score * 100,
     },
-    i: { val: interactive.rawValue.toFixed(2), score: interactive.score * 100 },
+    i: {
+      val: parseFloat(interactive.rawValue.toFixed(2)),
+      score: interactive.score * 100,
+    },
     fci: {
-      val: firstCpuIdle.rawValue.toFixed(2),
+      val: parseFloat(firstCpuIdle.rawValue.toFixed(2)),
       score: firstCpuIdle.score * 100,
     },
     eil: {
-      val: estimatedInputLatency.rawValue.toFixed(2),
+      val: parseFloat(estimatedInputLatency.rawValue.toFixed(2)),
       score: estimatedInputLatency.score * 100,
     },
-    si: { val: speedIndex.rawValue.toFixed(2), score: speedIndex.score * 100 },
+    si: {
+      val: parseFloat(speedIndex.rawValue.toFixed(2)),
+      score: speedIndex.score * 100,
+    },
     perf: {
-      val: performance.score * 100,
+      val: Math.round(performance.score * 100),
       score: Math.round(performance.score * 100),
     },
   }
@@ -324,8 +330,7 @@ function averageAll(reports) {
       ...avg,
       [metric]: average(
         reports,
-        (accumlator, nextReport) =>
-          accumlator + parseInt(nextReport[metric].val)
+        (accumlator, nextReport) => accumlator + nextReport[metric].val
       ),
     }
   }
@@ -340,7 +345,7 @@ function average(arr, callback) {
 (async function onStartup() {
   try {
     // await runLHSetDataForAllUsersUrls()
-    // await getShowcaseUrlsRunLighthouseSetDbData()
+    await getShowcaseUrlsRunLighthouseSetDbData()
     //await averageShowcaseScores()
     // setShowcaseCategories()
   } catch (error) {

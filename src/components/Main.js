@@ -96,12 +96,12 @@ class Main extends Component {
 
         const URLAveragesSnapshot = await showCaseRef.child('avg').once('value')
         const currentSnapshot = await showCaseRef.child('current').once('value')
-        const URLAverageScore = await URLAveragesSnapshot.val()
-        const currentScore = await currentSnapshot.val()
+        const averageScores = await URLAveragesSnapshot.val()
+        const currentScores = await currentSnapshot.val()
 
         return {
-          currentScore,
-          URLAverageScore,
+          currentScores,
+          averageScores,
           encodedURL: URL,
           decodedURL: base64.decode(URL),
         }
@@ -109,7 +109,7 @@ class Main extends Component {
       const rawData = await Promise.all(showcaseDataPromises)
 
       const showcaseData = rawData.sort(
-        (a, b) => b.currentScore.perf.score - a.currentScore.perf.score
+        (a, b) => b.currentScores.perf.score - a.currentScores.perf.score
       )
       this.setState(state => ({
         showcaseData: { ...state.showcaseData, [category]: showcaseData },
@@ -310,6 +310,7 @@ class Main extends Component {
               {categories.map(category => (
                 <ShowCaseSection
                   key={category}
+                  metrics={metrics}
                   getShowcaseData={this.getShowcaseData}
                   showcaseData={showcaseData}
                   category={category}
