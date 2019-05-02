@@ -16,7 +16,12 @@ function getPercentageChange(oldNumber, newNumber) {
   return ((decreaseValue / oldNumber) * 100).toFixed(2)
 }
 
-const ShowcaseSection = ({ category, showcaseData, getShowcaseData }) => {
+const ShowcaseSection = ({
+  category,
+  showcaseData,
+  getShowcaseData,
+  metrics,
+}) => {
   const [isOpen, toggleOpen] = useState(false)
   const getShowcaseDataAndOpen = () => {
     getShowcaseData(category)
@@ -40,16 +45,33 @@ const ShowcaseSection = ({ category, showcaseData, getShowcaseData }) => {
         <ShowcaseContainer>
           <Header>
             <H3 />
-            <Metric>Perf</Metric>
-            <Metric>FCP</Metric>
-            <Metric>TTI</Metric>
+            {metrics.map(metric => (
+              <Metric key={metric}>{metric}</Metric>
+            ))}
           </Header>
           {showcaseData[category].map(
-            ({ URLAverageScore, decodedURL, currentScore }, index) => {
+            ({ averageScores, decodedURL, currentScores }, index) => {
               const domain = new URL(decodedURL)
-              const { perf, i, fcp } = currentScore
-              const change = getPercentageChange(perf.score, URLAverageScore)
-              const scores = [perf.score, i.score, fcp.score]
+              const { perf, i, fcp, fci, eil, fmp, si } = currentScores
+              const {
+                perf: avgPerf,
+                i: avgI,
+                fcp: avgFcp,
+                fci: avgFci,
+                eil: avgEil,
+                fmp: avgFmp,
+                si: avgSi,
+              } = averageScores
+              const scores = [
+                [perf, avgPerf],
+                [fcp, avgFcp],
+                [fmp, avgFmp],
+                [si, avgSi],
+                [fci, avgFci],
+                [i, avgI],
+                [eil, avgEil],
+              ]
+              console.log(scores)
               return (
                 <Showcase key={decodedURL}>
                   <div>
@@ -61,18 +83,22 @@ const ShowcaseSection = ({ category, showcaseData, getShowcaseData }) => {
                     <div>{decodedURL}</div>
                   </div>
 
-                  {scores.map(score => (
-                    <Average key={score}>
+                  {scores.map(([current, avg], index) => (
+                    <Average key={metrics[index]}>
                       <Guage
                         height="100px"
                         width="100px"
                         label={value => `${value}/100`}
                         dialStartAngle={90}
                         dialEndAngle={0}
-                        value={score}
+                        value={Math.round(current.score)}
                       />
+                      <div>
+                        {(current.val * 0.001).toFixed(1)}
+s
+                      </div>
                       <Change>
-                        {change}
+                        {getPercentageChange(current.val, avg)}
 %
                       </Change>
                     </Average>

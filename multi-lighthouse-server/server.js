@@ -79,25 +79,31 @@ function transformData(lighthouse) {
 
   const auditData = {
     fcp: {
-      val: firstContentfulPaint.rawValue.toFixed(2),
+      val: parseFloat(firstContentfulPaint.rawValue.toFixed(2)),
       score: firstContentfulPaint.score * 100,
     },
     fmp: {
-      val: firstMeaningfulPaint.rawValue.toFixed(2),
+      val: parseFloat(firstMeaningfulPaint.rawValue.toFixed(2)),
       score: firstMeaningfulPaint.score * 100,
     },
-    i: { val: interactive.rawValue.toFixed(2), score: interactive.score * 100 },
+    i: {
+      val: parseFloat(interactive.rawValue.toFixed(2)),
+      score: interactive.score * 100,
+    },
     fci: {
-      val: firstCpuIdle.rawValue.toFixed(2),
+      val: parseFloat(firstCpuIdle.rawValue.toFixed(2)),
       score: firstCpuIdle.score * 100,
     },
     eil: {
-      val: estimatedInputLatency.rawValue.toFixed(2),
+      val: parseFloat(estimatedInputLatency.rawValue.toFixed(2)),
       score: estimatedInputLatency.score * 100,
     },
-    si: { val: speedIndex.rawValue.toFixed(2), score: speedIndex.score * 100 },
+    si: {
+      val: parseFloat(speedIndex.rawValue.toFixed(2)),
+      score: speedIndex.score * 100,
+    },
     perf: {
-      val: performance.score * 100,
+      val: Math.round(performance.score * 100),
       score: Math.round(performance.score * 100),
     },
   }
@@ -282,7 +288,7 @@ async function setShowcaseCategories() {
   }
 }
 
-async function averageShowcaseOverallScores() {
+async function averageShowcaseScores() {
   const showcaseUrls = await getShowcaseUrls()
   console.log(showcaseUrls)
   for (const [url, val] of showcaseUrls) {
@@ -301,20 +307,34 @@ async function averageShowcaseOverallScores() {
       const showcaseLHRReportsByDate = Object.values(
         await showcaseSnapshot.val()
       )
-      const averagePerformanceScores = average(
-        showcaseLHRReportsByDate,
-        (accumlator, nextReport) => accumlator + nextReport.perf.val
-      )
-      console.log(averagePerformanceScores, base64.decode(url), val.cat)
+      const avg = averageAll(showcaseLHRReportsByDate)
+      const { cat } = val
+
+      console.log(avg, base64.decode(url), cat)
       db.ref()
         .child('showcase')
         .child(url)
-        .update({ avg: averagePerformanceScores, cat: val.cat })
+        .update({ avg, cat })
     } catch (error) {
       console.log(error)
     }
   }
   return
+}
+
+function averageAll(reports) {
+  let avg = {}
+  const metrics = ['i', 'perf', 'fci', 'fmp', 'fcp', 'eil', 'si']
+  for (const metric of metrics) {
+    avg = {
+      ...avg,
+      [metric]: average(
+        reports,
+        (accumlator, nextReport) => accumlator + nextReport[metric].val
+      ),
+    }
+  }
+  return avg
 }
 
 function average(arr, callback) {
@@ -326,7 +346,7 @@ function average(arr, callback) {
   try {
     // await runLHSetDataForAllUsersUrls()
     await getShowcaseUrlsRunLighthouseSetDbData()
-    // await averageShowcaseOverallScores()
+    //await averageShowcaseScores()
     // setShowcaseCategories()
   } catch (error) {
     console.log(error)
