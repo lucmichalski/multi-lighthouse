@@ -107,8 +107,9 @@ class Main extends Component {
         }
       })
       const rawData = await Promise.all(showcaseDataPromises)
+
       const showcaseData = rawData.sort(
-        (a, b) => b.URLAverageScore - a.URLAverageScore
+        (a, b) => b.currentScore.perf.score - a.currentScore.perf.score
       )
       this.setState(state => ({
         showcaseData: { ...state.showcaseData, [category]: showcaseData },

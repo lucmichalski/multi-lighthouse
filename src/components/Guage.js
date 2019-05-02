@@ -26,7 +26,11 @@ class ScoreGuage extends Component {
     if (!this.gauge) {
       this.gauge = Gauge(this.gaugeEl, gaugeOptions)
     }
-    this.gauge.setValueAnimated(props.value, gaugeOptions.animDuration)
+
+    setTimeout(
+      () => this.gauge.setValueAnimated(props.value, gaugeOptions.animDuration),
+      1000
+    )
   }
 
   render() {

@@ -49,7 +49,7 @@ const ShowcaseSection = ({ category, showcaseData, getShowcaseData }) => {
               const domain = new URL(decodedURL)
               const { perf, i, fcp } = currentScore
               const change = getPercentageChange(perf.score, URLAverageScore)
-              const scores = [perf.score, i.score, fcp.score]
+              const scores = [perf, fcp, i]
               return (
                 <Showcase key={decodedURL}>
                   <div>
@@ -61,8 +61,8 @@ const ShowcaseSection = ({ category, showcaseData, getShowcaseData }) => {
                     <div>{decodedURL}</div>
                   </div>
 
-                  {scores.map(score => (
-                    <Average key={score}>
+                  {scores.map(({ score, val }) => (
+                    <Average key="get key here">
                       <Guage
                         height="100px"
                         width="100px"
@@ -71,6 +71,10 @@ const ShowcaseSection = ({ category, showcaseData, getShowcaseData }) => {
                         dialEndAngle={0}
                         value={score}
                       />
+                      <div>
+                        {(val * 0.001).toFixed(1)}
+s
+                      </div>
                       <Change>
                         {change}
 %
