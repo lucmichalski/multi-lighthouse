@@ -9,6 +9,7 @@ import {
   Header,
   Metric,
   Change,
+  URLSection,
 } from './ShowcaseSectionStyles'
 
 function getPercentageChange(oldNumber, newNumber) {
@@ -44,7 +45,7 @@ const ShowcaseSection = ({
       {showcaseData[category] && isOpen && (
         <ShowcaseContainer>
           <Header>
-            <H3 />
+            <URLSection />
             {metrics.map(metric => (
               <Metric key={metric}>{metric}</Metric>
             ))}
@@ -71,23 +72,21 @@ const ShowcaseSection = ({
                 [i, avgI],
                 [eil, avgEil],
               ]
-              console.log(scores)
+
               return (
                 <Showcase key={decodedURL}>
-                  <div>
+                  <URLSection>
                     <H3>
                       {`${index + 1}. `}
 
                       {domain.hostname.split('.')[1]}
                     </H3>
                     <div>{decodedURL}</div>
-                  </div>
+                  </URLSection>
 
                   {scores.map(([current, avg], index) => (
                     <Average key={metrics[index]}>
                       <Guage
-                        height="100px"
-                        width="100px"
                         label={value => `${value}/100`}
                         dialStartAngle={90}
                         dialEndAngle={0}
