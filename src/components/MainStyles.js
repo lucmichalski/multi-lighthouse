@@ -38,6 +38,11 @@ export const H3 = styled.h3`
   margin: 0;
   text-transform: capitalize;
 `
+export const H4 = styled.h3`
+  font-weight: 100;
+  font-size: 0.8rem;
+  margin: 0;
+`
 export const GraphH2 = styled(H2)`
   box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 2px 1px;
   min-height: 50px;

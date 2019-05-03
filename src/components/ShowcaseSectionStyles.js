@@ -11,6 +11,7 @@ export const Showcase = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  width: 100%;
   cursor: pointer;
   margin-bottom: 20px;
   background: rgb(255, 255, 255);
@@ -19,11 +20,15 @@ export const Showcase = styled.div`
     font-size: 1rem;
   }
 `
+export const Buffer = styled.div`
+  width: 300px;
+  padding: 15px;
+`
 
 export const URLSection = styled.div`
   box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 2px 1px;
   box-sizing: border-box;
-  height: 130px;
+  height: 8vw;
   width: 300px;
   padding: 15px;
   display: flex;
@@ -36,14 +41,15 @@ export const Header = styled.div`
   justify-content: flex-start;
   align-items: center;
   padding: 10px 0;
+  width: 100%;
 
   @media (min-width: 900px) {
     font-size: 1rem;
   }
 `
 export const Average = styled.div`
-  width: 130px;
-  height: 130px;
+  width: 8vw;
+  height: 8vw;
   display: flex;
   justify-content: center;
   align-items: center;

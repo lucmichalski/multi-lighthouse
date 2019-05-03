@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Guage from './Guage'
-import { Button, H3 } from './MainStyles'
+import { Button, H3, H4 } from './MainStyles'
 import {
   ShowcaseContainer,
   Showcase,
@@ -10,6 +10,7 @@ import {
   Metric,
   Change,
   URLSection,
+  Buffer,
 } from './ShowcaseSectionStyles'
 
 function getPercentageChange(oldNumber, newNumber) {
@@ -45,7 +46,7 @@ const ShowcaseSection = ({
       {showcaseData[category] && isOpen && (
         <ShowcaseContainer>
           <Header>
-            <URLSection />
+            <Buffer />
             {metrics.map(metric => (
               <Metric key={metric}>{metric}</Metric>
             ))}
@@ -81,7 +82,7 @@ const ShowcaseSection = ({
 
                       {domain.hostname.split('.')[1]}
                     </H3>
-                    <div>{decodedURL}</div>
+                    <H4>{decodedURL}</H4>
                   </URLSection>
 
                   {scores.map(([current, avg], index) => (
