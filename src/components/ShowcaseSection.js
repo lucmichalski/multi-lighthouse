@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Guage from './Guage'
-import { Button, H3 } from './MainStyles'
+import { Button, H3, H4 } from './MainStyles'
 import {
   ShowcaseContainer,
   Showcase,
@@ -9,6 +9,8 @@ import {
   Header,
   Metric,
   Change,
+  URLSection,
+  Buffer,
 } from './ShowcaseSectionStyles'
 
 function getPercentageChange(oldNumber, newNumber) {
@@ -44,7 +46,7 @@ const ShowcaseSection = ({
       {showcaseData[category] && isOpen && (
         <ShowcaseContainer>
           <Header>
-            <H3 />
+            <Buffer />
             {metrics.map(metric => (
               <Metric key={metric}>{metric}</Metric>
             ))}
@@ -71,31 +73,30 @@ const ShowcaseSection = ({
                 [i, avgI],
                 [eil, avgEil],
               ]
-              console.log(scores)
+
               return (
                 <Showcase key={decodedURL}>
-                  <div>
+                  <URLSection>
                     <H3>
                       {`${index + 1}. `}
 
                       {domain.hostname.split('.')[1]}
                     </H3>
-                    <div>{decodedURL}</div>
-                  </div>
+                    <H4>{decodedURL}</H4>
+                  </URLSection>
 
                   {scores.map(([current, avg], index) => (
                     <Average key={metrics[index]}>
                       <Guage
-                        height="100px"
-                        width="100px"
                         label={value => `${value}/100`}
                         dialStartAngle={90}
                         dialEndAngle={0}
                         value={Math.round(current.score)}
                       />
                       <div>
-                        {(current.val * 0.001).toFixed(1)}
-s
+                        {metrics[index] === 'perf'
+                          ? current.val
+                          : `${(current.val * 0.001).toFixed(2)}s`}
                       </div>
                       <Change>
                         {getPercentageChange(current.val, avg)}

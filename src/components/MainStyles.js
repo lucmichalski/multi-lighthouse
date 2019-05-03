@@ -35,12 +35,16 @@ export const Hero = styled.header`
 export const H3 = styled.h3`
   font-weight: 600;
   font-size: 1rem;
-  width: 300px;
   margin: 0;
   text-transform: capitalize;
 `
+export const H4 = styled.h3`
+  font-weight: 100;
+  font-size: 0.8rem;
+  margin: 0;
+`
 export const GraphH2 = styled(H2)`
-  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 4px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 2px 1px;
   min-height: 50px;
   display: flex;
   padding: 0 20px;
@@ -155,7 +159,7 @@ export const ModalMetric = styled.div`
   width: 30vw;
   height: 30vw;
   margin-bottom: 20px;
-  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 4px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 2px 1px;
 `
 export const CloseModal = styled.button`
   position: absolute;
