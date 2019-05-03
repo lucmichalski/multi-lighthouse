@@ -339,12 +339,12 @@ function averageAll(reports) {
 
 function average(arr, callback) {
   const average = arr.reduce(callback, 0) / arr.length
-  return average
+  return parseFloat(average.toFixed(2))
 }
 
 (async function onStartup() {
   try {
-    // await runLHSetDataForAllUsersUrls()
+    await runLHSetDataForAllUsersUrls()
     await getShowcaseUrlsRunLighthouseSetDbData()
     //await averageShowcaseScores()
     // setShowcaseCategories()

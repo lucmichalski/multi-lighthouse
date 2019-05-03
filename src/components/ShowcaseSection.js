@@ -94,8 +94,9 @@ const ShowcaseSection = ({
                         value={Math.round(current.score)}
                       />
                       <div>
-                        {(current.val * 0.001).toFixed(1)}
-s
+                        {metrics[index] === 'perf'
+                          ? current.val
+                          : `${(current.val * 0.001).toFixed(2)}s`}
                       </div>
                       <Change>
                         {getPercentageChange(current.val, avg)}

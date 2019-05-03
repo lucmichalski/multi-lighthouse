@@ -11,10 +11,10 @@ export const Showcase = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 4px;
-  padding: 0 20px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 2px 1px;
+  padding: 0 15px;
   cursor: pointer;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   background: rgb(255, 255, 255);
   :hover {
     filter: brightness(98%);
@@ -58,4 +58,5 @@ export const Categories = styled.div`
   display: flex;
   justify-content: flex-start;
   flex-direction: column;
+  padding: 0 15px;
 `
