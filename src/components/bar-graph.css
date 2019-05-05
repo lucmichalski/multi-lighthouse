@@ -1,0 +1,31 @@
+svg:not(:root) {
+  overflow: visible;
+}
+.rv-xy-plot {
+  padding: 0 5px;
+  margin: 0 auto;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 4px;
+}
+
+.bar {
+  cursor: pointer;
+}
+
+.line-graph-container {
+  width: 130px;
+  height: 60px;
+  position: absolute;
+  bottom: 0;
+}
+
+.line-graph-container .rv-xy-plot {
+  box-shadow: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+.line-graph-container .rv-xy-plot .rv-xy-plot__inner {
+  height: 10px;
+  width: 80px;
+}

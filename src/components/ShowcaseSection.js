@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
+import LineGraph from './LineGraph'
 import Guage from './Guage'
 import { Button, H3, H4 } from './MainStyles'
 import {
   ShowcaseContainer,
   Showcase,
   Categories,
-  Average,
+  SummaryContainer,
   Header,
   Metric,
   Change,
@@ -86,7 +87,7 @@ const ShowcaseSection = ({
                   </URLSection>
 
                   {scores.map(([current, avg], index) => (
-                    <Average key={metrics[index]}>
+                    <SummaryContainer key={metrics[index]}>
                       <Guage
                         label={value => `${value}/100`}
                         dialStartAngle={90}
@@ -102,7 +103,10 @@ const ShowcaseSection = ({
                         {getPercentageChange(current.val, avg)}
 %
                       </Change>
-                    </Average>
+                      <div className="line-graph-container">
+                        <LineGraph />
+                      </div>
+                    </SummaryContainer>
                   ))}
                 </Showcase>
               )

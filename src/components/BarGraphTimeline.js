@@ -10,7 +10,7 @@ import {
   Hint,
 } from 'react-vis'
 import { OuterGraph, Title, InnerGraph } from './BarGraphTimelineStyles'
-import './BarGraph.css'
+import './bar-graph.css'
 
 const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
   const defaultState = {
