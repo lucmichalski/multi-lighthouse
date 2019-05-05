@@ -3,7 +3,7 @@ import React, { Fragment } from 'react'
 import Helmet from 'react-helmet'
 import Main from '../components/Main'
 import Layout from '../components/Layout'
-import SEO from '../components/seo'
+import SEO from '../components/Seo'
 
 const IndexPage = () => (
   <Fragment>

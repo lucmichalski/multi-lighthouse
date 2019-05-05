@@ -344,9 +344,9 @@ function average(arr, callback) {
 
 (async function onStartup() {
   try {
-    await runLHSetDataForAllUsersUrls()
-    await getShowcaseUrlsRunLighthouseSetDbData()
-    //await averageShowcaseScores()
+    // await runLHSetDataForAllUsersUrls()
+    // await getShowcaseUrlsRunLighthouseSetDbData()
+    await averageShowcaseScores()
     // setShowcaseCategories()
   } catch (error) {
     console.log(error)

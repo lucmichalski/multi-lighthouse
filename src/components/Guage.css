@@ -20,8 +20,8 @@
   border-radius: 1.25em;
   height: 100%;
   display: inline-block;
-  animation: progress 1s ease-in-out forwards;
-  -webkit-animation: progress 1s ease-in-out forwards;
+  animation: progress 1.5s ease-in-out forwards;
+  -webkit-animation: progress 1.5s ease-in-out forwards;
 }
 
 .value {

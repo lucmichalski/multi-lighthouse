@@ -28,7 +28,7 @@ export const Buffer = styled.div`
 export const URLSection = styled.div`
   box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 2px 1px;
   box-sizing: border-box;
-  height: 8vw;
+  height: 100px;
   width: 300px;
   padding: 15px;
   display: flex;
@@ -47,18 +47,19 @@ export const Header = styled.div`
     font-size: 1rem;
   }
 `
-export const Average = styled.div`
-  width: 8vw;
-  height: 8vw;
+export const SummaryContainer = styled.div`
+  width: 150px;
+  height: 150px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   flex-direction: column;
   padding: 10px;
   margin: 0 8px;
   box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 2px 1px;
+  position: relative;
 `
-export const Metric = styled(Average)`
+export const Metric = styled(SummaryContainer)`
   height: auto;
 `
 
