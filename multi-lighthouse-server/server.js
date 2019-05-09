@@ -22,6 +22,7 @@ async function launchPuppeteerRunLighthouse(url) {
       ],
     })
     const port = browser._connection._url.slice(15, 20)
+    //set timeout here for lighthouse that takes too long
     const { lhr, report } = await lighthouse(url, {
       port,
       output: 'html',
@@ -171,14 +172,26 @@ async function setShowcaseURLData() {
     .child('urls')
 
   const urls = [
-    { domain: 'https://www.bing.com/', cat: 'Search Engines' },
-    { domain: 'https://www.google.com/', cat: 'Search Engines' },
-    { domain: 'https://www.amazon.com/', cat: 'Shopping' },
-    { domain: 'https://www.netflix.com/', cat: 'Streaming Video' },
-    { domain: 'https://www.airbnb.com/', cat: 'Travel' },
-    { domain: 'https://www.youtube.com/', cat: 'Streaming Video' },
-    { domain: 'https://www.wikipedia.org/', cat: 'Information' },
-    { domain: 'https://www.kayak.com/', cat: 'Travel' },
+    { domain: 'https://www.zillow.com', cat: 'Real Estate' },
+    { domain: 'https://www.realtor.com', cat: 'Real Estate' },
+    { domain: 'https://www.loopnet.com', cat: 'Real Estate' },
+    { domain: 'https://www.remax.com', cat: 'Real Estate' },
+    { domain: 'https://www.movoto.com', cat: 'Real Estate' },
+    { domain: 'https://www.sothebysrealty.com/eng', cat: 'Real Estate' },
+    { domain: 'https://www.costar.com', cat: 'Real Estate' },
+    { domain: 'https://www.century21.com', cat: 'Real Estate' },
+    { domain: 'https://www.coldwellbanker.com', cat: 'Real Estate' },
+    { domain: 'https://www.landwatch.com', cat: 'Real Estate' },
+    { domain: 'https://www.wsj.com', cat: 'Newspapers' },
+    { domain: 'https://economictimes.indiatimes.com', cat: 'Newspapers' },
+    { domain: 'https://www.ft.com/', cat: 'Newspapers' },
+    { domain: 'https://www.economist.com', cat: 'Newspapers' },
+    { domain: 'https://www.bizjournals.com', cat: 'Newspapers' },
+    { domain: 'https://www.globes.co.il', cat: 'Newspapers' },
+    { domain: 'https://www.ibtimes.com', cat: 'Newspapers' },
+    { domain: 'https://www.brecorder.com', cat: 'Newspapers' },
+    { domain: 'http://labusinessjournal.com', cat: 'Newspapers' },
+    { domain: 'https://www.businessnews.com.au', cat: 'Newspapers' },
   ]
   const urlObj = urls.reduce((obj, item) => {
     obj[base64.encode(item.domain)] = { cat: item.cat }
@@ -211,6 +224,10 @@ async function deleteData() {
   //     .child('report')
   //   reportRef.remove()
   // }
+  //return
+}
+
+async function deleteShowcaseData() {
   const showcaseUrls = await getShowcaseUrls()
   for (const [url, val] of showcaseUrls) {
     const urlRef = db
@@ -322,6 +339,15 @@ async function averageShowcaseScores() {
   return
 }
 
+function archiveAverages() {
+  //get urls
+  //loop through urls
+  //get avg snapshot
+  //set avg in archivedAvg with a new Date timestamp
+  //remove lhr node possibly as the very last thing.
+  // make this a firebase function which runs once a month. Or every 15days.
+}
+
 function averageAll(reports) {
   let avg = {}
   const metrics = ['i', 'perf', 'fci', 'fmp', 'fcp', 'eil', 'si']
@@ -346,8 +372,12 @@ function average(arr, callback) {
   try {
     // await runLHSetDataForAllUsersUrls()
     // await getShowcaseUrlsRunLighthouseSetDbData()
-    await averageShowcaseScores()
-    // setShowcaseCategories()
+
+    //Maintenance Functions
+    //await deleteShowcaseData()
+    //await setShowcaseURLData()
+    //await averageShowcaseScores()
+    //setShowcaseCategories()
   } catch (error) {
     console.log(error)
   }

@@ -69,13 +69,7 @@ const initialState = {
     timelineResults: 'timeline',
   },
   showcaseData: {},
-  categories: [
-    'Information',
-    'Search Engines',
-    'Shopping',
-    'Streaming Video',
-    'Travel',
-  ],
+  categories: ['Real Estate', 'Newspapers'],
 }
 class Main extends Component {
   state = { ...initialState }
