@@ -7,27 +7,49 @@ const dotenv = require('dotenv')
 const { db } = require('./firebase')
 
 dotenv.config()
+;(async function onStartup() {
+  await runLHSetDataForAllUsersUrls()
+  await getShowcaseUrlsRunLighthouseSetData()
+  await averageShowcaseScores()
+})()
 
 async function launchPuppeteerRunLighthouse(url) {
   try {
+    const args = [
+      '--no-sandbox',
+      '--incognito',
+      '--disable-gpu',
+      '--disable-dev-shm-usage',
+      '--disable-setuid-sandbox',
+      '--no-first-run',
+      '--no-zygote',
+    ]
     const browser = await puppeteer.launch({
-      args: [
-        '--no-sandbox',
-        '--incognito',
-        '--disable-gpu',
-        '--disable-dev-shm-usage',
-        '--disable-setuid-sandbox',
-        '--no-first-run',
-        '--no-zygote',
-      ],
+      args,
     })
+    const config = {
+      extends: 'lighthouse:default',
+      settings: {
+        maxWaitForFcp: 30 * 1000,
+        onlyAudits: [
+          'first-meaningful-paint',
+          'interactive',
+          'first-contentful-paint',
+          'first-cpu-idle',
+          'estimated-input-latency',
+          'speed-index',
+        ],
+      },
+    }
+
     const port = browser._connection._url.slice(15, 20)
-    //set timeout here for lighthouse that takes too long
-    const { lhr, report } = await lighthouse(url, {
-      port,
-      output: 'html',
-      onlyCategories: ['performance'],
-    })
+    const { lhr, report } = await lighthouse(
+      url,
+      {
+        port,
+      },
+      config
+    )
     browser.close()
 
     if (
@@ -38,17 +60,14 @@ async function launchPuppeteerRunLighthouse(url) {
 
       return { report, lhr }
     }
-    //Is this handling the error correctly and just moving on to the next url?
-    //or should I return an error and then throw from another function?
-    throw 'No Lighthouse Report Generated'
+
+    return {}
   } catch (error) {
     console.log(error)
     throw error
   }
 }
 
-//belongs in utils
-//all functions file and routes file
 function getDefinedData(data) {
   let lighthouseReports = {}
 
@@ -65,67 +84,74 @@ function getDefinedData(data) {
 }
 
 function transformData(lighthouse) {
-  const { lhr, report } = lighthouse
-  const { fetchTime, audits, categories, runtimeError, finalUrl } = lhr
-  const { performance } = categories
-  const date = base64.encode(fetchTime)
-  const {
-    interactive,
-    'first-contentful-paint': firstContentfulPaint,
-    'first-meaningful-paint': firstMeaningfulPaint,
-    'estimated-input-latency': estimatedInputLatency,
-    'first-cpu-idle': firstCpuIdle,
-    'speed-index': speedIndex,
-  } = audits
+  if (lighthouse) {
+    const { lhr, report } = lighthouse
+    const { fetchTime, audits, categories, runtimeError, finalUrl } = lhr
+    const { performance } = categories
+    const date = base64.encode(fetchTime)
+    const {
+      interactive,
+      'first-contentful-paint': firstContentfulPaint,
+      'first-meaningful-paint': firstMeaningfulPaint,
+      'estimated-input-latency': estimatedInputLatency,
+      'first-cpu-idle': firstCpuIdle,
+      'speed-index': speedIndex,
+    } = audits
 
-  const auditData = {
-    fcp: {
-      val: parseFloat(firstContentfulPaint.rawValue.toFixed(2)),
-      score: firstContentfulPaint.score * 100,
-    },
-    fmp: {
-      val: parseFloat(firstMeaningfulPaint.rawValue.toFixed(2)),
-      score: firstMeaningfulPaint.score * 100,
-    },
-    i: {
-      val: parseFloat(interactive.rawValue.toFixed(2)),
-      score: interactive.score * 100,
-    },
-    fci: {
-      val: parseFloat(firstCpuIdle.rawValue.toFixed(2)),
-      score: firstCpuIdle.score * 100,
-    },
-    eil: {
-      val: parseFloat(estimatedInputLatency.rawValue.toFixed(2)),
-      score: estimatedInputLatency.score * 100,
-    },
-    si: {
-      val: parseFloat(speedIndex.rawValue.toFixed(2)),
-      score: speedIndex.score * 100,
-    },
-    perf: {
-      val: Math.round(performance.score * 100),
-      score: Math.round(performance.score * 100),
-    },
-  }
+    const auditData = {
+      fcp: {
+        val: parseFloat(firstContentfulPaint.numericValue.toFixed(2)),
+        score: firstContentfulPaint.score * 100,
+      },
+      fmp: {
+        val: parseFloat(firstMeaningfulPaint.numericValue.toFixed(2)),
+        score: firstMeaningfulPaint.score * 100,
+      },
+      i: {
+        val: parseFloat(interactive.numericValue.toFixed(2)),
+        score: interactive.score * 100,
+      },
+      fci: {
+        val: parseFloat(firstCpuIdle.numericValue.toFixed(2)),
+        score: firstCpuIdle.score * 100,
+      },
+      eil: {
+        val: parseFloat(estimatedInputLatency.numericValue.toFixed(2)),
+        score: estimatedInputLatency.score * 100,
+      },
+      si: {
+        val: parseFloat(speedIndex.numericValue.toFixed(2)),
+        score: speedIndex.score * 100,
+      },
+      perf: {
+        val: Math.round(performance.score * 100),
+        score: Math.round(performance.score * 100),
+      },
+    }
 
-  const dbData = {
-    fu: finalUrl,
-    ft: fetchTime,
-    re: runtimeError ? runtimeError.code : 'Runtime Error is Undefined',
-    ...auditData,
+    const dbData = {
+      fu: finalUrl,
+      ft: fetchTime,
+      re: runtimeError ? runtimeError.code : 'Runtime Error is Undefined',
+      ...auditData,
+    }
+    return {
+      fetchTime,
+      dbData,
+      date,
+      finalUrl,
+      report,
+      performance,
+    }
   }
-  return {
-    fetchTime,
-    dbData,
-    date,
-    finalUrl,
-    report,
-    performance,
-  }
+  return {}
 }
 
-async function runLighthouseSetDBData(
+/////////////////////////////////
+/////////////////////////////////
+/////Users
+
+async function runLighthouseSetUserData(
   url,
   uid = 'ChqBqCMRh1R2g8cAMjIezSabGMl2'
 ) {
@@ -147,58 +173,29 @@ async function runLighthouseSetDBData(
   return { message: `${formatURL} ${fetchTime} OK` }
 }
 
-async function getSetLHData(uid) {
+async function getSetLHDataForUser(uid) {
   const ref = await db.ref(`${uid}/urls`)
   const urlsSnapshot = await ref.once('value')
   const urls = Object.values(urlsSnapshot.val())
 
   // Trying to account for cold starts
   for (const url of urls) {
-    await launchPuppeteerRunLighthouse(url)
+    try {
+      await launchPuppeteerRunLighthouse(url)
+    } catch (error) {
+      console.log(error, 'Error while accounting for cold starts')
+    }
   }
 
   //The real deal
   for (const url of urls) {
-    await runLighthouseSetDBData(url, uid)
+    try {
+      await runLighthouseSetUserData(url, uid)
+    } catch (error) {
+      console.log(error, 'Errow while running lighthouse and setting for users')
+    }
   }
   return urls
-}
-
-//Utility function to set data
-async function setShowcaseURLData() {
-  const Ref = db
-    .ref()
-    .child('showcase')
-    .child('urls')
-
-  const urls = [
-    { domain: 'https://www.zillow.com', cat: 'Real Estate' },
-    { domain: 'https://www.realtor.com', cat: 'Real Estate' },
-    { domain: 'https://www.loopnet.com', cat: 'Real Estate' },
-    { domain: 'https://www.remax.com', cat: 'Real Estate' },
-    { domain: 'https://www.movoto.com', cat: 'Real Estate' },
-    { domain: 'https://www.sothebysrealty.com/eng', cat: 'Real Estate' },
-    { domain: 'https://www.costar.com', cat: 'Real Estate' },
-    { domain: 'https://www.century21.com', cat: 'Real Estate' },
-    { domain: 'https://www.coldwellbanker.com', cat: 'Real Estate' },
-    { domain: 'https://www.landwatch.com', cat: 'Real Estate' },
-    { domain: 'https://www.wsj.com', cat: 'Newspapers' },
-    { domain: 'https://economictimes.indiatimes.com', cat: 'Newspapers' },
-    { domain: 'https://www.ft.com/', cat: 'Newspapers' },
-    { domain: 'https://www.economist.com', cat: 'Newspapers' },
-    { domain: 'https://www.bizjournals.com', cat: 'Newspapers' },
-    { domain: 'https://www.globes.co.il', cat: 'Newspapers' },
-    { domain: 'https://www.ibtimes.com', cat: 'Newspapers' },
-    { domain: 'https://www.brecorder.com', cat: 'Newspapers' },
-    { domain: 'http://labusinessjournal.com', cat: 'Newspapers' },
-    { domain: 'https://www.businessnews.com.au', cat: 'Newspapers' },
-  ]
-  const urlObj = urls.reduce((obj, item) => {
-    obj[base64.encode(item.domain)] = { cat: item.cat }
-    return obj
-  }, {})
-
-  Ref.set(urlObj)
 }
 
 async function getUsers() {
@@ -209,35 +206,16 @@ async function getUsers() {
   return users
 }
 
-//Utility function to delete data
-async function deleteData() {
-  // const users = await getUsers()
-  // for (const user of users) {
-  //   const lhrRef = db
-  //     .ref()
-  //     .child(user)
-  //     .child('lhr')
-  //   lhrRef.remove()
-  //   const reportRef = db
-  //     .ref()
-  //     .child(user)
-  //     .child('report')
-  //   reportRef.remove()
-  // }
-  //return
+async function runLHSetDataForAllUsersUrls() {
+  const users = await getUsers()
+  for (const user of users) {
+    await getSetLHDataForUser(user)
+  }
 }
 
-async function deleteShowcaseData() {
-  const showcaseUrls = await getShowcaseUrls()
-  for (const [url, val] of showcaseUrls) {
-    const urlRef = db
-      .ref()
-      .child('showcase')
-      .child(url)
-    urlRef.remove()
-  }
-  return
-}
+/////////////////////////////////
+////////////////////////////////
+/////Showcases
 
 async function getShowcaseUrls() {
   const showcaseRef = db
@@ -250,37 +228,44 @@ async function getShowcaseUrls() {
   return showcaseUrls
 }
 
-async function runLHSetDataForAllUsersUrls() {
-  const users = await getUsers()
-  for (const user of users) {
-    await getSetLHData(user)
-  }
-}
-
-async function getShowcaseUrlsRunLighthouseSetDbData() {
+async function getShowcaseUrlsRunLighthouseSetData() {
   const showcaseUrls = await getShowcaseUrls()
   //Account for cold start
   for (const [url, val] of showcaseUrls) {
-    const decodedUrl = base64.decode(url)
-    await launchPuppeteerRunLighthouse(decodedUrl)
+    try {
+      const decodedUrl = base64.decode(url)
+      await launchPuppeteerRunLighthouse(decodedUrl)
+    } catch (error) {
+      console.log(
+        error,
+        'error accounting for cold starts running lighthouse for showcase data'
+      )
+    }
   }
 
   //Real Deal
   for (const [url, val] of showcaseUrls) {
-    const decodedUrl = base64.decode(url)
-    const lighthouse = await launchPuppeteerRunLighthouse(decodedUrl)
-    const { finalUrl, date, dbData, performance } = transformData(lighthouse)
+    try {
+      const decodedUrl = base64.decode(url)
+      const lighthouse = await launchPuppeteerRunLighthouse(decodedUrl)
+      const { finalUrl, date, dbData, performance } = transformData(lighthouse)
 
-    if (dbData) {
-      const urlRef = db.ref(`showcase/${url}`)
-      const currentRef = urlRef.child(`current`)
-      const lhrRef = urlRef.child(`/lhr/${date}`)
-      lhrRef.set(dbData, error => error && console.log(error))
-      currentRef.set(dbData, error => error && console.log(error))
+      if (dbData) {
+        const urlRef = db.ref(`showcase/${url}`)
+        const currentRef = urlRef.child(`current`)
+        const lhrRef = urlRef.child(`/lhr/${date}`)
+        lhrRef.set(dbData, error => error && console.log(error))
+        currentRef.set(dbData, error => error && console.log(error))
+        console.log(
+          `Setting DB Data for ${finalUrl}. The total score is ${
+            performance.score
+          }`
+        )
+      }
+    } catch (error) {
       console.log(
-        `Setting DB Data for ${finalUrl}. The total score is ${
-          performance.score
-        }`
+        error,
+        'Error while running lighthouse and setting data for showcases'
       )
     }
   }
@@ -339,6 +324,10 @@ async function averageShowcaseScores() {
   return
 }
 
+///////////////////////////
+/////////////////////////////
+///////Averages Helpers
+
 function archiveAverages() {
   //get urls
   //loop through urls
@@ -368,17 +357,82 @@ function average(arr, callback) {
   return parseFloat(average.toFixed(2))
 }
 
-(async function onStartup() {
-  try {
-    // await runLHSetDataForAllUsersUrls()
-    // await getShowcaseUrlsRunLighthouseSetDbData()
+//////////////////////////////////////
+/////////////////////////////////////
+//Helpers
+async function deleteUserData() {
+  // const users = await getUsers()
+  // for (const user of users) {
+  //   const lhrRef = db
+  //     .ref()
+  //     .child(user)
+  //     .child('lhr')
+  //   lhrRef.remove()
+  //   const reportRef = db
+  //     .ref()
+  //     .child(user)
+  //     .child('report')
+  //   reportRef.remove()
+  // }
+  //return
+}
 
-    //Maintenance Functions
-    //await deleteShowcaseData()
-    //await setShowcaseURLData()
-    //await averageShowcaseScores()
-    //setShowcaseCategories()
-  } catch (error) {
-    console.log(error)
+async function deleteShowcaseData() {
+  const showcaseUrls = await getShowcaseUrls()
+  for (const [url, val] of showcaseUrls) {
+    const urlRef = db
+      .ref()
+      .child('showcase')
+      .child(url)
+    urlRef.remove()
   }
-})()
+  return
+}
+
+async function testErrors() {
+  const urls = ['https://www.realtor.com', 'https://www.realtor.com']
+  for (const url of urls) {
+    try {
+      await launchPuppeteerRunLighthouse(url)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+}
+
+//Utility function to set data
+async function setShowcaseURLData() {
+  const Ref = db
+    .ref()
+    .child('showcase')
+    .child('urls')
+
+  const urls = [
+    { domain: 'https://www.zillow.com', cat: 'Real Estate' },
+    { domain: 'https://www.realtor.com', cat: 'Real Estate' },
+    { domain: 'https://www.loopnet.com', cat: 'Real Estate' },
+    { domain: 'https://www.remax.com', cat: 'Real Estate' },
+    { domain: 'https://www.movoto.com', cat: 'Real Estate' },
+    { domain: 'https://www.sothebysrealty.com/eng', cat: 'Real Estate' },
+    { domain: 'https://www.costar.com', cat: 'Real Estate' },
+    { domain: 'https://www.century21.com', cat: 'Real Estate' },
+    { domain: 'https://www.coldwellbanker.com', cat: 'Real Estate' },
+    { domain: 'https://www.landwatch.com', cat: 'Real Estate' },
+    { domain: 'https://www.wsj.com', cat: 'Newspapers' },
+    { domain: 'https://economictimes.indiatimes.com', cat: 'Newspapers' },
+    { domain: 'https://www.ft.com/', cat: 'Newspapers' },
+    { domain: 'https://www.economist.com', cat: 'Newspapers' },
+    { domain: 'https://www.bizjournals.com', cat: 'Newspapers' },
+    { domain: 'https://www.globes.co.il', cat: 'Newspapers' },
+    { domain: 'https://www.ibtimes.com', cat: 'Newspapers' },
+    { domain: 'https://www.brecorder.com', cat: 'Newspapers' },
+    { domain: 'http://labusinessjournal.com', cat: 'Newspapers' },
+    { domain: 'https://www.businessnews.com.au', cat: 'Newspapers' },
+  ]
+  const urlObj = urls.reduce((obj, item) => {
+    obj[base64.encode(item.domain)] = { cat: item.cat }
+    return obj
+  }, {})
+
+  Ref.set(urlObj)
+}
