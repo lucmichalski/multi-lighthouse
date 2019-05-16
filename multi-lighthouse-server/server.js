@@ -9,8 +9,8 @@ const { db } = require('./firebase')
 dotenv.config()
 ;(async function onStartup() {
   await runLHSetDataForAllUsersUrls()
-  await getShowcaseUrlsRunLighthouseSetData()
-  await averageShowcaseScores()
+  // await getShowcaseUrlsRunLighthouseSetData()
+  // await averageShowcaseScores()
 })()
 
 async function launchPuppeteerRunLighthouse(url) {
@@ -375,6 +375,27 @@ async function deleteUserData() {
   //   reportRef.remove()
   // }
   //return
+}
+function setUserUrls() {
+  const urls = [
+    'https://www-dev.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158/',
+    'https://www-dev.landsofamerica.com/Texas/all-land/',
+    'https://beta.landsofamerica.com',
+    'https://beta.landsofamerica.com/United-States/all-land',
+    'https://beta.landsofamerica.com/Texas/all-land/',
+    'https://beta.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158/',
+    'https://beta.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
+  ]
+
+  const urlObj = urls.reduce((obj, item) => {
+    obj[base64.encode(item)] = item
+    return obj
+  }, {})
+
+  db.ref()
+    .child('ChqBqCMRh1R2g8cAMjIezSabGMl2')
+    .child('urls')
+    .update(urlObj)
 }
 
 async function deleteShowcaseData() {
