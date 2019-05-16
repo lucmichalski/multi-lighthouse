@@ -8,9 +8,9 @@ const { db } = require('./firebase')
 
 dotenv.config()
 ;(async function onStartup() {
-  await runLHSetDataForAllUsersUrls()
+  // await runLHSetDataForAllUsersUrls()
   // await getShowcaseUrlsRunLighthouseSetData()
-  // await averageShowcaseScores()
+  //await averageShowcaseScores()
 })()
 
 async function launchPuppeteerRunLighthouse(url) {
@@ -311,12 +311,13 @@ async function averageShowcaseScores() {
       )
       const avg = averageAll(showcaseLHRReportsByDate)
       const { cat } = val
+      const monthYear = getMonthYear()
 
       console.log(avg, base64.decode(url), cat)
       db.ref()
         .child('showcase')
         .child(url)
-        .update({ avg, cat })
+        .update({ avg, cat, [monthYear]: avg })
     } catch (error) {
       console.log(error)
     }
@@ -355,6 +356,14 @@ function averageAll(reports) {
 function average(arr, callback) {
   const average = arr.reduce(callback, 0) / arr.length
   return parseFloat(average.toFixed(2))
+}
+
+function getMonthYear() {
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = date.getMonth()
+  console.log(`${month}${year}avg`)
+  return `${month}${year}avg`
 }
 
 //////////////////////////////////////
