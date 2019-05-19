@@ -10,7 +10,7 @@ dotenv.config()
 ;(async function onStartup() {
   // await runLHSetDataForAllUsersUrls()
   // await getShowcaseUrlsRunLighthouseSetData()
-  //await averageShowcaseScores()
+  // await averageShowcaseScores()
 })()
 
 async function launchPuppeteerRunLighthouse(url) {
@@ -86,6 +86,7 @@ function getDefinedData(data) {
 function transformData(lighthouse) {
   if (lighthouse) {
     const { lhr, report } = lighthouse
+
     const { fetchTime, audits, categories, runtimeError, finalUrl } = lhr
     const { performance } = categories
     const date = base64.encode(fetchTime)
@@ -101,27 +102,27 @@ function transformData(lighthouse) {
     const auditData = {
       fcp: {
         val: parseFloat(firstContentfulPaint.numericValue.toFixed(2)),
-        score: firstContentfulPaint.score * 100,
+        score: Math.round(firstContentfulPaint.score * 100),
       },
       fmp: {
         val: parseFloat(firstMeaningfulPaint.numericValue.toFixed(2)),
-        score: firstMeaningfulPaint.score * 100,
+        score: Math.round(firstMeaningfulPaint.score * 100),
       },
       i: {
         val: parseFloat(interactive.numericValue.toFixed(2)),
-        score: interactive.score * 100,
+        score: Math.round(interactive.score * 100),
       },
       fci: {
         val: parseFloat(firstCpuIdle.numericValue.toFixed(2)),
-        score: firstCpuIdle.score * 100,
+        score: Math.round(firstCpuIdle.score * 100),
       },
       eil: {
         val: parseFloat(estimatedInputLatency.numericValue.toFixed(2)),
-        score: estimatedInputLatency.score * 100,
+        score: Math.round(estimatedInputLatency.score * 100),
       },
       si: {
         val: parseFloat(speedIndex.numericValue.toFixed(2)),
-        score: speedIndex.score * 100,
+        score: Math.round(speedIndex.score * 100),
       },
       perf: {
         val: Math.round(performance.score * 100),
@@ -135,6 +136,7 @@ function transformData(lighthouse) {
       re: runtimeError ? runtimeError.code : 'Runtime Error is Undefined',
       ...auditData,
     }
+
     return {
       fetchTime,
       dbData,
@@ -317,7 +319,13 @@ async function averageShowcaseScores() {
       db.ref()
         .child('showcase')
         .child(url)
-        .update({ avg, cat, [monthYear]: avg })
+        .update({ avg, cat })
+      db.ref()
+        .child('showcase')
+        .child(url)
+        .child('pastAvg')
+        .child(monthYear)
+        .set(avg)
     } catch (error) {
       console.log(error)
     }
@@ -328,15 +336,6 @@ async function averageShowcaseScores() {
 ///////////////////////////
 /////////////////////////////
 ///////Averages Helpers
-
-function archiveAverages() {
-  //get urls
-  //loop through urls
-  //get avg snapshot
-  //set avg in archivedAvg with a new Date timestamp
-  //remove lhr node possibly as the very last thing.
-  // make this a firebase function which runs once a month. Or every 15days.
-}
 
 function averageAll(reports) {
   let avg = {}
@@ -362,8 +361,8 @@ function getMonthYear() {
   const date = new Date()
   const year = date.getFullYear()
   const month = date.getMonth()
-  console.log(`${month}${year}avg`)
-  return `${month}${year}avg`
+  console.log(`${month}${year}`)
+  return `${month}${year}`
 }
 
 //////////////////////////////////////
@@ -420,10 +419,11 @@ async function deleteShowcaseData() {
 }
 
 async function testErrors() {
-  const urls = ['https://www.realtor.com', 'https://www.realtor.com']
+  const urls = ['https://www-dev.landsofamerica.com']
   for (const url of urls) {
     try {
-      await launchPuppeteerRunLighthouse(url)
+      const lhr = await launchPuppeteerRunLighthouse(url)
+      await transformData(lhr)
     } catch (error) {
       console.log(error)
     }
