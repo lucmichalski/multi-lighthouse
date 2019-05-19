@@ -53,7 +53,10 @@ const ShowcaseSection = ({
             ))}
           </Header>
           {showcaseData[category].map(
-            ({ averageScores, decodedURL, currentScores }, index) => {
+            (
+              { averageScores, decodedURL, currentScores, pastAverageScores },
+              URLindex
+            ) => {
               const domain = new URL(decodedURL)
               const { perf, i, fcp, fci, eil, fmp, si } = currentScores
               const {
@@ -79,7 +82,7 @@ const ShowcaseSection = ({
                 <Showcase key={decodedURL}>
                   <URLSection>
                     <H3>
-                      {`${index + 1}. `}
+                      {`${URLindex + 1}. `}
 
                       {domain.hostname.split('.')[1]}
                     </H3>
@@ -104,7 +107,14 @@ const ShowcaseSection = ({
 %
                       </Change>
                       <div className="line-graph-container">
-                        <LineGraph />
+                        <LineGraph
+                          data={Object.entries(pastAverageScores).map(
+                            ([date, scoresByDate]) => ({
+                              x: date,
+                              y: scoresByDate[metrics[index]],
+                            })
+                          )}
+                        />
                       </div>
                     </SummaryContainer>
                   ))}

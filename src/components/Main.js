@@ -90,10 +90,15 @@ class Main extends Component {
 
         const URLAveragesSnapshot = await showCaseRef.child('avg').once('value')
         const currentSnapshot = await showCaseRef.child('current').once('value')
+        const URLPastAverageSnapshot = await showCaseRef
+          .child('pastAvg')
+          .once('value')
         const averageScores = await URLAveragesSnapshot.val()
+        const pastAverageScores = await URLPastAverageSnapshot.val()
         const currentScores = await currentSnapshot.val()
 
         return {
+          pastAverageScores,
           currentScores,
           averageScores,
           encodedURL: URL,
@@ -136,12 +141,15 @@ class Main extends Component {
 
     for (const prop of Object.keys(lhr)) {
       if (lhr[prop].val) {
+        console.log(lhr[prop].val)
         if (prop === 'eil') {
           lhr[prop].displayVal = `${lhr[prop].val}ms`
         } else if (prop === 'perf') {
-          lhr[prop].displayVal = `${lhr[prop].val.toString()}/100`
+          lhr[prop].displayVal = `${lhr[prop].val.toFixed()}/100`
         } else {
-          lhr[prop].displayVal = `${this.msToSeconds(lhr[prop].val)}s`
+          lhr[prop].displayVal = `${this.msToSeconds(lhr[prop].val).toFixed(
+            2
+          )}s`
         }
       }
     }
