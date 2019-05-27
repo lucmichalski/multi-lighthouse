@@ -142,7 +142,6 @@ class Main extends Component {
 
     for (const prop of Object.keys(lhr)) {
       if (lhr[prop].val) {
-        console.log(lhr[prop].val)
         if (prop === 'eil') {
           lhr[prop].displayVal = `${lhr[prop].val}ms`
         } else if (prop === 'perf') {
@@ -347,6 +346,7 @@ class Main extends Component {
           !fetching &&
           timelineResults &&
           databaseData &&
+          !detailedLHRByDate &&
           Object.entries(databaseData)
             .sort((a, b) => b[1].length - a[1].length)
             .map(([key, value], index) => (
@@ -364,7 +364,6 @@ class Main extends Component {
           <Modal
             onClick={() => this.setState(() => ({ detailedLHRByDate: null }))}
           >
-            <CloseModal>Close</CloseModal>
             {/* {modal scroll styles} */}
             <div
               style={{
@@ -376,6 +375,7 @@ class Main extends Component {
               }}
             >
               <ModalContent>
+                <CloseModal>Close</CloseModal>
                 {metrics.map(metric => (
                   <ModalMetric key={metric}>
                     <ModalTitle>{metricsDisplayNames[metric]}</ModalTitle>
