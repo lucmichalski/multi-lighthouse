@@ -28,6 +28,13 @@
   font-size: 1.2em;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.7);
+  margin-right: 2px;
+}
+
+.hundred {
+  font-size: 0.6em;
+  font-weight: lighter;
+  color: rgba(0, 0, 0, 0.7);
 }
 
 /* animation */

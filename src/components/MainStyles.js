@@ -77,7 +77,7 @@ export const Button = styled.button`
   font-size: .9rem;
     height: 52px;
     text-decoration: none;
-    color: ${props => (props.color ? props.color : `rgb(0, 0, 28)`)};;
+    color: ${props => (props.color ? props.color : `rgb(0, 0, 28)`)};
     background-color: ${props =>
       props.background ? props.background : `rgb(0, 0, 28)`};
     text-align: center;

@@ -11,6 +11,8 @@ dotenv.config()
   // await runLHSetDataForAllUsersUrls()
   // await getShowcaseUrlsRunLighthouseSetData()
   // await averageShowcaseScores()
+  // await setShowcaseURLData()
+  // await setShowcaseCategories()
 })()
 
 async function launchPuppeteerRunLighthouse(url) {
@@ -213,6 +215,7 @@ async function runLHSetDataForAllUsersUrls() {
   for (const user of users) {
     await getSetLHDataForUser(user)
   }
+  console.log('All User Data is Set')
 }
 
 /////////////////////////////////
@@ -287,7 +290,7 @@ async function setShowcaseCategories() {
       //check if url exists here maybe?
       const urlRef = categoriesRef.child(val.cat).child('urls')
 
-      urlRef.update({ [url]: url })
+      urlRef.update({ [url]: base64.decode(url) })
     }
   }
 }
@@ -386,13 +389,18 @@ async function deleteUserData() {
 }
 function setUserUrls() {
   const urls = [
-    'https://www-dev.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158/',
-    'https://www-dev.landsofamerica.com/Texas/all-land/',
-    'https://beta.landsofamerica.com',
-    'https://beta.landsofamerica.com/United-States/all-land',
-    'https://beta.landsofamerica.com/Texas/all-land/',
-    'https://beta.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158/',
-    'https://beta.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
+    // 'https://www-dev.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158/',
+    // 'https://www-dev.landsofamerica.com/Texas/all-land/',
+    // 'https://beta.landsofamerica.com',
+    // 'https://beta.landsofamerica.com/United-States/all-land',
+    // 'https://beta.landsofamerica.com/Texas/all-land/',
+    // 'https://beta.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158/',
+    // 'https://beta.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
+    // 'https://www.landsofamerica.com',
+    // 'https://www.landsofamerica.com/United-States/all-land',
+    // 'https://www.landsofamerica.com/Texas/all-land/',
+    // 'https://www.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158/',
+    // 'https://www.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
   ]
 
   const urlObj = urls.reduce((obj, item) => {
@@ -438,6 +446,7 @@ async function setShowcaseURLData() {
     .child('urls')
 
   const urls = [
+    { domain: 'https://beta.landsofamerica.com', cat: 'Real Estate' },
     { domain: 'https://www.zillow.com', cat: 'Real Estate' },
     { domain: 'https://www.realtor.com', cat: 'Real Estate' },
     { domain: 'https://www.loopnet.com', cat: 'Real Estate' },

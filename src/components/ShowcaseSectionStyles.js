@@ -48,27 +48,39 @@ export const Header = styled.div`
   }
 `
 export const SummaryContainer = styled.div`
-  width: 150px;
-  height: 150px;
+  width: 130px;
+  height: 120px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
   flex-direction: column;
-  padding: 10px;
+  padding: 20px;
   margin: 0 8px;
   box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 2px 1px;
   position: relative;
 `
 export const Metric = styled(SummaryContainer)`
-  height: auto;
+  height: 58px;
+  font-size: 0.8em;
+  padding: 10px;
 `
 
 export const Change = styled.div`
   font-weight: 300;
-  font-size: 12px;
+  font-size: 0.6em;
+  letter-spacing: 0.05px;
+  color: rgb(44, 44, 44);
+  padding: 2px 5px;
+  background: ${props =>
+    props.isIncrease ? 'rgba(255, 0, 0, 0.2);' : 'rgba(41, 241, 195, 0.2)'};
+`
+
+export const Time = styled.div`
+  font-size: 0.8em;
   letter-spacing: 0.05px;
   color: rgb(44, 44, 44);
 `
+
 export const Categories = styled.div`
   width: 100%;
   display: flex;

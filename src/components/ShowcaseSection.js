@@ -12,6 +12,7 @@ import {
   Change,
   URLSection,
   Buffer,
+  Time,
 } from './ShowcaseSectionStyles'
 
 function getPercentageChange(oldNumber, newNumber) {
@@ -24,6 +25,7 @@ const ShowcaseSection = ({
   showcaseData,
   getShowcaseData,
   metrics,
+  metricsDisplayNames,
 }) => {
   const [isOpen, toggleOpen] = useState(false)
   const getShowcaseDataAndOpen = () => {
@@ -49,7 +51,7 @@ const ShowcaseSection = ({
           <Header>
             <Buffer />
             {metrics.map(metric => (
-              <Metric key={metric}>{metric}</Metric>
+              <Metric key={metric}>{metricsDisplayNames[metric]}</Metric>
             ))}
           </Header>
           {showcaseData[category].map(
@@ -89,35 +91,55 @@ const ShowcaseSection = ({
                     <H4>{decodedURL}</H4>
                   </URLSection>
 
-                  {scores.map(([current, avg], index) => (
-                    <SummaryContainer key={metrics[index]}>
-                      <Guage
-                        label={value => `${value}/100`}
-                        dialStartAngle={90}
-                        dialEndAngle={0}
-                        value={Math.round(current.score)}
-                      />
-                      <div>
-                        {metrics[index] === 'perf'
-                          ? current.val
-                          : `${(current.val * 0.001).toFixed(2)}s`}
-                      </div>
-                      <Change>
-                        {getPercentageChange(current.val, avg)}
-%
-                      </Change>
-                      <div className="line-graph-container">
-                        <LineGraph
-                          data={Object.entries(pastAverageScores).map(
-                            ([date, scoresByDate]) => ({
-                              x: date,
-                              y: scoresByDate[metrics[index]],
-                            })
-                          )}
+                  {scores.map(([current, avg], index) => {
+                    const change = getPercentageChange(current.val, avg)
+                    const isIncrease =
+                      metrics[index] === 'perf'
+                        ? change > 0
+                          ? false
+                          : true
+                        : change > 0
+                        ? true
+                        : false
+
+                    return (
+                      <SummaryContainer key={metrics[index]}>
+                        <Guage
+                          label={value => `${value}/100`}
+                          dialStartAngle={90}
+                          dialEndAngle={0}
+                          value={Math.round(current.score)}
                         />
-                      </div>
-                    </SummaryContainer>
-                  ))}
+                        <Time>
+                          {metrics[index] === 'perf'
+                            ? `${current.val} total`
+                            : `${(current.val * 0.001).toFixed(2)}s`}
+                        </Time>
+                        <Change isIncrease={isIncrease}>
+                          {change.toString()}
+%
+                          {isIncrease ? (
+                            <span>&darr;</span>
+                          ) : (
+                            <span>&uarr;</span>
+                          )}
+                          avg
+                        </Change>
+                        {false && (
+                          <div className="line-graph-container">
+                            <LineGraph
+                              data={Object.entries(pastAverageScores).map(
+                                ([date, scoresByDate]) => ({
+                                  x: date,
+                                  y: scoresByDate[metrics[index]],
+                                })
+                              )}
+                            />
+                          </div>
+                        )}
+                      </SummaryContainer>
+                    )
+                  })}
                 </Showcase>
               )
             }

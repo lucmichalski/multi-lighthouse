@@ -8,6 +8,7 @@ import Error from './Error'
 import Loading from './Loading'
 import Guage from './Guage'
 import ShowCaseSection from './ShowcaseSection'
+import './firebase.css'
 
 import {
   MainWrapper,
@@ -316,6 +317,7 @@ class Main extends Component {
                   getShowcaseData={this.getShowcaseData}
                   showcaseData={showcaseData}
                   category={category}
+                  metricsDisplayNames={metricsDisplayNames}
                 />
               ))}
 
