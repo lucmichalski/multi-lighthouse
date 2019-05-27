@@ -12,10 +12,11 @@ function ScoreGuage(props) {
           style={{ width: `${value.toString()}%` }}
         />
       </div>
-      <span className="value">
-        {value.toString()}
-        /100
-      </span>
+      <div>
+        <span className="value">{value.toString()}</span>
+
+        <span className="hundred">/100</span>
+      </div>
     </div>
   )
 }
