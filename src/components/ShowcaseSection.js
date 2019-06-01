@@ -116,7 +116,7 @@ const ShowcaseSection = ({
                             : `${(current.val * 0.001).toFixed(2)}s`}
                         </Time>
                         <Change isIncrease={isIncrease}>
-                          {change.toString()}
+                          {change.toString().slice(1)}
 %
                           {isIncrease ? (
                             <span>&darr;</span>

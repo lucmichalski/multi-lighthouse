@@ -278,23 +278,6 @@ async function getShowcaseUrlsRunLighthouseSetData() {
   return
 }
 
-async function setShowcaseCategories() {
-  const showcaseUrls = await getShowcaseUrls()
-  for (const [url, val] of showcaseUrls) {
-    const categoriesRef = db.ref().child('categories')
-    const categoryNode = await categoriesRef.child(val.cat).once('value')
-
-    if (!categoryNode.exists()) {
-      categoriesRef.update({ [val.cat]: { urls: { [url]: url } } })
-    } else {
-      //check if url exists here maybe?
-      const urlRef = categoriesRef.child(val.cat).child('urls')
-
-      urlRef.update({ [url]: base64.decode(url) })
-    }
-  }
-}
-
 async function averageShowcaseScores() {
   const showcaseUrls = await getShowcaseUrls()
   console.log(showcaseUrls)
@@ -425,7 +408,22 @@ async function deleteShowcaseData() {
   }
   return
 }
+async function setShowcaseCategories() {
+  const showcaseUrls = await getShowcaseUrls()
+  for (const [url, val] of showcaseUrls) {
+    const categoriesRef = db.ref().child('categories')
+    const categoryNode = await categoriesRef.child(val.cat).once('value')
 
+    if (!categoryNode.exists()) {
+      categoriesRef.update({ [val.cat]: { urls: { [url]: url } } })
+    } else {
+      //check if url exists here maybe?
+      const urlRef = categoriesRef.child(val.cat).child('urls')
+
+      urlRef.update({ [url]: base64.decode(url) })
+    }
+  }
+}
 async function testErrors() {
   const urls = ['https://www-dev.landsofamerica.com']
   for (const url of urls) {
