@@ -101,7 +101,7 @@ const ShowcaseSection = ({
                         : change > 0
                         ? true
                         : false
-
+                    const changeStr = change.toString()
                     return (
                       <SummaryContainer key={metrics[index]}>
                         <Guage
@@ -116,8 +116,10 @@ const ShowcaseSection = ({
                             : `${(current.val * 0.001).toFixed(2)}s`}
                         </Time>
                         <Change isIncrease={isIncrease}>
-                          {change.toString().slice(1)}
-%
+                          {changeStr[0] === '-'
+                            ? changeStr.slice(1)
+                            : changeStr}
+                          %
                           {isIncrease ? (
                             <span>&darr;</span>
                           ) : (

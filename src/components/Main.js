@@ -70,7 +70,7 @@ const initialState = {
     timelineResults: 'timeline',
   },
   showcaseData: {},
-  categories: ['Real Estate', 'Newspapers'],
+  categories: ['Real Estate', 'Newspapers', 'top'],
 }
 class Main extends Component {
   state = { ...initialState }
@@ -108,7 +108,11 @@ class Main extends Component {
       })
       const rawData = await Promise.all(showcaseDataPromises)
 
-      const showcaseData = rawData.sort(
+      const definedData = rawData.filter(
+        item => item && item.currentScores && item.currentScores.perf
+      )
+
+      const showcaseData = definedData.sort(
         (a, b) => b.currentScores.perf.score - a.currentScores.perf.score
       )
       this.setState(state => ({

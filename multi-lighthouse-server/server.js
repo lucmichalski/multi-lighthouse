@@ -6,11 +6,13 @@ const puppeteer = require('puppeteer')
 const dotenv = require('dotenv')
 const { db } = require('./firebase')
 
+//const { topsites } = require('./.response.js')
+
 dotenv.config()
 ;(async function onStartup() {
   // await runLHSetDataForAllUsersUrls()
-  // await getShowcaseUrlsRunLighthouseSetData()
-  // await averageShowcaseScores()
+  await getShowcaseUrlsRunLighthouseSetData()
+  await averageShowcaseScores()
   // await setShowcaseURLData()
   // await setShowcaseCategories()
 })()
@@ -472,4 +474,27 @@ async function setShowcaseURLData() {
   }, {})
 
   Ref.set(urlObj)
+}
+
+function setTopSites() {
+  const topsitesArr = JSON.parse(topsites).Ats.Results.Result.Alexa.TopSites
+    .Country.Sites.Site
+  const Ref = db
+    .ref()
+    .child('showcase')
+    .child('urls')
+
+  const topsSitesObj = topsitesArr.reduce((acc, item) => {
+    const url = `https://www.${item.DataUrl}`
+    acc[base64.encode(url)] = {
+      url,
+      cat: 'top',
+      rank: item.Global.Rank,
+      views: item.Country.PageViews,
+    }
+    return acc
+  }, {})
+  console.log(topsSitesObj)
+
+  Ref.update(topsSitesObj)
 }
