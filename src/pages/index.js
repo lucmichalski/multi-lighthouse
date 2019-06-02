@@ -1,18 +1,11 @@
 import React, { Fragment } from 'react'
 
-import Helmet from 'react-helmet'
 import Main from '../components/Main'
 import Layout from '../components/Layout'
 import SEO from '../components/Seo'
 
 const IndexPage = () => (
   <Fragment>
-    <Helmet>
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/react-vis/dist/style.css"
-      />
-    </Helmet>
     <Layout>
       <Main />
       <SEO />

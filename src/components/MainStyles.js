@@ -52,6 +52,9 @@ export const GraphH2 = styled(H2)`
   align-items: center;
   cursor: pointer;
   background: rgb(255, 255, 255);
+  font-size: 0.6rem;
+  word-wrap: break-word;
+  text-align: left;
   :hover {
     filter: brightness(98%);
   }
@@ -133,33 +136,40 @@ export const Modal = styled.div`
   right: 0;
   bottom: 0;
   z-index: 1;
-  padding: 70px 0 20px 0;
+
   @media (min-width: 600px) {
     padding: 1rem;
   }
 `
 export const ModalContent = styled.div`
   display: flex;
-  justify-content: space-evenly;
+  justify-content: flex-start;
   align-items: center;
   flex-direction: row;
   flex-wrap: wrap;
   background: #fff;
-  padding: 30px 30px 0 30px;
+  position: relative;
+  padding: 5em 20px 0 20px;
 `
 export const ModalTitle = styled.h5`
-  margin: 0;
+  margin: 0 0 30px 0;
+  font-size: 0.8em;
 `
 export const ModalMetric = styled.div`
   box-sizing: border-box;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
   flex-direction: column;
-  width: 30vw;
-  height: 30vw;
+  width: 99vw;
+  height 49vw;
+  padding: 20px;
   margin-bottom: 20px;
   box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 2px 1px;
+  @media (min-width: 600px) {
+    width: 29vw;
+    height: 29vw;
+  }
 `
 export const CloseModal = styled.button`
   position: absolute;

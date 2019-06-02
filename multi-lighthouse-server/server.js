@@ -6,11 +6,13 @@ const puppeteer = require('puppeteer')
 const dotenv = require('dotenv')
 const { db } = require('./firebase')
 
+//const { topsites } = require('./.response.js')
+
 dotenv.config()
 ;(async function onStartup() {
   // await runLHSetDataForAllUsersUrls()
-  // await getShowcaseUrlsRunLighthouseSetData()
-  // await averageShowcaseScores()
+  //await getShowcaseUrlsRunLighthouseSetData()
+  await averageShowcaseScores()
   // await setShowcaseURLData()
   // await setShowcaseCategories()
 })()
@@ -278,23 +280,6 @@ async function getShowcaseUrlsRunLighthouseSetData() {
   return
 }
 
-async function setShowcaseCategories() {
-  const showcaseUrls = await getShowcaseUrls()
-  for (const [url, val] of showcaseUrls) {
-    const categoriesRef = db.ref().child('categories')
-    const categoryNode = await categoriesRef.child(val.cat).once('value')
-
-    if (!categoryNode.exists()) {
-      categoriesRef.update({ [val.cat]: { urls: { [url]: url } } })
-    } else {
-      //check if url exists here maybe?
-      const urlRef = categoriesRef.child(val.cat).child('urls')
-
-      urlRef.update({ [url]: base64.decode(url) })
-    }
-  }
-}
-
 async function averageShowcaseScores() {
   const showcaseUrls = await getShowcaseUrls()
   console.log(showcaseUrls)
@@ -425,7 +410,22 @@ async function deleteShowcaseData() {
   }
   return
 }
+async function setShowcaseCategories() {
+  const showcaseUrls = await getShowcaseUrls()
+  for (const [url, val] of showcaseUrls) {
+    const categoriesRef = db.ref().child('categories')
+    const categoryNode = await categoriesRef.child(val.cat).once('value')
 
+    if (!categoryNode.exists()) {
+      categoriesRef.update({ [val.cat]: { urls: { [url]: url } } })
+    } else {
+      //check if url exists here maybe?
+      const urlRef = categoriesRef.child(val.cat).child('urls')
+
+      urlRef.update({ [url]: base64.decode(url) })
+    }
+  }
+}
 async function testErrors() {
   const urls = ['https://www-dev.landsofamerica.com']
   for (const url of urls) {
@@ -474,4 +474,27 @@ async function setShowcaseURLData() {
   }, {})
 
   Ref.set(urlObj)
+}
+
+function setTopSites() {
+  const topsitesArr = JSON.parse(topsites).Ats.Results.Result.Alexa.TopSites
+    .Country.Sites.Site
+  const Ref = db
+    .ref()
+    .child('showcase')
+    .child('urls')
+
+  const topsSitesObj = topsitesArr.reduce((acc, item) => {
+    const url = `https://www.${item.DataUrl}`
+    acc[base64.encode(url)] = {
+      url,
+      cat: 'top',
+      rank: item.Global.Rank,
+      views: item.Country.PageViews,
+    }
+    return acc
+  }, {})
+  console.log(topsSitesObj)
+
+  Ref.update(topsSitesObj)
 }

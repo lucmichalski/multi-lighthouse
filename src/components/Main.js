@@ -2,29 +2,12 @@ import React, { Component, Fragment } from 'react'
 import base64 from 'base-64'
 import firebase from 'firebase/app'
 import 'firebase/database'
-import URLGraphSection from './URLGraphSection'
-import RadioGroup from './RadioGroup'
-import Error from './Error'
-import Loading from './Loading'
-import Guage from './Guage'
-import ShowCaseSection from './ShowcaseSection'
-import './firebase.css'
 
-import {
-  MainWrapper,
-  RadioGroupWrapper,
-  RadioGroupStyles,
-  // Hero,
-  // H2,
-  AuthContainer,
-  Modal,
-  ModalContent,
-  ModalTitle,
-  ModalMetric,
-  CloseModal,
-  InnerWrapper,
-  SignOut,
-} from './MainStyles'
+import Error from './Error'
+
+import ShowCaseSection from './ShowcaseSection'
+
+import { MainWrapper, InnerWrapper } from './MainStyles'
 
 const config = {
   apiKey: process.env.GATSBY_FIREBASE_API_KEY,
@@ -36,21 +19,8 @@ const config = {
 }
 
 firebase.initializeApp(config)
-function setGlobals() {
-  if (typeof window !== `undefined`) {
-    const firebaseui = require('firebaseui')
-    const auth = firebase.auth()
-    const ui = new firebaseui.auth.AuthUI(auth)
-
-    return { auth, ui }
-  }
-}
-const globals = setGlobals()
 
 const initialState = {
-  user: {},
-  detailedLHRByDate: null,
-  databaseData: null,
   metrics: ['perf', 'fcp', 'fmp', 'si', 'fci', 'i', 'eil'],
   metricsDisplayNames: Object.freeze({
     perf: 'Overall Performance',
@@ -64,20 +34,11 @@ const initialState = {
   errorUrl: '',
   error: false,
   errorMessage: '',
-  fetching: false,
-  timelineResults: false,
-  radioIds: {
-    timelineResults: 'timeline',
-  },
   showcaseData: {},
-  categories: ['Real Estate', 'Newspapers'],
+  categories: ['top', 'Real Estate', 'Newspapers'],
 }
 class Main extends Component {
   state = { ...initialState }
-
-  async componentDidMount() {
-    this.initAuth()
-  }
 
   getShowcaseData = async category => {
     const { showcaseData } = this.state
@@ -108,7 +69,11 @@ class Main extends Component {
       })
       const rawData = await Promise.all(showcaseDataPromises)
 
-      const showcaseData = rawData.sort(
+      const definedData = rawData.filter(
+        item => item && item.currentScores && item.currentScores.perf
+      )
+
+      const showcaseData = definedData.sort(
         (a, b) => b.currentScores.perf.score - a.currentScores.perf.score
       )
       this.setState(state => ({
@@ -129,138 +94,6 @@ class Main extends Component {
     return URLs
   }
 
-  reset = () =>
-    this.setState(state => ({
-      ...initialState,
-      showcaseData: state.showcaseData,
-    }))
-
-  retrieveDbReport = (URL, date) => {
-    const { databaseData } = this.state
-    const userURLData = [...databaseData[URL]]
-    const lhr = userURLData.filter(({ ft }) => ft === date)[0]
-
-    for (const prop of Object.keys(lhr)) {
-      if (lhr[prop].val) {
-        console.log(lhr[prop].val)
-        if (prop === 'eil') {
-          lhr[prop].displayVal = `${lhr[prop].val}ms`
-        } else if (prop === 'perf') {
-          lhr[prop].displayVal = `${lhr[prop].val.toFixed()}/100`
-        } else {
-          lhr[prop].displayVal = `${this.msToSeconds(lhr[prop].val).toFixed(
-            2
-          )}s`
-        }
-      }
-    }
-    const detailedLHRByDate = lhr
-
-    this.setState(() => ({ detailedLHRByDate }))
-  }
-
-  retrieveDbLHR = () => {
-    const { user } = this.state
-    this.setState(() => ({
-      fetching: true,
-    }))
-    const db = firebase.database()
-    const ref = db.ref(`${user.uid}/lhr`)
-    ref.once(
-      'value',
-      snapshot => {
-        const exists = snapshot.exists()
-        if (exists) {
-          const data = snapshot.val()
-          const routes = Object.keys(data)
-          const databaseData = {}
-
-          routes.forEach(route => {
-            const values = Object.entries(data[route]).map(
-              ([key, value]) => value
-            )
-
-            databaseData[route] = values
-          })
-          this.setState(() => ({
-            databaseData,
-            fetching: false,
-          }))
-        } else {
-          this.setState(() => ({
-            error: true,
-            fetching: false,
-            errorMessage: 'Sorry, no data for this user',
-          }))
-        }
-      },
-      errorObject => {
-        console.log('The read failed: ' + errorObject.code)
-      }
-    )
-  }
-
-  onChangeRadio = (id, onClick) =>
-    this.setState(
-      state => ({
-        timelineResults: id === state.radioIds.timelineResults ? true : false,
-      }),
-      () => onClick()
-    )
-
-  signOut = () => {
-    const { auth } = globals
-    auth.signOut()
-    this.reset()
-  }
-
-  initAuth = () => {
-    const { auth, ui } = globals
-    auth.onAuthStateChanged(
-      user => {
-        if (user) {
-          const displayName = user.displayName
-          const email = user.email
-          const emailVerified = user.emailVerified
-          const photoURL = user.photoURL
-          const uid = user.uid
-          const phoneNumber = user.phoneNumber
-          const providerData = user.providerData
-          user.getIdToken().then(accessToken => {
-            const user = {
-              displayName: displayName,
-              email: email,
-              emailVerified: emailVerified,
-              phoneNumber: phoneNumber,
-              photoURL: photoURL,
-              uid: uid,
-              accessToken: accessToken,
-              providerData: providerData,
-            }
-            this.setState(() => ({ user }))
-          })
-        } else {
-          const uiConfig = {
-            callbacks: {
-              signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-                return false
-              },
-            },
-            signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
-          }
-          ui.start('#firebaseui-auth-container', uiConfig)
-        }
-      },
-      function(error) {
-        console.log(error)
-      }
-    )
-  }
-
-  msToSeconds(num) {
-    return num / 1000
-  }
-
   render() {
     const {
       metrics,
@@ -268,47 +101,14 @@ class Main extends Component {
       error,
       errorMessage,
       errorUrl,
-      fetching,
-      timelineResults,
-      radioIds,
-      databaseData,
-      detailedLHRByDate,
-      user,
       showcaseData,
       categories,
     } = this.state
 
-    const radioIdentifiers = [
-      {
-        value: 'Timeline Results',
-        id: radioIds.timelineResults,
-        checked: timelineResults,
-        onClick: () => this.retrieveDbLHR(),
-      },
-    ]
-    const colors = ['#448aff', '#ffde03', `#6200ee`, `#03dac5`, '#e30425']
-
-    const bodyLock =
-      typeof window !== 'undefined' && window.innerWidth <= 1366
-        ? `body{position:fixed} html{position:fixed}`
-        : `body{overflow: hidden} html{overflow: hidden}`
-
     return (
-      <MainWrapper style={{ overflow: detailedLHRByDate ? 'hidden' : 'auto' }}>
-        <AuthContainer>
-          {user.accessToken ? (
-            <SignOut type="button" onClick={this.signOut}>
-              Sign Out
-            </SignOut>
-          ) : (
-            <div id="firebaseui-auth-container" />
-          )}
-        </AuthContainer>
-        {!error && !timelineResults && (
+      <MainWrapper>
+        {!error && (
           <Fragment>
-            {/* <Hero>
-              <H2>Track Performance of Your Site</H2>
-            </Hero> */}
             <InnerWrapper>
               {categories.map(category => (
                 <ShowCaseSection
@@ -320,78 +120,10 @@ class Main extends Component {
                   metricsDisplayNames={metricsDisplayNames}
                 />
               ))}
-
-              {user && user.uid && (
-                <RadioGroupWrapper>
-                  <RadioGroup
-                    onChange={this.onChangeRadio}
-                    identifiers={radioIdentifiers}
-                    groupName="searchType"
-                    className="radio-group"
-                    styles={RadioGroupStyles}
-                  />
-                </RadioGroupWrapper>
-              )}
             </InnerWrapper>
           </Fragment>
         )}
 
-        {!error && fetching === true && (
-          <Loading
-            showLoading={!error && fetching === true}
-            loadingMessage="Getting Data"
-          />
-        )}
-
-        {!error &&
-          !fetching &&
-          timelineResults &&
-          databaseData &&
-          Object.entries(databaseData)
-            .sort((a, b) => b[1].length - a[1].length)
-            .map(([key, value], index) => (
-              <URLGraphSection
-                key={key}
-                onClick={this.retrieveDbReport}
-                colors={colors}
-                metrics={metrics}
-                url={key}
-                data={value}
-                index={index}
-              />
-            ))}
-        {detailedLHRByDate && (
-          <Modal
-            onClick={() => this.setState(() => ({ detailedLHRByDate: null }))}
-          >
-            <CloseModal>Close</CloseModal>
-            {/* {modal scroll styles} */}
-            <div
-              style={{
-                width: '100%',
-                height: '100%',
-                overflowScrolling: 'touch',
-                WebkitOverflowScrolling: 'touch',
-                overflow: 'scroll',
-              }}
-            >
-              <ModalContent>
-                {metrics.map(metric => (
-                  <ModalMetric key={metric}>
-                    <ModalTitle>{metricsDisplayNames[metric]}</ModalTitle>
-                    <Guage value={detailedLHRByDate[metric].score} />
-                    <h6>{detailedLHRByDate[metric].displayVal}</h6>
-                  </ModalMetric>
-                ))}
-              </ModalContent>
-            </div>
-            <style
-              dangerouslySetInnerHTML={{
-                __html: bodyLock,
-              }}
-            />
-          </Modal>
-        )}
         {error && (
           <Error
             showError={error}
