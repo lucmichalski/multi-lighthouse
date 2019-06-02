@@ -8,13 +8,33 @@ const { db } = require('./firebase')
 
 //const { topsites } = require('./.response.js')
 
+const { PubSub } = require('@google-cloud/pubsub')
+
+async function triggerPubSub() {
+  // Creates a client
+  const pubsub = new PubSub()
+
+  const topicName = 'stop-instance-event'
+  const data = JSON.stringify({
+    zone: 'us-east1-b',
+    instance: 'instance-automation',
+  })
+
+  // Publishes the message as a string, e.g. "Hello, world!" or JSON.stringify(someObject)
+  const dataBuffer = Buffer.from(data)
+
+  const messageId = await pubsub.topic(topicName).publish(dataBuffer)
+  console.log(`Message ${messageId} published.`)
+}
+
 dotenv.config()
 ;(async function onStartup() {
-  // await runLHSetDataForAllUsersUrls()
-  //await getShowcaseUrlsRunLighthouseSetData()
-  await averageShowcaseScores()
+  await runLHSetDataForAllUsersUrls()
+  await getShowcaseUrlsRunLighthouseSetData()
+  //await averageShowcaseScores()
   // await setShowcaseURLData()
   // await setShowcaseCategories()
+  await triggerPubSub()
 })()
 
 async function launchPuppeteerRunLighthouse(url) {

@@ -73,3 +73,6 @@ multi-lighthouse-server/app.yaml
 
 # Firebase Credentials
 multi-lighthouse-server/multi-lighthouse-firebase-adminsdk-3yznr-744b1662ca.json
+
+# Google compute engine credentials
+multi-lighthouse-server/Multi-Lighthouse-c0953c69fa23.json
