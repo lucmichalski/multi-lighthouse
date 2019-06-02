@@ -11,7 +11,7 @@ const { db } = require('./firebase')
 dotenv.config()
 ;(async function onStartup() {
   // await runLHSetDataForAllUsersUrls()
-  await getShowcaseUrlsRunLighthouseSetData()
+  //await getShowcaseUrlsRunLighthouseSetData()
   await averageShowcaseScores()
   // await setShowcaseURLData()
   // await setShowcaseCategories()
