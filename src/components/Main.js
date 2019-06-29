@@ -18,7 +18,9 @@ const config = {
   messagingSenderId: process.env.GATSBY_FIREBASE_MESSAGING_SENDER_ID,
 }
 
-firebase.initializeApp(config)
+if (!firebase.apps.length) {
+  firebase.initializeApp(config)
+}
 
 const initialState = {
   metrics: ['perf', 'fcp', 'fmp', 'si', 'fci', 'i', 'eil'],
