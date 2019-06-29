@@ -1,16 +1,11 @@
 import React, { Component } from 'react'
 import firebase from 'firebase/app'
-import RadioGroup from './RadioGroup'
 import Loading from './Loading'
 import Guage from './Guage'
 import URLGraphSection from './URLGraphSection'
 import Error from './Error'
 
-import './firebase.css'
-
 import {
-  RadioGroupWrapper,
-  RadioGroupStyles,
   AuthContainer,
   Modal,
   ModalContent,
@@ -21,29 +16,8 @@ import {
   MainWrapper,
 } from './MainStyles'
 
-// const config = {
-//   apiKey: process.env.GATSBY_FIREBASE_API_KEY,
-//   authDomain: process.env.GATSBY_FIREBASE_AUTH_DOMAIN,
-//   databaseURL: process.env.GATSBY_FIREBASE_DATABASE_URL,
-//   projectId: process.env.GATSBY_FIREBASE_PROJECT_ID,
-//   storageBucket: process.env.GATSBY_FIREBASE_GOOGLE_STORAGE_BUCKET,
-//   messagingSenderId: process.env.GATSBY_FIREBASE_MESSAGING_SENDER_ID,
-// }
-
-// firebase.initializeApp(config)
-function setGlobals() {
-  if (typeof window !== `undefined`) {
-    const firebaseui = require('firebaseui')
-    const auth = firebase.auth()
-    const ui = new firebaseui.auth.AuthUI(auth)
-
-    return { auth, ui }
-  }
-}
-const globals = setGlobals()
-
 const initialState = {
-  user: {},
+  user: { uid: 'ChqBqCMRh1R2g8cAMjIezSabGMl2' },
   detailedLHRByDate: null,
   databaseData: null,
   metrics: ['perf', 'fcp', 'fmp', 'si', 'fci', 'i', 'eil'],
@@ -60,17 +34,14 @@ const initialState = {
   error: false,
   errorMessage: '',
   fetching: false,
-  timelineResults: false,
-  radioIds: {
-    timelineResults: 'timeline',
-  },
+  timelineResults: true,
 }
 
 class AuthPage extends Component {
   state = { ...initialState }
 
   async componentDidMount() {
-    this.initAuth()
+    this.fetchAllURLData()
   }
 
   reset = () =>
@@ -78,7 +49,7 @@ class AuthPage extends Component {
       ...initialState,
     }))
 
-  retrieveDbLHR = () => {
+  fetchAllURLData = () => {
     const { user } = this.state
     this.setState(() => ({
       fetching: true,
@@ -119,61 +90,6 @@ class AuthPage extends Component {
     )
   }
 
-  onChangeRadio = (id, onClick) =>
-    this.setState(
-      state => ({
-        timelineResults: id === state.radioIds.timelineResults ? true : false,
-      }),
-      () => onClick()
-    )
-
-  signOut = () => {
-    const { auth } = globals
-    auth.signOut()
-    this.reset()
-  }
-  initAuth = () => {
-    const { auth, ui } = globals
-    auth.onAuthStateChanged(
-      user => {
-        if (user) {
-          const displayName = user.displayName
-          const email = user.email
-          const emailVerified = user.emailVerified
-          const photoURL = user.photoURL
-          const uid = user.uid
-          const phoneNumber = user.phoneNumber
-          const providerData = user.providerData
-          user.getIdToken().then(accessToken => {
-            const user = {
-              displayName: displayName,
-              email: email,
-              emailVerified: emailVerified,
-              phoneNumber: phoneNumber,
-              photoURL: photoURL,
-              uid: uid,
-              accessToken: accessToken,
-              providerData: providerData,
-            }
-            this.setState(() => ({ user }))
-          })
-        } else {
-          const uiConfig = {
-            callbacks: {
-              signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-                return false
-              },
-            },
-            signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
-          }
-          ui.start('#firebaseui-auth-container', uiConfig)
-        }
-      },
-      function(error) {
-        console.log(error)
-      }
-    )
-  }
   retrieveDbReport = (URL, date) => {
     const { databaseData } = this.state
     const userURLData = [...databaseData[URL]]
@@ -203,7 +119,6 @@ class AuthPage extends Component {
 
   render() {
     const {
-      radioIds,
       user,
       timelineResults,
       detailedLHRByDate,
@@ -215,14 +130,7 @@ class AuthPage extends Component {
       databaseData,
       metricsDisplayNames,
     } = this.state
-    const radioIdentifiers = [
-      {
-        value: 'Timeline Results',
-        id: radioIds.timelineResults,
-        checked: timelineResults,
-        onClick: () => this.retrieveDbLHR(),
-      },
-    ]
+
     const colors = ['#448aff', '#ffde03', `#6200ee`, `#03dac5`, '#e30425']
 
     const bodyLock =
@@ -240,17 +148,7 @@ class AuthPage extends Component {
             <div id="firebaseui-auth-container" />
           )}
         </AuthContainer>
-        {user && user.uid && (
-          <RadioGroupWrapper>
-            <RadioGroup
-              onChange={this.onChangeRadio}
-              identifiers={radioIdentifiers}
-              groupName="searchType"
-              className="radio-group"
-              styles={RadioGroupStyles}
-            />
-          </RadioGroupWrapper>
-        )}
+
         {!error &&
           !fetching &&
           timelineResults &&

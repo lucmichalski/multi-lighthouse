@@ -14,9 +14,23 @@ const SecondPage = () => (
       />
     </Helmet>
     <Layout>
-      <SEO title="Page two" />
+      <SEO title="Land" />
+      <Link
+        style={{
+          position: 'absolute',
+          right: 20,
+          top: 20,
+          textDecoration: 'none',
+          background: 'rgb(0,0,28)',
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: `4px`,
+        }}
+        to="/"
+      >
+        Home
+      </Link>
       <AuthPage />
-      <Link to="/">Go back to the homepage</Link>
     </Layout>
   </Fragment>
 )
