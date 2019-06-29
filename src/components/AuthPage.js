@@ -17,6 +17,18 @@ import {
   MainWrapper,
 } from './MainStyles'
 
+const config = {
+  apiKey: process.env.GATSBY_FIREBASE_API_KEY,
+  authDomain: process.env.GATSBY_FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.GATSBY_FIREBASE_DATABASE_URL,
+  projectId: process.env.GATSBY_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.GATSBY_FIREBASE_GOOGLE_STORAGE_BUCKET,
+  messagingSenderId: process.env.GATSBY_FIREBASE_MESSAGING_SENDER_ID,
+}
+if (!firebase.apps.length) {
+  firebase.initializeApp(config)
+}
+
 const initialState = {
   user: { uid: 'ChqBqCMRh1R2g8cAMjIezSabGMl2' },
   detailedLHRByDate: null,
