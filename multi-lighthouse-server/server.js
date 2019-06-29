@@ -29,13 +29,15 @@ async function triggerPubSub() {
 
 dotenv.config()
 ;(async function onStartup() {
-  //await runLHSetDataForAllUsersUrls()
-  //await getShowcaseUrlsRunLighthouseSetData()
-  //await averageShowcaseScores()
+  await runLHSetDataForAllUsersUrls()
+  await getShowcaseUrlsRunLighthouseSetData()
+  await triggerPubSub()
+
+  ///UTILITY///
+  // await averageShowcaseScores()
   // await setShowcaseURLData()
   // await setTopSites()
   // await setShowcaseCategories()
-  //await triggerPubSub()
 })()
 
 async function launchPuppeteerRunLighthouse(url) {
@@ -339,6 +341,7 @@ async function averageShowcaseScores() {
       console.log(error)
     }
   }
+  console.log('average showcase scores complete')
   return
 }
 
