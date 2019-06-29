@@ -42,9 +42,12 @@ export const Header = styled.div`
   align-items: center;
   padding: 10px 0;
   width: 100%;
+  z-index: 1;
 
   @media (min-width: 900px) {
     font-size: 1rem;
+    position: sticky;
+    top: -10px;
   }
 `
 export const SummaryContainer = styled.div`
@@ -63,6 +66,7 @@ export const Metric = styled(SummaryContainer)`
   height: 58px;
   font-size: 0.8em;
   padding: 10px;
+  background: #fff;
 `
 
 export const Change = styled.div`
