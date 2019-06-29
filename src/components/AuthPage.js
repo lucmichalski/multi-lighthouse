@@ -4,6 +4,7 @@ import Loading from './Loading'
 import Guage from './Guage'
 import URLGraphSection from './URLGraphSection'
 import Error from './Error'
+import 'firebase/database'
 
 import {
   AuthContainer,
