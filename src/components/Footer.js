@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'gatsby'
 import styled from 'styled-components'
 
 const FooterWrapper = styled.footer`
@@ -16,7 +17,8 @@ const Logo = styled.h3`
 const Footer = () => {
   return (
     <FooterWrapper>
-      <a
+      <Link
+        to="/"
         style={{ textDecoration: 'none' }}
         href={
           process.env.NODE_ENV === 'production'
@@ -25,7 +27,7 @@ const Footer = () => {
         }
       >
         <Logo>all the Lighthouses</Logo>
-      </a>
+      </Link>
     </FooterWrapper>
   )
 }

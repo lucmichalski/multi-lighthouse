@@ -12,7 +12,14 @@ import {
 import { OuterGraph, Title, InnerGraph } from './BarGraphTimelineStyles'
 import './bar-graph.css'
 
-const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
+const BarGraphTimeline = ({
+  data,
+  metric,
+  color,
+  onClick,
+  dbKey,
+  metricsDisplayNames,
+}) => {
   const defaultState = {
     isTooltip: false,
     tooltipValue: { x: null, y: null },
@@ -41,7 +48,7 @@ const BarGraphTimeline = ({ data, metric, color, onClick, dbKey }) => {
                   }`,
         }}
       />
-      <Title>{metric}</Title>
+      <Title>{metricsDisplayNames[metric]}</Title>
       <InnerGraph>
         <FlexibleXYPlot xType="ordinal">
           <VerticalGridLines />

@@ -142,14 +142,16 @@ export const Modal = styled.div`
   }
 `
 export const ModalContent = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  flex-direction: row;
-  flex-wrap: wrap;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto;
+  justify-items: center;
   background: #fff;
   position: relative;
   padding: 5em 20px 0 20px;
+  @media (min-width: 600px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
 `
 export const ModalTitle = styled.h5`
   margin: 0 0 30px 0;
@@ -161,7 +163,7 @@ export const ModalMetric = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  width: 99vw;
+  width: 100%;
   height 49vw;
   padding: 20px;
   margin-bottom: 20px;

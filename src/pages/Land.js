@@ -2,10 +2,10 @@ import React, { Fragment } from 'react'
 import { Link } from 'gatsby'
 import Helmet from 'react-helmet'
 import Layout from '../components/Layout'
-import AuthPage from '../components/AuthPage'
+import LandGraphs from '../components/LandGraphs'
 import SEO from '../components/Seo'
 
-const SecondPage = () => (
+const Land = () => (
   <Fragment>
     <Helmet>
       <link
@@ -30,9 +30,9 @@ const SecondPage = () => (
       >
         Home
       </Link>
-      <AuthPage />
+      <LandGraphs />
     </Layout>
   </Fragment>
 )
 
-export default SecondPage
+export default Land
