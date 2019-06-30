@@ -9,7 +9,6 @@ const IndexPage = () => (
     <Layout>
       <Main />
       <SEO />
-      {/* <Link to="/page-2/">Go to page 2</Link> */}
     </Layout>
   </Fragment>
 )

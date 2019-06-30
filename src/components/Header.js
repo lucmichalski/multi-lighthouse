@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'gatsby'
 import styled from 'styled-components'
 
 const Logo = styled.h1`
@@ -11,7 +12,8 @@ const Logo = styled.h1`
 
 const Header = () => (
   <header>
-    <a
+    <Link
+      to="/"
       style={{ textDecoration: 'none' }}
       href={
         process.env.NODE_ENV === 'production'
@@ -20,7 +22,7 @@ const Header = () => (
       }
     >
       <Logo>all the Lighthouses</Logo>
-    </a>
+    </Link>
   </header>
 )
 

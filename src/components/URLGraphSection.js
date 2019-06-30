@@ -10,6 +10,7 @@ export default function URLGraphSection({
   colors,
   metrics,
   onClick,
+  metricsDisplayNames,
 }) {
   const defaultState = {
     isGraphsVisible: false,
@@ -44,6 +45,7 @@ export default function URLGraphSection({
                 key={metric}
                 data={data}
                 metric={metric}
+                metricsDisplayNames={metricsDisplayNames}
               />
             ))}
           </Fragment>

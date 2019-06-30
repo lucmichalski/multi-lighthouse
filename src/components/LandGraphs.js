@@ -7,13 +7,11 @@ import Error from './Error'
 import 'firebase/database'
 
 import {
-  AuthContainer,
   Modal,
   ModalContent,
   ModalTitle,
   ModalMetric,
   CloseModal,
-  SignOut,
   MainWrapper,
 } from './MainStyles'
 
@@ -34,6 +32,7 @@ const initialState = {
   detailedLHRByDate: null,
   databaseData: null,
   metrics: ['perf', 'fcp', 'fmp', 'si', 'fci', 'i', 'eil'],
+  //Some of this state could be global. Use Graphql
   metricsDisplayNames: Object.freeze({
     perf: 'Overall Performance',
     fcp: 'First Contentful Paint',
@@ -50,7 +49,7 @@ const initialState = {
   timelineResults: true,
 }
 
-class AuthPage extends Component {
+class LandGraphs extends Component {
   state = { ...initialState }
 
   async componentDidMount() {
@@ -132,7 +131,6 @@ class AuthPage extends Component {
 
   render() {
     const {
-      user,
       timelineResults,
       detailedLHRByDate,
       error,
@@ -152,16 +150,6 @@ class AuthPage extends Component {
         : `body{overflow: hidden} html{overflow: hidden}`
     return (
       <MainWrapper style={{ overflow: detailedLHRByDate ? 'hidden' : 'auto' }}>
-        <AuthContainer>
-          {user.accessToken ? (
-            <SignOut type="button" onClick={this.signOut}>
-              Sign Out
-            </SignOut>
-          ) : (
-            <div id="firebaseui-auth-container" />
-          )}
-        </AuthContainer>
-
         {!error &&
           !fetching &&
           timelineResults &&
@@ -178,6 +166,7 @@ class AuthPage extends Component {
                 url={key}
                 data={value}
                 index={index}
+                metricsDisplayNames={metricsDisplayNames}
               />
             ))}
         {detailedLHRByDate && (
@@ -230,4 +219,4 @@ class AuthPage extends Component {
   }
 }
 
-export default AuthPage
+export default LandGraphs
