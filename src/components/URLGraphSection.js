@@ -1,49 +1,55 @@
 import React, { Fragment, useState } from 'react'
-import base64 from 'base-64'
+
 import BarGraphTimeline from './BarGraphTimeline'
 import { GraphH2, BarGraphTimelineContainer, Arrow } from './MainStyles'
 
 export default function URLGraphSection({
   url,
-  data,
-  index,
-  colors,
+  urlLHRData,
+  color,
   metrics,
-  onClick,
+  retrieveDbReport,
   metricsDisplayNames,
+  fetchURLData,
 }) {
   const defaultState = {
-    isGraphsVisible: false,
+    areGraphsVisible: false,
   }
   const [graph, setGraphVisibility] = useState(defaultState)
   const { areGraphsVisible } = graph
+  const lhrsAndDatesForURL = urlLHRData[url[0]]
+  const justLHRsForURL =
+    lhrsAndDatesForURL && urlLHRData[url[0]].map(item => item[1])
   return (
-    <Fragment>
+    <div style={{ width: '100%' }} key={url[1]}>
+      {/*eslint-disable-next-line*/}
       <div
-        onClick={() =>
-          setGraphVisibility(() => ({
-            areGraphsVisible: !areGraphsVisible,
-          }))
-        }
         style={{ width: '100%' }}
         role="button"
+        onKeyDown={() => {
+          fetchURLData(url[0])
+          setGraphVisibility({ areGraphsVisible: !areGraphsVisible })
+        }}
+        onClick={() => {
+          fetchURLData(url[0])
+          setGraphVisibility({ areGraphsVisible: !areGraphsVisible })
+        }}
       >
         <GraphH2>
-          {base64.decode(url)}
-          <Arrow isOpen={areGraphsVisible} />
+          {url[1]}
+          <Arrow isOpen={false} />
         </GraphH2>
       </div>
-
-      {areGraphsVisible && (
+      {lhrsAndDatesForURL && areGraphsVisible && (
         <BarGraphTimelineContainer>
           <Fragment>
             {metrics.map(metric => (
               <BarGraphTimeline
-                onClick={onClick}
-                color={colors[index]}
+                onClick={retrieveDbReport}
+                color={color}
                 dbKey={url}
                 key={metric}
-                data={data}
+                data={justLHRsForURL}
                 metric={metric}
                 metricsDisplayNames={metricsDisplayNames}
               />
@@ -51,6 +57,6 @@ export default function URLGraphSection({
           </Fragment>
         </BarGraphTimelineContainer>
       )}
-    </Fragment>
+    </div>
   )
 }

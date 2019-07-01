@@ -29,15 +29,15 @@ async function triggerPubSub() {
 
 dotenv.config()
 ;(async function onStartup() {
-  await runLHSetDataForAllUsersUrls()
-  await getShowcaseUrlsRunLighthouseSetData()
-  await triggerPubSub()
-
+  // await runLHSetDataForAllUsersUrls()
+  // await getShowcaseUrlsRunLighthouseSetData()
+  // await triggerPubSub()
   ///UTILITY///
   // await averageShowcaseScores()
   // await setShowcaseURLData()
   // await setTopSites()
   // await setShowcaseCategories()
+  // await setUserUrls()
 })()
 
 async function launchPuppeteerRunLighthouse(url) {
@@ -398,20 +398,23 @@ async function deleteUserData() {
 }
 function setUserUrls() {
   const urls = [
-    'https://www-dev.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158/',
-    'https://www-dev.landsofamerica.com/Texas/all-land/',
+    'https://www-dev.landsofamerica.com',
+    'https://www-dev.landsofamerica.com/United-States/all-land',
+    'https://www-dev.landsofamerica.com/Texas/all-land',
+    'https://www-dev.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158',
+    'https://www-dev.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
     'https://beta.landsofamerica.com',
     'https://beta.landsofamerica.com/United-States/all-land',
-    'https://beta.landsofamerica.com/Texas/all-land/',
-    'https://beta.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158/',
+    'https://beta.landsofamerica.com/Texas/all-land',
+    'https://beta.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158',
     'https://beta.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
     'https://www.landsofamerica.com',
     'https://www.landsofamerica.com/United-States/all-land',
-    'https://www.landsofamerica.com/Texas/all-land/',
-    'https://www.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158/',
+    'https://www.landsofamerica.com/Texas/all-land',
+    'https://www.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158',
     'https://www.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
-    `https://www.landsoftexas.com/`,
-    'https://www.landsoftexas.com/texas/all-land/',
+    `https://www.landsoftexas.com`,
+    'https://www.landsoftexas.com/texas/all-land',
     'https://www.landsoftexas.com/property/Hope-Drive-Cleveland-Texas-77327/7019079',
   ]
 
@@ -423,7 +426,7 @@ function setUserUrls() {
   db.ref()
     .child('ChqBqCMRh1R2g8cAMjIezSabGMl2')
     .child('urls')
-    .update(urlObj)
+    .set(urlObj)
 }
 
 async function deleteShowcaseData() {

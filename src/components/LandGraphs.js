@@ -28,9 +28,8 @@ if (!firebase.apps.length) {
 }
 
 const initialState = {
-  user: { uid: 'ChqBqCMRh1R2g8cAMjIezSabGMl2' },
+  user: { uid: 'ChqBqCMRh1R2g8cAMjIezSabGMl2', urls: [] },
   detailedLHRByDate: null,
-  databaseData: null,
   metrics: ['perf', 'fcp', 'fmp', 'si', 'fci', 'i', 'eil'],
   //Some of this state could be global. Use Graphql
   metricsDisplayNames: Object.freeze({
@@ -46,14 +45,14 @@ const initialState = {
   error: false,
   errorMessage: '',
   fetching: false,
-  timelineResults: true,
+  urlLHRData: [],
 }
 
 class LandGraphs extends Component {
   state = { ...initialState }
 
   async componentDidMount() {
-    this.fetchAllURLData()
+    this.fetchUserURLs()
   }
 
   reset = () =>
@@ -61,38 +60,42 @@ class LandGraphs extends Component {
       ...initialState,
     }))
 
-  fetchAllURLData = () => {
-    const { user } = this.state
-    this.setState(() => ({
-      fetching: true,
-    }))
+  fetchUserURLs = async () => {
+    const { uid } = this.state.user
     const db = firebase.database()
-    const ref = db.ref(`${user.uid}/lhr`)
+    const ref = await db.ref(`${uid}/urls`)
+    const urlsSnapshot = await ref.once('value')
+    const urls = await urlsSnapshot.val()
+    const user = { uid, urls: Object.entries(urls) }
+
+    this.setState({ user })
+  }
+
+  fetchURLData = url => {
+    const { user, urlLHRData } = this.state
+    if (urlLHRData[url]) {
+      return
+    }
+
+    const db = firebase.database()
+    const ref = db.ref(`${user.uid}/lhr/${url}`)
     ref.once(
       'value',
       snapshot => {
         const exists = snapshot.exists()
         if (exists) {
           const data = snapshot.val()
-          const routes = Object.keys(data)
-          const databaseData = {}
 
-          routes.forEach(route => {
-            const values = Object.entries(data[route]).map(
-              ([key, value]) => value
-            )
-
-            databaseData[route] = values
-          })
-          this.setState(() => ({
-            databaseData,
+          this.setState(state => ({
+            urlLHRData: { ...state.urlLHRData, [url]: Object.entries(data) },
+            error: false,
             fetching: false,
           }))
         } else {
           this.setState(() => ({
             error: true,
             fetching: false,
-            errorMessage: 'Sorry, no data for this user',
+            errorMessage: 'Sorry, no data for this URL',
           }))
         }
       },
@@ -103,8 +106,10 @@ class LandGraphs extends Component {
   }
 
   retrieveDbReport = (URL, date) => {
-    const { databaseData } = this.state
-    const userURLData = [...databaseData[URL]]
+    //This could be easier now. I should just encode the date to get the exact data from lhrs
+    const { urlLHRData } = this.state
+    const encodedURL = URL[0]
+    const userURLData = urlLHRData[encodedURL].map(item => item[1])
     const lhr = userURLData.filter(({ ft }) => ft === date)[0]
 
     for (const prop of Object.keys(lhr)) {
@@ -131,44 +136,67 @@ class LandGraphs extends Component {
 
   render() {
     const {
-      timelineResults,
+      user,
       detailedLHRByDate,
       error,
       errorMessage,
       errorUrl,
       fetching,
       metrics,
-      databaseData,
       metricsDisplayNames,
+      urlLHRData,
     } = this.state
 
-    const colors = ['#448aff', '#ffde03', `#6200ee`, `#03dac5`, '#e30425']
+    const colors = [
+      '#448aff',
+      '#ffde03',
+      `#6200ee`,
+      `#03dac5`,
+      '#e30425',
+      '#448aff',
+      '#ffde03',
+      `#6200ee`,
+      `#03dac5`,
+      '#e30425',
+      '#448aff',
+      '#ffde03',
+      `#6200ee`,
+      '#448aff',
+      '#ffde03',
+      `#6200ee`,
+      `#03dac5`,
+      '#e30425',
+      '#448aff',
+      '#ffde03',
+      `#6200ee`,
+      `#03dac5`,
+      '#e30425',
+      '#448aff',
+      '#ffde03',
+      `#6200ee`,
+    ]
 
     const bodyLock =
       typeof window !== 'undefined' && window.innerWidth <= 1366
         ? `body{position:fixed} html{position:fixed}`
         : `body{overflow: hidden} html{overflow: hidden}`
+
     return (
       <MainWrapper style={{ overflow: detailedLHRByDate ? 'hidden' : 'auto' }}>
         {!error &&
           !fetching &&
-          timelineResults &&
-          databaseData &&
-          !detailedLHRByDate &&
-          Object.entries(databaseData)
-            .sort((a, b) => b[1].length - a[1].length)
-            .map(([key, value], index) => (
-              <URLGraphSection
-                key={key}
-                onClick={this.retrieveDbReport}
-                colors={colors}
-                metrics={metrics}
-                url={key}
-                data={value}
-                index={index}
-                metricsDisplayNames={metricsDisplayNames}
-              />
-            ))}
+          user.urls.map((url, index) => (
+            <URLGraphSection
+              key={url[0]}
+              url={url}
+              retrieveDbReport={this.retrieveDbReport}
+              fetchURLData={this.fetchURLData}
+              urlLHRData={urlLHRData}
+              color={colors[index]}
+              metrics={metrics}
+              metricsDisplayNames={metricsDisplayNames}
+            />
+          ))}
         {detailedLHRByDate && (
           <Modal
             onClick={() => this.setState(() => ({ detailedLHRByDate: null }))}
