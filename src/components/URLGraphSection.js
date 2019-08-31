@@ -17,30 +17,28 @@ export default function URLGraphSection({
   }
   const [graph, setGraphVisibility] = useState(defaultState)
   const { areGraphsVisible } = graph
-  const lhrsAndDatesForURL = urlLHRData[url[0]]
-  const justLHRsForURL =
-    lhrsAndDatesForURL && urlLHRData[url[0]].map(item => item[1])
+  const decodedURL = url[1]
+  const encodedURL = url[0]
+  function handleGraphEvents() {
+    fetchURLData(encodedURL)
+    setGraphVisibility({ areGraphsVisible: !areGraphsVisible })
+  }
+
   return (
     <div style={{ width: '100%' }} key={url[1]}>
       {/*eslint-disable-next-line*/}
       <div
         style={{ width: '100%' }}
         role="button"
-        onKeyDown={() => {
-          fetchURLData(url[0])
-          setGraphVisibility({ areGraphsVisible: !areGraphsVisible })
-        }}
-        onClick={() => {
-          fetchURLData(url[0])
-          setGraphVisibility({ areGraphsVisible: !areGraphsVisible })
-        }}
+        onKeyDown={handleGraphEvents}
+        onClick={handleGraphEvents}
       >
         <GraphH2>
-          {url[1]}
+          {decodedURL}
           <Arrow isOpen={false} />
         </GraphH2>
       </div>
-      {lhrsAndDatesForURL && areGraphsVisible && (
+      {urlLHRData && areGraphsVisible && (
         <BarGraphTimelineContainer>
           <Fragment>
             {metrics.map(metric => (
@@ -49,7 +47,7 @@ export default function URLGraphSection({
                 color={color}
                 dbKey={url}
                 key={metric}
-                data={justLHRsForURL}
+                data={urlLHRData}
                 metric={metric}
                 metricsDisplayNames={metricsDisplayNames}
               />

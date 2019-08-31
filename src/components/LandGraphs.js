@@ -185,18 +185,23 @@ class LandGraphs extends Component {
       <MainWrapper style={{ overflow: detailedLHRByDate ? 'hidden' : 'auto' }}>
         {!error &&
           !fetching &&
-          user.urls.map((url, index) => (
-            <URLGraphSection
-              key={url[0]}
-              url={url}
-              retrieveDbReport={this.retrieveDbReport}
-              fetchURLData={this.fetchURLData}
-              urlLHRData={urlLHRData}
-              color={colors[index]}
-              metrics={metrics}
-              metricsDisplayNames={metricsDisplayNames}
-            />
-          ))}
+          user.urls.map((url, index) => {
+            const lhrsAndDatesForURL = urlLHRData[url[0]]
+            const justLHRsForURL =
+              lhrsAndDatesForURL && urlLHRData[url[0]].map(item => item[1])
+            return (
+              <URLGraphSection
+                key={url[0]}
+                url={url}
+                retrieveDbReport={this.retrieveDbReport}
+                fetchURLData={this.fetchURLData}
+                urlLHRData={justLHRsForURL}
+                color={colors[index]}
+                metrics={metrics}
+                metricsDisplayNames={metricsDisplayNames}
+              />
+            )
+          })}
         {detailedLHRByDate && (
           <Modal
             onClick={() => this.setState(() => ({ detailedLHRByDate: null }))}

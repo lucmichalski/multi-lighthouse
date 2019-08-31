@@ -54,98 +54,105 @@ const ShowcaseSection = ({
               <Metric key={metric}>{metricsDisplayNames[metric]}</Metric>
             ))}
           </Header>
-          {showcaseData[category].map(
-            (
-              { averageScores, decodedURL, currentScores, pastAverageScores },
-              URLindex
-            ) => {
-              const domain = new URL(decodedURL)
-              const { perf, i, fcp, fci, eil, fmp, si } = currentScores
-              const {
-                perf: avgPerf,
-                i: avgI,
-                fcp: avgFcp,
-                fci: avgFci,
-                eil: avgEil,
-                fmp: avgFmp,
-                si: avgSi,
-              } = averageScores
-              const scores = [
-                [perf, avgPerf],
-                [fcp, avgFcp],
-                [fmp, avgFmp],
-                [si, avgSi],
-                [fci, avgFci],
-                [i, avgI],
-                [eil, avgEil],
-              ]
+          {showcaseData[category] &&
+            showcaseData[category].map(
+              (
+                { averageScores, decodedURL, currentScores, pastAverageScores },
+                URLindex
+              ) => {
+                if (!currentScores || !averageScores || !pastAverageScores) {
+                  return null
+                }
+                const domain = new URL(decodedURL)
+                const { perf, i, fcp, fci, eil, fmp, si } = currentScores
+                const {
+                  perf: avgPerf,
+                  i: avgI,
+                  fcp: avgFcp,
+                  fci: avgFci,
+                  eil: avgEil,
+                  fmp: avgFmp,
+                  si: avgSi,
+                } = averageScores
+                const scores = [
+                  [perf, avgPerf],
+                  [fcp, avgFcp],
+                  [fmp, avgFmp],
+                  [si, avgSi],
+                  [fci, avgFci],
+                  [i, avgI],
+                  [eil, avgEil],
+                ]
 
-              return (
-                <Showcase key={decodedURL}>
-                  <URLSection>
-                    <H3>
-                      {`${URLindex + 1}. `}
+                return (
+                  <Showcase key={decodedURL}>
+                    <URLSection>
+                      <H3>
+                        {`${URLindex + 1}. `}
 
-                      {domain.hostname.split('.')[1]}
-                    </H3>
-                    <H4>{decodedURL}</H4>
-                  </URLSection>
+                        {domain.hostname.split('.')[1]}
+                      </H3>
+                      <H4>{decodedURL}</H4>
+                    </URLSection>
 
-                  {scores.map(([current, avg], index) => {
-                    const change = getPercentageChange(current.val, avg)
-                    const isIncrease =
-                      metrics[index] === 'perf'
-                        ? change > 0
-                          ? false
-                          : true
-                        : change > 0
-                        ? true
-                        : false
-                    const changeStr = change.toString()
-                    return (
-                      <SummaryContainer key={metrics[index]}>
-                        <Guage
-                          label={value => `${value}/100`}
-                          dialStartAngle={90}
-                          dialEndAngle={0}
-                          value={Math.round(current.score)}
-                        />
-                        <Time>
-                          {metrics[index] === 'perf'
-                            ? `${current.val} total`
-                            : `${(current.val * 0.001).toFixed(2)}s`}
-                        </Time>
-                        <Change isIncrease={isIncrease}>
-                          {changeStr[0] === '-'
-                            ? changeStr.slice(1)
-                            : changeStr}
-                          %
-                          {isIncrease ? (
-                            <span>&darr;</span>
-                          ) : (
-                            <span>&uarr;</span>
+                    {scores.map(([current, avg], index) => {
+                      const change = getPercentageChange(current.val, avg)
+                      const isIncrease =
+                        metrics[index] === 'perf'
+                          ? change > 0
+                            ? false
+                            : true
+                          : change > 0
+                          ? true
+                          : false
+                      const changeStr = change.toString()
+                      return (
+                        <SummaryContainer key={metrics[index]}>
+                          <Guage
+                            label={value => `${value}/100`}
+                            dialStartAngle={90}
+                            dialEndAngle={0}
+                            value={Math.round(current.score)}
+                          />
+                          <Time>
+                            {metrics[index] === 'perf'
+                              ? `${current.val} total`
+                              : `${(current.val * 0.001).toFixed(2)}s`}
+                          </Time>
+                          <Change isIncrease={isIncrease}>
+                            {changeStr[0] === '-'
+                              ? changeStr.slice(1)
+                              : changeStr}
+                            %
+                            {isIncrease ? (
+                              <span>&darr;</span>
+                            ) : (
+                              <span>&uarr;</span>
+                            )}
+                            avg
+                          </Change>
+                          {false && (
+                            <div className="line-graph-container">
+                              <LineGraph
+                                data={
+                                  pastAverageScores &&
+                                  Object.entries(pastAverageScores).map(
+                                    ([date, scoresByDate]) => ({
+                                      x: date,
+                                      y: scoresByDate[metrics[index]],
+                                    })
+                                  )
+                                }
+                              />
+                            </div>
                           )}
-                          avg
-                        </Change>
-                        {false && (
-                          <div className="line-graph-container">
-                            <LineGraph
-                              data={Object.entries(pastAverageScores).map(
-                                ([date, scoresByDate]) => ({
-                                  x: date,
-                                  y: scoresByDate[metrics[index]],
-                                })
-                              )}
-                            />
-                          </div>
-                        )}
-                      </SummaryContainer>
-                    )
-                  })}
-                </Showcase>
-              )
-            }
-          )}
+                        </SummaryContainer>
+                      )
+                    })}
+                  </Showcase>
+                )
+              }
+            )}
         </ShowcaseContainer>
       )}
     </Categories>
