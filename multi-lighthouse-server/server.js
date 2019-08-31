@@ -23,9 +23,9 @@ async function triggerPubSub() {
 
 dotenv.config()
 ;(async function onStartup() {
-  await runLHSetDataForAllUsersUrls()
-  await getShowcaseUrlsRunLighthouseSetData()
-  await triggerPubSub()
+  //await runLHSetDataForAllUsersUrls()
+  //await getShowcaseUrlsRunLighthouseSetData()
+  //await triggerPubSub()
   ///UTILITY///
   //await averageShowcaseScores()
   // These next two have to be run together. Put them in a function. Probably should rename alot of this too.
