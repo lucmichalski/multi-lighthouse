@@ -23,7 +23,18 @@ if (!firebase.apps.length) {
 }
 
 const initialState = {
-  metrics: ['perf', 'fcp', 'fmp', 'si', 'fci', 'i', 'eil'],
+  metrics: [
+    'perf',
+    'fcp',
+    'fmp',
+    'si',
+    'fci',
+    'i',
+    'eil',
+    'ttfb',
+    'tbt',
+    'mpfid',
+  ],
   metricsDisplayNames: Object.freeze({
     perf: 'Overall Performance',
     fcp: 'First Contentful Paint',
@@ -32,12 +43,15 @@ const initialState = {
     fci: 'First CPU Idle',
     i: 'Time to Interactive',
     eil: 'Estimated Input Latency',
+    ttfb: 'Time To First Byte',
+    tbt: 'Total Blocking Time',
+    mpfid: 'Max Potential First Input Delay',
   }),
   errorUrl: '',
   error: false,
   errorMessage: '',
   showcaseData: {},
-  categories: ['top', 'Real Estate', 'Newspapers'],
+  categories: ['top', 'Real Estate', 'Newspapers', 'Shopping'],
 }
 class Main extends Component {
   state = { ...initialState }
@@ -51,7 +65,6 @@ class Main extends Component {
       const db = firebase.database()
       const showcaseDataPromises = URLs.map(async URL => {
         const showCaseRef = db.ref('showcase').child(URL)
-
         const URLAveragesSnapshot = await showCaseRef.child('avg').once('value')
         const currentSnapshot = await showCaseRef.child('current').once('value')
         const URLPastAverageSnapshot = await showCaseRef
@@ -70,7 +83,6 @@ class Main extends Component {
         }
       })
       const rawData = await Promise.all(showcaseDataPromises)
-
       const definedData = rawData.filter(
         item => item && item.currentScores && item.currentScores.perf
       )

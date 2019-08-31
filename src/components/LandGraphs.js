@@ -30,7 +30,18 @@ if (!firebase.apps.length) {
 const initialState = {
   user: { uid: 'ChqBqCMRh1R2g8cAMjIezSabGMl2', urls: [] },
   detailedLHRByDate: null,
-  metrics: ['perf', 'fcp', 'fmp', 'si', 'fci', 'i', 'eil'],
+  metrics: [
+    'perf',
+    'fcp',
+    'fmp',
+    'si',
+    'fci',
+    'i',
+    'eil',
+    'ttfb',
+    'tbt',
+    'mpfid',
+  ],
   //Some of this state could be global. Use Graphql
   metricsDisplayNames: Object.freeze({
     perf: 'Overall Performance',
@@ -40,6 +51,9 @@ const initialState = {
     fci: 'First CPU Idle',
     i: 'Time to Interactive',
     eil: 'Estimated Input Latency',
+    ttfb: 'Time To First Byte',
+    tbt: 'Total Blocking Time',
+    mpfid: 'Max Potential First Input Delay',
   }),
   errorUrl: '',
   error: false,
