@@ -17,15 +17,7 @@ const Logo = styled.h3`
 const Footer = () => {
   return (
     <FooterWrapper>
-      <Link
-        to="/"
-        style={{ textDecoration: 'none' }}
-        href={
-          process.env.NODE_ENV === 'production'
-            ? 'https://allthelighthouses.netlify.com/'
-            : 'http://localhost:8000/'
-        }
-      >
+      <Link to="/" style={{ textDecoration: 'none' }}>
         <Logo>all the Lighthouses</Logo>
       </Link>
     </FooterWrapper>

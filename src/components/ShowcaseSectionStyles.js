@@ -5,20 +5,19 @@ export const ShowcaseContainer = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   flex-wrap: wrap;
+  width: inherit;
+  font-size: 1rem;
 `
 
 export const Showcase = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  width: 100%;
+  width: inherit;
   cursor: pointer;
   margin-bottom: 20px;
   background: rgb(255, 255, 255);
   border-radius: 4px;
-  @media (min-width: 900px) {
-    font-size: 1rem;
-  }
 `
 export const Buffer = styled.div`
   width: 300px;
@@ -41,11 +40,10 @@ export const Header = styled.div`
   justify-content: flex-start;
   align-items: center;
   padding: 10px 0;
-  width: 100%;
+  width: inherit;
   z-index: 1;
 
   @media (min-width: 900px) {
-    font-size: 1rem;
     position: sticky;
     top: -10px;
   }
@@ -86,7 +84,8 @@ export const Time = styled.div`
 `
 
 export const Categories = styled.div`
-  width: 100%;
+  width: auto;
+  overflow-x: scroll;
   display: flex;
   justify-content: flex-start;
   flex-direction: column;
