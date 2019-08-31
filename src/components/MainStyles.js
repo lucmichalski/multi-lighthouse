@@ -8,6 +8,7 @@ export const MainWrapper = styled.div`
   width: 100%;
   min-height: 100vh;
   overflow-x: scroll;
+  -webkit-overflow-scrolling: touch;
 `
 export const InnerWrapper = styled.div`
   display: flex;
