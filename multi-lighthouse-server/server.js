@@ -6,7 +6,7 @@ const puppeteer = require('puppeteer')
 const dotenv = require('dotenv')
 const { db } = require('./firebase')
 
-const { topsites } = require('./.response.js')
+// const { topsites } = require('./.response.js')
 
 const { PubSub } = require('@google-cloud/pubsub')
 
@@ -23,14 +23,15 @@ async function triggerPubSub() {
 
 dotenv.config()
 ;(async function onStartup() {
-  await runLHSetDataForAllUsersUrls()
+  //await runLHSetDataForAllUsersUrls()
   await getShowcaseUrlsRunLighthouseSetData()
-  await triggerPubSub()
+  //await triggerPubSub()
   ///UTILITY///
-  // await averageShowcaseScores()
-  // await setShowcaseURLData()
+  //await averageShowcaseScores()
+  // These next two have to be run together. Put them in a function. Probably should rename alot of this too.
+  //await setShowcaseURLData()
   // await setTopSites()
-  // await setShowcaseCategories()
+  //await setShowcaseCategories()
   // await setUserUrls()
   return
 })()
@@ -53,14 +54,7 @@ async function launchPuppeteerRunLighthouse(url) {
       extends: 'lighthouse:default',
       settings: {
         maxWaitForFcp: 30 * 1000,
-        onlyAudits: [
-          'first-meaningful-paint',
-          'interactive',
-          'first-contentful-paint',
-          'first-cpu-idle',
-          'estimated-input-latency',
-          'speed-index',
-        ],
+        onlyCategories: ['performance'],
       },
     }
 
@@ -78,7 +72,7 @@ async function launchPuppeteerRunLighthouse(url) {
       (lhr && lhr.runtimeError && lhr.runtimeError.code === 'NO_ERROR') ||
       (lhr && !lhr.runtimeError)
     ) {
-      console.log(lhr.requestedUrl, lhr.categories.performance.score)
+      console.log(lhr.requestedUrl, lhr.categories.performance.score, lhr)
 
       return { report, lhr }
     }
@@ -119,6 +113,9 @@ function transformData(lighthouse) {
       'estimated-input-latency': estimatedInputLatency,
       'first-cpu-idle': firstCpuIdle,
       'speed-index': speedIndex,
+      'total-blocking-time': totalBlockingTime,
+      'max-potential-fid': maxPotentialFid,
+      'time-to-first-byte': timeToFirstByte,
     } = audits
 
     const auditData = {
@@ -145,6 +142,18 @@ function transformData(lighthouse) {
       si: {
         val: parseFloat(speedIndex.numericValue.toFixed(2)),
         score: Math.round(speedIndex.score * 100),
+      },
+      tbt: {
+        val: parseFloat(totalBlockingTime.numericValue.toFixed(2)),
+        score: Math.round(totalBlockingTime.score * 100),
+      },
+      mpfid: {
+        val: parseFloat(maxPotentialFid.numericValue.toFixed(2)),
+        score: Math.round(maxPotentialFid.score * 100),
+      },
+      ttfb: {
+        val: parseFloat(timeToFirstByte.numericValue.toFixed(2)),
+        score: Math.round(timeToFirstByte.score * 100),
       },
       perf: {
         val: Math.round(performance.score * 100),
@@ -375,22 +384,22 @@ function getMonthYear() {
 //////////////////////////////////////
 /////////////////////////////////////
 //Helpers
-async function deleteUserData() {
-  // const users = await getUsers()
-  // for (const user of users) {
-  //   const lhrRef = db
-  //     .ref()
-  //     .child(user)
-  //     .child('lhr')
-  //   lhrRef.remove()
-  //   const reportRef = db
-  //     .ref()
-  //     .child(user)
-  //     .child('report')
-  //   reportRef.remove()
-  // }
-  //return
-}
+//async function deleteUserData() {
+// const users = await getUsers()
+// for (const user of users) {
+//   const lhrRef = db
+//     .ref()
+//     .child(user)
+//     .child('lhr')
+//   lhrRef.remove()
+//   const reportRef = db
+//     .ref()
+//     .child(user)
+//     .child('report')
+//   reportRef.remove()
+// }
+//return
+//}
 function setUserUrls() {
   const urls = [
     'https://www-dev.landsofamerica.com',
@@ -481,6 +490,10 @@ async function setShowcaseURLData() {
     .child('urls')
 
   const urls = [
+    { domain: 'https://www.redfin.com', cat: 'Real Estate' },
+    { domain: 'https://www.trulia.com', cat: 'Real Estate' },
+    { domain: 'https://www.landandfarm.com', cat: 'Real Estate' },
+    { domain: 'https://www.land.com', cat: 'Real Estate' },
     { domain: 'https://www.landsofamerica.com', cat: 'Real Estate' },
     { domain: 'https://www.zillow.com', cat: 'Real Estate' },
     { domain: 'https://www.realtor.com', cat: 'Real Estate' },
@@ -502,6 +515,17 @@ async function setShowcaseURLData() {
     { domain: 'https://www.brecorder.com', cat: 'Newspapers' },
     { domain: 'http://labusinessjournal.com', cat: 'Newspapers' },
     { domain: 'https://www.businessnews.com.au', cat: 'Newspapers' },
+    { domain: 'https://www.texastribune.org', cat: 'Newspapers' },
+    { domain: 'https://www.dallasnews.com', cat: 'Newspapers' },
+    { domain: 'https://www.foxnews.com', cat: 'Newspapers' },
+    { domain: 'https://www.nytimes.com', cat: 'Newspapers' },
+    { domain: 'https://www.telegraph.co.uk', cat: 'Newspapers' },
+    { domain: 'https://www.cnn.com', cat: 'Newspapers' },
+    { domain: 'https://www.amazon.com', cat: 'Shopping' },
+    { domain: 'https://www.bestbuy.com', cat: 'Shopping' },
+    { domain: 'https://www.nike.com', cat: 'Shopping' },
+    { domain: 'https://www.zappos.com', cat: 'Shopping' },
+    { domain: 'https://www.wholefoodsmarket.com', cat: 'Shopping' },
   ]
   const urlObj = urls.reduce((obj, item) => {
     obj[base64.encode(item.domain)] = { cat: item.cat }

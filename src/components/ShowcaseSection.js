@@ -64,7 +64,18 @@ const ShowcaseSection = ({
                   return null
                 }
                 const domain = new URL(decodedURL)
-                const { perf, i, fcp, fci, eil, fmp, si } = currentScores
+                const {
+                  perf,
+                  i,
+                  fcp,
+                  fci,
+                  eil,
+                  fmp,
+                  si,
+                  ttfb,
+                  tbt,
+                  mpfid,
+                } = currentScores
                 const {
                   perf: avgPerf,
                   i: avgI,
@@ -73,6 +84,9 @@ const ShowcaseSection = ({
                   eil: avgEil,
                   fmp: avgFmp,
                   si: avgSi,
+                  ttfb: avgTtfb,
+                  tbt: avgTbt,
+                  mpfid: avgMpfid,
                 } = averageScores
                 const scores = [
                   [perf, avgPerf],
@@ -82,6 +96,9 @@ const ShowcaseSection = ({
                   [fci, avgFci],
                   [i, avgI],
                   [eil, avgEil],
+                  [ttfb, avgTtfb],
+                  [tbt, avgTbt],
+                  [mpfid, avgMpfid],
                 ]
 
                 return (
@@ -96,6 +113,9 @@ const ShowcaseSection = ({
                     </URLSection>
 
                     {scores.map(([current, avg], index) => {
+                      if (!current) {
+                        return null
+                      }
                       const change = getPercentageChange(current.val, avg)
                       const isIncrease =
                         metrics[index] === 'perf'
