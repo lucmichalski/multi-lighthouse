@@ -13,31 +13,26 @@ const { PubSub } = require('@google-cloud/pubsub')
 async function triggerPubSub() {
   // Creates a client
   const pubsub = new PubSub()
-
   const topicName = 'stop-instance-event'
-  const data = JSON.stringify({
-    zone: 'us-east1-b',
-    instance: 'instance-automation',
-  })
-
+  const data = JSON.stringify({ zone: 'us-east1-b', label: 'env=dev' })
   // Publishes the message as a string, e.g. "Hello, world!" or JSON.stringify(someObject)
   const dataBuffer = Buffer.from(data)
-
   const messageId = await pubsub.topic(topicName).publish(dataBuffer)
   console.log(`Message ${messageId} published.`)
 }
 
 dotenv.config()
 ;(async function onStartup() {
-  // await runLHSetDataForAllUsersUrls()
-  // await getShowcaseUrlsRunLighthouseSetData()
-  // await triggerPubSub()
+  await runLHSetDataForAllUsersUrls()
+  await getShowcaseUrlsRunLighthouseSetData()
+  await triggerPubSub()
   ///UTILITY///
   // await averageShowcaseScores()
   // await setShowcaseURLData()
   // await setTopSites()
   // await setShowcaseCategories()
   // await setUserUrls()
+  return
 })()
 
 async function launchPuppeteerRunLighthouse(url) {
@@ -403,11 +398,6 @@ function setUserUrls() {
     'https://www-dev.landsofamerica.com/Texas/all-land',
     'https://www-dev.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158',
     'https://www-dev.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
-    'https://beta.landsofamerica.com',
-    'https://beta.landsofamerica.com/United-States/all-land',
-    'https://beta.landsofamerica.com/Texas/all-land',
-    'https://beta.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158',
-    'https://beta.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
     'https://www.landsofamerica.com',
     'https://www.landsofamerica.com/United-States/all-land',
     'https://www.landsofamerica.com/Texas/all-land',
@@ -416,7 +406,22 @@ function setUserUrls() {
     `https://www.landsoftexas.com`,
     'https://www.landsoftexas.com/texas/all-land',
     'https://www.landsoftexas.com/property/Hope-Drive-Cleveland-Texas-77327/7019079',
+    `https://www.landwatch.com`,
+    'https://www.landwatch.com/Texas_land_for_sale',
+    'https://www.landwatch.com/Land_For_Sale',
+    'https://www.landwatch.com/Arizona-Farms-and-Ranches-for-sale/pid/25009743',
+    'https://www.landwatch.com/Park-County-Colorado-House-for-sale/pid/334699603',
+    'https://www.landandfarm.com',
+    'https://www.landandfarm.com/search/all-land',
+    'https://www.landandfarm.com/search/Texas-land-for-sale',
+    'https://www.landandfarm.com/property/Final_Release_of_Prime_Waterfront_Acreage-9598883',
+    'https://www.landandfarm.com/property/_6_Acres_Sonoita_AZ-9633103',
   ]
+  // 'https://beta.landsofamerica.com',
+  // 'https://beta.landsofamerica.com/United-States/all-land',
+  // 'https://beta.landsofamerica.com/Texas/all-land',
+  // 'https://beta.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158',
+  // 'https://beta.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
 
   const urlObj = urls.reduce((obj, item) => {
     obj[base64.encode(item)] = item
