@@ -7,11 +7,12 @@ export const MainWrapper = styled.div`
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
+  overflow-x: scroll;
 `
 export const InnerWrapper = styled.div`
   display: flex;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   flex-direction: column;
   width: 100%;
 `
