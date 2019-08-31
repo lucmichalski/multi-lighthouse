@@ -51,7 +51,7 @@ const initialState = {
   error: false,
   errorMessage: '',
   showcaseData: {},
-  categories: ['top', 'Real Estate', 'Newspapers', 'Shopping'],
+  categories: ['Top', 'Real Estate', 'Newspapers', 'Shopping'],
 }
 class Main extends Component {
   state = { ...initialState }
@@ -63,8 +63,9 @@ class Main extends Component {
     } else {
       const URLs = await this.getCategoryURLs(category)
       const db = firebase.database()
+
       const showcaseDataPromises = URLs.map(async URL => {
-        const showCaseRef = db.ref('showcase').child(URL)
+        const showCaseRef = db.ref('showcaseReports').child(URL)
         const URLAveragesSnapshot = await showCaseRef.child('avg').once('value')
         const currentSnapshot = await showCaseRef.child('current').once('value')
         const URLPastAverageSnapshot = await showCaseRef
@@ -100,7 +101,7 @@ class Main extends Component {
   async getCategoryURLs(category) {
     const db = firebase.database()
     const ref = db
-      .ref(`categories`)
+      .ref(`showcaseCategories`)
       .child(category)
       .child('urls')
     const URLsSnapshot = await ref.once('value')

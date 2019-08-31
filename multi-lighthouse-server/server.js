@@ -23,16 +23,18 @@ async function triggerPubSub() {
 
 dotenv.config()
 ;(async function onStartup() {
-  //await runLHSetDataForAllUsersUrls()
+  await runLHSetDataForAllUsersUrls()
   await getShowcaseUrlsRunLighthouseSetData()
-  //await triggerPubSub()
+  await triggerPubSub()
   ///UTILITY///
   //await averageShowcaseScores()
   // These next two have to be run together. Put them in a function. Probably should rename alot of this too.
-  //await setShowcaseURLData()
+  //await setShowcaseUrls()
   // await setTopSites()
   //await setShowcaseCategories()
   // await setUserUrls()
+  //await launchPuppeteerRunLighthouse('https://www.coldwellbanker.com/d')
+  //await deleteShowcaseData()
   return
 })()
 
@@ -68,11 +70,20 @@ async function launchPuppeteerRunLighthouse(url) {
     )
     browser.close()
 
+    if (lhr && lhr.finalUrl !== lhr.requestedUrl) {
+      console.log(
+        'Requested url does not match final url',
+        lhr.finalUrl,
+        lhr.requestedUrl
+      )
+      return {}
+    }
+
     if (
       (lhr && lhr.runtimeError && lhr.runtimeError.code === 'NO_ERROR') ||
       (lhr && !lhr.runtimeError)
     ) {
-      console.log(lhr.requestedUrl, lhr.categories.performance.score, lhr)
+      console.log(lhr.requestedUrl, lhr.categories.performance.score)
 
       return { report, lhr }
     }
@@ -252,10 +263,7 @@ async function runLHSetDataForAllUsersUrls() {
 /////Showcases
 
 async function getShowcaseUrls() {
-  const showcaseRef = db
-    .ref()
-    .child('showcase')
-    .child('urls')
+  const showcaseRef = db.ref().child('showcaseUrls')
   const showcaseSnapshot = await showcaseRef.once('value')
   const showcaseUrls = Object.entries(showcaseSnapshot.val())
 
@@ -265,17 +273,17 @@ async function getShowcaseUrls() {
 async function getShowcaseUrlsRunLighthouseSetData() {
   const showcaseUrls = await getShowcaseUrls()
   //Account for cold start
-  for (const [url, val] of showcaseUrls) {
-    try {
-      const decodedUrl = base64.decode(url)
-      await launchPuppeteerRunLighthouse(decodedUrl)
-    } catch (error) {
-      console.log(
-        error,
-        'error accounting for cold starts running lighthouse for showcase data'
-      )
-    }
-  }
+  // for (const [url, val] of showcaseUrls) {
+  //   try {
+  //     const decodedUrl = base64.decode(url)
+  //     await launchPuppeteerRunLighthouse(decodedUrl)
+  //   } catch (error) {
+  //     console.log(
+  //       error,
+  //       'error accounting for cold starts running lighthouse for showcase data'
+  //     )
+  //   }
+  // }
 
   //Real Deal
   for (const [url, val] of showcaseUrls) {
@@ -285,7 +293,7 @@ async function getShowcaseUrlsRunLighthouseSetData() {
       const { finalUrl, date, dbData, performance } = transformData(lighthouse)
 
       if (dbData) {
-        const urlRef = db.ref(`showcase/${url}`)
+        const urlRef = db.ref(`showcaseReports/${url}`)
         const currentRef = urlRef.child(`current`)
         const lhrRef = urlRef.child(`/lhr/${date}`)
         lhrRef.set(dbData, error => error && console.log(error))
@@ -309,34 +317,35 @@ async function getShowcaseUrlsRunLighthouseSetData() {
 
 async function averageShowcaseScores() {
   const showcaseUrls = await getShowcaseUrls()
-  console.log(showcaseUrls)
+
   for (const [url, val] of showcaseUrls) {
     try {
       const showcaseRef = db
         .ref()
-        .child('showcase')
+        .child('showcaseReports')
         .child(url)
         .child('lhr')
 
       if (!showcaseRef) {
-        continue
+        return
       }
 
       const showcaseSnapshot = await showcaseRef.once('value')
-      const showcaseLHRReportsByDate = Object.values(
-        await showcaseSnapshot.val()
-      )
-      const avg = averageAll(showcaseLHRReportsByDate)
+      const showcaseSnapshotVal = await showcaseSnapshot.val()
+      const showcaseLHRReportsByDate =
+        showcaseSnapshotVal && Object.values(showcaseSnapshotVal)
+
+      const avg =
+        showcaseLHRReportsByDate && averageAll(showcaseLHRReportsByDate)
       const { cat } = val
       const monthYear = getMonthYear()
 
-      console.log(avg, base64.decode(url), cat)
       db.ref()
-        .child('showcase')
+        .child('showcaseReports')
         .child(url)
         .update({ avg, cat })
       db.ref()
-        .child('showcase')
+        .child('showcaseReports')
         .child(url)
         .child('pastAvg')
         .child(monthYear)
@@ -355,7 +364,18 @@ async function averageShowcaseScores() {
 
 function averageAll(reports) {
   let avg = {}
-  const metrics = ['i', 'perf', 'fci', 'fmp', 'fcp', 'eil', 'si']
+  const metrics = [
+    'i',
+    'perf',
+    'fci',
+    'fmp',
+    'fcp',
+    'eil',
+    'si',
+    'ttfb',
+    'mpfid',
+    'tbt',
+  ]
   for (const metric of metrics) {
     avg = {
       ...avg,
@@ -384,7 +404,7 @@ function getMonthYear() {
 //////////////////////////////////////
 /////////////////////////////////////
 //Helpers
-//async function deleteUserData() {
+// async function deleteUserData() {
 // const users = await getUsers()
 // for (const user of users) {
 //   const lhrRef = db
@@ -398,8 +418,9 @@ function getMonthYear() {
 //     .child('report')
 //   reportRef.remove()
 // }
-//return
-//}
+// return
+// }
+
 function setUserUrls() {
   const urls = [
     'https://www-dev.landsofamerica.com',
@@ -444,20 +465,23 @@ function setUserUrls() {
 }
 
 async function deleteShowcaseData() {
-  const showcaseUrls = await getShowcaseUrls()
-  for (const [url, val] of showcaseUrls) {
-    const urlRef = db
-      .ref()
-      .child('showcase')
-      .child(url)
-    urlRef.remove()
-  }
+  // const showcaseUrls = await getShowcaseUrls()
+  // for (const [url, val] of showcaseUrls) {
+  //   const urlRef = db
+  //     .ref()
+  //     .child('showcase')
+  //     .child(url)
+  //   urlRef.remove()
+  // }
+  // db.ref()
+  //   .child('showcase')
+  //   .remove()
   return
 }
 async function setShowcaseCategories() {
   const showcaseUrls = await getShowcaseUrls()
   for (const [url, val] of showcaseUrls) {
-    const categoriesRef = db.ref().child('categories')
+    const categoriesRef = db.ref().child('showcaseCategories')
     const categoryNode = await categoriesRef.child(val.cat).once('value')
 
     if (!categoryNode.exists()) {
@@ -483,11 +507,8 @@ async function testErrors() {
 }
 
 //Utility function to set data
-async function setShowcaseURLData() {
-  const Ref = db
-    .ref()
-    .child('showcase')
-    .child('urls')
+async function setShowcaseUrls() {
+  const Ref = db.ref().child('showcaseUrls')
 
   const urls = [
     { domain: 'https://www.redfin.com', cat: 'Real Estate' },
@@ -538,16 +559,13 @@ async function setShowcaseURLData() {
 function setTopSites() {
   const topsitesArr = JSON.parse(topsites).Ats.Results.Result.Alexa.TopSites
     .Country.Sites.Site
-  const Ref = db
-    .ref()
-    .child('showcase')
-    .child('urls')
+  const Ref = db.ref().child('showcaseUrls')
 
   const topsSitesObj = topsitesArr.reduce((acc, item) => {
     const url = `https://www.${item.DataUrl}`
     acc[base64.encode(url)] = {
       url,
-      cat: 'top',
+      cat: 'Top',
       rank: item.Global.Rank,
       views: item.Country.PageViews,
     }
