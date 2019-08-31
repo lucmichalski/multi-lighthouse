@@ -86,6 +86,7 @@ export const Time = styled.div`
 export const Categories = styled.div`
   width: auto;
   overflow-x: scroll;
+  -webkit-overflow-scrolling: touch
   display: flex;
   justify-content: flex-start;
   flex-direction: column;
