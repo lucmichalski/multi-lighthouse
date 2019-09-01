@@ -8,7 +8,8 @@ admin.initializeApp()
 // Take the text parameter passed to this HTTP endpoint and insert it into the
 // Realtime Database under the path /messages/:pushId/original
 exports.averageLHRsAndDelete = functions.pubsub
-  .schedule('every 2 minutes')
+  .schedule('every monday 01:00')
+  .timeZone('America/Chicago')
   .onRun(async context => {
     const db = admin.database()
     await averageShowcaseScores()

@@ -23,18 +23,17 @@ async function triggerPubSub() {
 
 dotenv.config()
 ;(async function onStartup() {
-  //await runLHSetDataForAllUsersUrls()
-  await getShowcaseUrlsRunLighthouseSetData()
+  // await runLHSetDataForAllUsersUrls()
+  // await getShowcaseUrlsRunLighthouseSetData()
   // await triggerPubSub()
+
   ///UTILITY///
-  //await averageShowcaseScores()
   // These next two have to be run together. Put them in a function. Probably should rename alot of this too.
   // await setShowcaseUrls()
   // await setTopSites()
   // await setShowcaseCategories()
   // await setUserUrls()
   //await launchPuppeteerRunLighthouse('https://www.coldwellbanker.com/d')
-  //await deleteShowcaseData()
   return
 })()
 
@@ -312,92 +311,6 @@ async function getShowcaseUrlsRunLighthouseSetData() {
   return
 }
 
-// async function averageShowcaseScores() {
-//   const showcaseUrls = await getShowcaseUrls()
-
-//   for (const [url, val] of showcaseUrls) {
-//     try {
-//       const showcaseRef = db
-//         .ref()
-//         .child('showcaseReports')
-//         .child(url)
-//         .child('lhr')
-
-//       if (!showcaseRef) {
-//         return
-//       }
-
-//       const showcaseSnapshot = await showcaseRef.once('value')
-//       const showcaseSnapshotVal = await showcaseSnapshot.val()
-//       const showcaseLHRReportsByDate =
-//         showcaseSnapshotVal && Object.values(showcaseSnapshotVal)
-
-//       const avg =
-//         showcaseLHRReportsByDate && averageAll(showcaseLHRReportsByDate)
-//       const { cat } = val
-//       const monthYear = getMonthYear()
-
-//       db.ref()
-//         .child('showcaseReports')
-//         .child(url)
-//         .update({ avg, cat })
-//       db.ref()
-//         .child('showcaseReports')
-//         .child(url)
-//         .child('pastAvg')
-//         .child(monthYear)
-//         .set(avg)
-//     } catch (error) {
-//       console.log(error)
-//     }
-//   }
-//   console.log('average showcase scores complete')
-//   return
-// }
-
-// ///////////////////////////
-// /////////////////////////////
-// ///////Averages Helpers
-
-// function averageAll(reports) {
-//   let avg = {}
-//   const metrics = [
-//     'i',
-//     'perf',
-//     'fci',
-//     'fmp',
-//     'fcp',
-//     'eil',
-//     'si',
-//     'ttfb',
-//     'mpfid',
-//     'tbt',
-//   ]
-//   for (const metric of metrics) {
-//     avg = {
-//       ...avg,
-//       [metric]: average(
-//         reports,
-//         (accumlator, nextReport) => accumlator + nextReport[metric].val
-//       ),
-//     }
-//   }
-//   return avg
-// }
-
-// function average(arr, callback) {
-//   const average = arr.reduce(callback, 0) / arr.length
-//   return parseFloat(average.toFixed(2))
-// }
-
-// function getMonthYear() {
-//   const date = new Date()
-//   const year = date.getFullYear()
-//   const month = date.getMonth()
-//   console.log(`${month}${year}`)
-//   return `${month}${year}`
-// }
-
 //////////////////////////////////////
 /////////////////////////////////////
 //Helpers
@@ -461,20 +374,6 @@ function setUserUrls() {
     .set(urlObj)
 }
 
-async function deleteShowcaseData() {
-  const showcaseUrls = await getShowcaseUrls()
-  for (const [url, val] of showcaseUrls) {
-    const ref = db
-      .ref()
-      .child('showcaseReports')
-      .child(url)
-      .child('lhr')
-    ref.remove()
-  }
-
-  console.log('LHRs have been deleted for all showcase urls')
-  return
-}
 async function setShowcaseCategories() {
   const showcaseUrls = await getShowcaseUrls()
   for (const [url, val] of showcaseUrls) {
@@ -508,40 +407,40 @@ async function setShowcaseUrls() {
   const Ref = db.ref().child('showcaseUrls')
 
   const urls = [
-    // { domain: 'https://www.redfin.com', cat: 'Real Estate' },
-    // { domain: 'https://www.trulia.com', cat: 'Real Estate' },
-    // { domain: 'https://www.landandfarm.com', cat: 'Real Estate' },
-    // { domain: 'https://www.land.com', cat: 'Real Estate' },
-    // { domain: 'https://www.landsofamerica.com', cat: 'Real Estate' },
-    // { domain: 'https://www.zillow.com', cat: 'Real Estate' },
-    // { domain: 'https://www.realtor.com', cat: 'Real Estate' },
+    { domain: 'https://www.redfin.com', cat: 'Real Estate' },
+    { domain: 'https://www.trulia.com', cat: 'Real Estate' },
+    { domain: 'https://www.landandfarm.com', cat: 'Real Estate' },
+    { domain: 'https://www.land.com', cat: 'Real Estate' },
+    { domain: 'https://www.landsofamerica.com', cat: 'Real Estate' },
+    { domain: 'https://www.zillow.com', cat: 'Real Estate' },
+    { domain: 'https://www.realtor.com', cat: 'Real Estate' },
     { domain: 'https://www.loopnet.com', cat: 'Real Estate' },
-    // { domain: 'https://www.remax.com', cat: 'Real Estate' },
-    // { domain: 'https://www.movoto.com', cat: 'Real Estate' },
-    // { domain: 'https://www.sothebysrealty.com/eng', cat: 'Real Estate' },
-    // { domain: 'https://www.costar.com', cat: 'Real Estate' },
-    // { domain: 'https://www.century21.com', cat: 'Real Estate' },
-    // { domain: 'https://www.coldwellbanker.com', cat: 'Real Estate' },
+    { domain: 'https://www.remax.com', cat: 'Real Estate' },
+    { domain: 'https://www.movoto.com', cat: 'Real Estate' },
+    { domain: 'https://www.sothebysrealty.com/eng', cat: 'Real Estate' },
+    { domain: 'https://www.costar.com', cat: 'Real Estate' },
+    { domain: 'https://www.century21.com', cat: 'Real Estate' },
+    { domain: 'https://www.coldwellbanker.com', cat: 'Real Estate' },
     { domain: 'https://www.landwatch.com', cat: 'Real Estate' },
-    // { domain: 'https://www.wsj.com', cat: 'Newspapers' },
-    // { domain: 'https://economictimes.indiatimes.com', cat: 'Newspapers' },
+    { domain: 'https://www.wsj.com', cat: 'Newspapers' },
+    { domain: 'https://economictimes.indiatimes.com', cat: 'Newspapers' },
     { domain: 'https://www.ft.com/', cat: 'Newspapers' },
     { domain: 'https://www.economist.com', cat: 'Newspapers' },
-    // { domain: 'https://www.bizjournals.com', cat: 'Newspapers' },
-    // { domain: 'https://www.globes.co.il', cat: 'Newspapers' },
-    // { domain: 'https://www.ibtimes.com', cat: 'Newspapers' },
-    // { domain: 'https://www.brecorder.com', cat: 'Newspapers' },
-    // { domain: 'http://labusinessjournal.com', cat: 'Newspapers' },
-    // { domain: 'https://www.businessnews.com.au', cat: 'Newspapers' },
-    // { domain: 'https://www.texastribune.org', cat: 'Newspapers' },
-    // { domain: 'https://www.dallasnews.com', cat: 'Newspapers' },
-    // { domain: 'https://www.foxnews.com', cat: 'Newspapers' },
-    // { domain: 'https://www.nytimes.com', cat: 'Newspapers' },
-    // { domain: 'https://www.telegraph.co.uk', cat: 'Newspapers' },
-    // { domain: 'https://www.cnn.com', cat: 'Newspapers' },
-    // { domain: 'https://www.amazon.com', cat: 'Shopping' },
-    // { domain: 'https://www.bestbuy.com', cat: 'Shopping' },
-    // { domain: 'https://www.nike.com', cat: 'Shopping' },
+    { domain: 'https://www.bizjournals.com', cat: 'Newspapers' },
+    { domain: 'https://www.globes.co.il', cat: 'Newspapers' },
+    { domain: 'https://www.ibtimes.com', cat: 'Newspapers' },
+    { domain: 'https://www.brecorder.com', cat: 'Newspapers' },
+    { domain: 'http://labusinessjournal.com', cat: 'Newspapers' },
+    { domain: 'https://www.businessnews.com.au', cat: 'Newspapers' },
+    { domain: 'https://www.texastribune.org', cat: 'Newspapers' },
+    { domain: 'https://www.dallasnews.com', cat: 'Newspapers' },
+    { domain: 'https://www.foxnews.com', cat: 'Newspapers' },
+    { domain: 'https://www.nytimes.com', cat: 'Newspapers' },
+    { domain: 'https://www.telegraph.co.uk', cat: 'Newspapers' },
+    { domain: 'https://www.cnn.com', cat: 'Newspapers' },
+    { domain: 'https://www.amazon.com', cat: 'Shopping' },
+    { domain: 'https://www.bestbuy.com', cat: 'Shopping' },
+    { domain: 'https://www.nike.com', cat: 'Shopping' },
     { domain: 'https://www.zappos.com', cat: 'Shopping' },
     { domain: 'https://www.wholefoodsmarket.com', cat: 'Shopping' },
   ]
