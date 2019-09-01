@@ -74,6 +74,9 @@ const ShowcaseSection = ({
                   tbt,
                   mpfid,
                 } = currentScores
+                if (perf.score === 0) {
+                  return null
+                }
                 const {
                   perf: avgPerf,
                   i: avgI,
