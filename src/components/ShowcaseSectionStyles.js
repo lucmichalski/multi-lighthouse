@@ -94,5 +94,6 @@ export const Categories = styled.div`
 `
 export const Err = styled.div`
   color: red;
-  font-size: 0.8em;
+  font-size: 0.7em;
+  white-space: pre-line;
 `

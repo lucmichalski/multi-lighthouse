@@ -29,11 +29,11 @@ dotenv.config()
 
   ///UTILITY///
   // These next two have to be run together. Put them in a function. Probably should rename alot of this too.
-  // await setShowcaseUrls()
+  //await setShowcaseUrls()
   // await setTopSites()
-  // await setShowcaseCategories()
+  //await setShowcaseCategories()
   // await setUserUrls()
-  //await launchPuppeteerRunLighthouse('https://www.coldwellbanker.com/d')
+  //await launchPuppeteerRunLighthouse('https://www.movoto.com')
   return
 })()
 
@@ -73,18 +73,23 @@ async function launchPuppeteerRunLighthouse(url) {
       (lhr && lhr.runtimeError && lhr.runtimeError.code === 'NO_ERROR') ||
       (lhr && !lhr.runtimeError)
     ) {
-      console.log(lhr.requestedUrl, lhr.categories.performance.score)
       if (lhr && lhr.finalUrl !== lhr.requestedUrl) {
-        const err = `Requested url does not match final url. Requested Url: ${
+        const err = `Requested url does not match final url.\nRequested Url: ${
           lhr.requestedUrl
-        } Final Url: ${lhr.finalUrl}`
+        }\nFinal Url: ${lhr.finalUrl}`
         console.log(err)
         return { report, lhr, err }
       }
+      console.log(
+        'Successful LHR',
+        lhr.requestedUrl,
+        lhr.categories.performance.score
+      )
       return { report, lhr, err: 0 }
     }
-
-    throw new Error()
+    const runtimeError = lhr && lhr.runtimeError
+    const errObj = JSON.stringify({ ...runtimeError, url })
+    throw new Error(errObj)
   } catch (error) {
     console.log(error)
   }
@@ -443,6 +448,30 @@ async function setShowcaseUrls() {
     { domain: 'https://www.nike.com', cat: 'Shopping' },
     { domain: 'https://www.zappos.com', cat: 'Shopping' },
     { domain: 'https://www.wholefoodsmarket.com', cat: 'Shopping' },
+    { domain: 'https://www.walmart.com', cat: 'Shopping' },
+    { domain: 'https://www.target.com', cat: 'Shopping' },
+    { domain: 'https://www.ikea.com', cat: 'Shopping' },
+    { domain: 'https://www.homedepot.com', cat: 'Shopping' },
+    { domain: 'https://www.macys.com', cat: 'Shopping' },
+    { domain: 'https://www.costco.com', cat: 'Shopping' },
+    { domain: 'https://www.ebay.com', cat: 'Shopping' },
+    { domain: 'https://www.apple.com', cat: 'Tech' },
+    { domain: 'https://www.google.com', cat: 'Tech' },
+    { domain: 'https://www.facebook.com', cat: 'Tech' },
+    { domain: 'https://www.linkedin.com', cat: 'Tech' },
+    { domain: 'https://www.github.com', cat: 'Tech' },
+    { domain: 'https://www.salesforce.com', cat: 'Tech' },
+    { domain: 'https://www.paypal.com', cat: 'Tech' },
+    { domain: 'https://www.msn.com', cat: 'Tech' },
+    { domain: 'https://www.dropbox.com', cat: 'Tech' },
+    { domain: 'https://www.stackoverflow.com', cat: 'Tech' },
+    { domain: 'https://www.twitter.com', cat: 'Tech' },
+    { domain: 'https://www.pinterest.com', cat: 'Tech' },
+    { domain: 'https://www.instagram.com', cat: 'Tech' },
+    { domain: 'https://www.yahoo.com', cat: 'Tech' },
+    { domain: 'https://www.youtube.com', cat: 'Entertainment' },
+    { domain: 'https://www.netflix.com', cat: 'Entertainment' },
+    { domain: 'https://www.spotify.com', cat: 'Entertainment' },
   ]
   const urlObj = urls.reduce((obj, item) => {
     obj[base64.encode(item.domain)] = { cat: item.cat }

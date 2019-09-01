@@ -58,7 +58,14 @@ const initialState = {
     encodedURL: '',
     decodedURL: '',
   },
-  categories: ['Top', 'Real Estate', 'Newspapers', 'Shopping'],
+  categories: [
+    'Top',
+    'Real Estate',
+    'Newspapers',
+    'Shopping',
+    'Tech',
+    'Entertainment',
+  ],
 }
 class Main extends Component {
   state = { ...initialState }
