@@ -21,20 +21,21 @@ const config = {
 if (!firebase.apps.length) {
   firebase.initializeApp(config)
 }
+const defaultMetrics = Object.freeze({
+  perf: { score: 0, value: 0 },
+  i: { score: 0, value: 0 },
+  fcp: { score: 0, value: 0 },
+  fci: { score: 0, value: 0 },
+  eil: { score: 0, value: 0 },
+  fmp: { score: 0, value: 0 },
+  si: { score: 0, value: 0 },
+  ttfb: { score: 0, value: 0 },
+  tbt: { score: 0, value: 0 },
+  mpfid: { score: 0, value: 0 },
+})
 
 const initialState = {
-  metrics: [
-    'perf',
-    'fcp',
-    'fmp',
-    'si',
-    'fci',
-    'i',
-    'eil',
-    'ttfb',
-    'tbt',
-    'mpfid',
-  ],
+  metrics: Object.keys(defaultMetrics),
   metricsDisplayNames: Object.freeze({
     perf: 'Overall Performance',
     fcp: 'First Contentful Paint',
@@ -50,7 +51,13 @@ const initialState = {
   errorUrl: '',
   error: false,
   errorMessage: '',
-  showcaseData: {},
+  showcaseData: {
+    pastAverageScores: defaultMetrics,
+    currentScores: defaultMetrics,
+    averageScores: defaultMetrics,
+    encodedURL: '',
+    decodedURL: '',
+  },
   categories: ['Top', 'Real Estate', 'Newspapers', 'Shopping'],
 }
 class Main extends Component {
@@ -58,12 +65,15 @@ class Main extends Component {
 
   getShowcaseData = async category => {
     const { showcaseData } = this.state
+
     if (showcaseData[category]) {
       return
     } else {
       const URLs = await this.getCategoryURLs(category)
+      if (!URLs) {
+        return null
+      }
       const db = firebase.database()
-
       const showcaseDataPromises = URLs.map(async URL => {
         const showCaseRef = db.ref('showcaseReports').child(URL)
         const URLAveragesSnapshot = await showCaseRef.child('avg').once('value')
@@ -74,11 +84,12 @@ class Main extends Component {
         const averageScores = await URLAveragesSnapshot.val()
         const pastAverageScores = await URLPastAverageSnapshot.val()
         const currentScores = await currentSnapshot.val()
-
+        const { showcaseData } = this.state
         return {
-          pastAverageScores,
-          currentScores,
-          averageScores,
+          pastAverageScores:
+            pastAverageScores || showcaseData.pastAverageScores,
+          currentScores: currentScores || showcaseData.currentScores,
+          averageScores: averageScores || showcaseData.averageScores,
           encodedURL: URL,
           decodedURL: base64.decode(URL),
         }
@@ -105,8 +116,11 @@ class Main extends Component {
       .child(category)
       .child('urls')
     const URLsSnapshot = await ref.once('value')
-    const URLs = Object.keys(await URLsSnapshot.val())
-    return URLs
+    const urlsVal = URLsSnapshot.val()
+    if (urlsVal) {
+      const URLs = Object.keys(await urlsVal)
+      return URLs
+    }
   }
 
   render() {

@@ -13,6 +13,7 @@ import {
   URLSection,
   Buffer,
   Time,
+  Err,
 } from './ShowcaseSectionStyles'
 
 function getPercentageChange(oldNumber, newNumber) {
@@ -60,9 +61,6 @@ const ShowcaseSection = ({
                 { averageScores, decodedURL, currentScores, pastAverageScores },
                 URLindex
               ) => {
-                if (!currentScores || !averageScores || !pastAverageScores) {
-                  return null
-                }
                 const domain = new URL(decodedURL)
                 const {
                   perf,
@@ -110,65 +108,73 @@ const ShowcaseSection = ({
                         {domain.hostname.split('.')[1]}
                       </H3>
                       <H4>{decodedURL}</H4>
+                      {currentScores.err !== 0 && (
+                        <Err>{currentScores.err}</Err>
+                      )}
                     </URLSection>
 
-                    {scores.map(([current, avg], index) => {
-                      if (!current) {
-                        return null
-                      }
-                      const change = getPercentageChange(current.val, avg)
-                      const isIncrease =
-                        metrics[index] === 'perf'
-                          ? change > 0
-                            ? false
-                            : true
-                          : change > 0
-                          ? true
-                          : false
-                      const changeStr = change.toString()
-                      return (
-                        <SummaryContainer key={metrics[index]}>
-                          <Guage
-                            label={value => `${value}/100`}
-                            dialStartAngle={90}
-                            dialEndAngle={0}
-                            value={Math.round(current.score)}
-                          />
-                          <Time>
-                            {metrics[index] === 'perf'
-                              ? `${current.val} total`
-                              : `${(current.val * 0.001).toFixed(2)}s`}
-                          </Time>
-                          <Change isIncrease={isIncrease}>
-                            {changeStr[0] === '-'
-                              ? changeStr.slice(1)
-                              : changeStr}
-                            %
-                            {isIncrease ? (
-                              <span>&darr;</span>
-                            ) : (
-                              <span>&uarr;</span>
+                    {scores &&
+                      scores.map(([current, avg], index) => {
+                        if (!current || !avg) {
+                          return null
+                        }
+                        const change = getPercentageChange(current.val, avg)
+
+                        const isIncrease =
+                          metrics[index] === 'perf'
+                            ? change > 0
+                              ? false
+                              : true
+                            : change > 0
+                            ? true
+                            : false
+                        const changeStr = change.toString()
+                        return (
+                          <SummaryContainer key={metrics[index]}>
+                            <Guage
+                              label={value => `${value}/100`}
+                              dialStartAngle={90}
+                              dialEndAngle={0}
+                              value={Math.round(current.score)}
+                            />
+                            <Time>
+                              {metrics[index] === 'perf'
+                                ? `${current.val} total`
+                                : `${(current.val * 0.001).toFixed(2)}s`}
+                            </Time>
+                            {change !== 'NaN' && (
+                              <Change isIncrease={isIncrease}>
+                                {changeStr[0] === '-'
+                                  ? changeStr.slice(1)
+                                  : changeStr}
+                                %
+                                {isIncrease ? (
+                                  <span>&darr;</span>
+                                ) : (
+                                  <span>&uarr;</span>
+                                )}
+                                avg
+                              </Change>
                             )}
-                            avg
-                          </Change>
-                          {false && (
-                            <div className="line-graph-container">
-                              <LineGraph
-                                data={
-                                  pastAverageScores &&
-                                  Object.entries(pastAverageScores).map(
-                                    ([date, scoresByDate]) => ({
-                                      x: date,
-                                      y: scoresByDate[metrics[index]],
-                                    })
-                                  )
-                                }
-                              />
-                            </div>
-                          )}
-                        </SummaryContainer>
-                      )
-                    })}
+
+                            {false && (
+                              <div className="line-graph-container">
+                                <LineGraph
+                                  data={
+                                    pastAverageScores &&
+                                    Object.entries(pastAverageScores).map(
+                                      ([date, scoresByDate]) => ({
+                                        x: date,
+                                        y: scoresByDate[metrics[index]],
+                                      })
+                                    )
+                                  }
+                                />
+                              </div>
+                            )}
+                          </SummaryContainer>
+                        )
+                      })}
                   </Showcase>
                 )
               }

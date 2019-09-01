@@ -23,15 +23,15 @@ async function triggerPubSub() {
 
 dotenv.config()
 ;(async function onStartup() {
-  await runLHSetDataForAllUsersUrls()
+  //await runLHSetDataForAllUsersUrls()
   await getShowcaseUrlsRunLighthouseSetData()
-  await triggerPubSub()
+  // await triggerPubSub()
   ///UTILITY///
   //await averageShowcaseScores()
   // These next two have to be run together. Put them in a function. Probably should rename alot of this too.
-  //await setShowcaseUrls()
+  // await setShowcaseUrls()
   // await setTopSites()
-  //await setShowcaseCategories()
+  // await setShowcaseCategories()
   // await setUserUrls()
   //await launchPuppeteerRunLighthouse('https://www.coldwellbanker.com/d')
   //await deleteShowcaseData()
@@ -70,28 +70,24 @@ async function launchPuppeteerRunLighthouse(url) {
     )
     browser.close()
 
-    if (lhr && lhr.finalUrl !== lhr.requestedUrl) {
-      console.log(
-        'Requested url does not match final url',
-        lhr.finalUrl,
-        lhr.requestedUrl
-      )
-      return {}
-    }
-
     if (
       (lhr && lhr.runtimeError && lhr.runtimeError.code === 'NO_ERROR') ||
       (lhr && !lhr.runtimeError)
     ) {
       console.log(lhr.requestedUrl, lhr.categories.performance.score)
-
-      return { report, lhr }
+      if (lhr && lhr.finalUrl !== lhr.requestedUrl) {
+        const err = `Requested url does not match final url. Requested Url: ${
+          lhr.requestedUrl
+        } Final Url: ${lhr.finalUrl}`
+        console.log(err)
+        return { report, lhr, err }
+      }
+      return { report, lhr, err: 0 }
     }
 
-    return {}
+    throw new Error()
   } catch (error) {
     console.log(error)
-    throw error
   }
 }
 
@@ -111,84 +107,85 @@ function getDefinedData(data) {
 }
 
 function transformData(lighthouse) {
-  if (lighthouse) {
-    const { lhr, report } = lighthouse
-
-    const { fetchTime, audits, categories, runtimeError, finalUrl } = lhr
-    const { performance } = categories
-    const date = base64.encode(fetchTime)
-    const {
-      interactive,
-      'first-contentful-paint': firstContentfulPaint,
-      'first-meaningful-paint': firstMeaningfulPaint,
-      'estimated-input-latency': estimatedInputLatency,
-      'first-cpu-idle': firstCpuIdle,
-      'speed-index': speedIndex,
-      'total-blocking-time': totalBlockingTime,
-      'max-potential-fid': maxPotentialFid,
-      'time-to-first-byte': timeToFirstByte,
-    } = audits
-
-    const auditData = {
-      fcp: {
-        val: parseFloat(firstContentfulPaint.numericValue.toFixed(2)),
-        score: Math.round(firstContentfulPaint.score * 100),
-      },
-      fmp: {
-        val: parseFloat(firstMeaningfulPaint.numericValue.toFixed(2)),
-        score: Math.round(firstMeaningfulPaint.score * 100),
-      },
-      i: {
-        val: parseFloat(interactive.numericValue.toFixed(2)),
-        score: Math.round(interactive.score * 100),
-      },
-      fci: {
-        val: parseFloat(firstCpuIdle.numericValue.toFixed(2)),
-        score: Math.round(firstCpuIdle.score * 100),
-      },
-      eil: {
-        val: parseFloat(estimatedInputLatency.numericValue.toFixed(2)),
-        score: Math.round(estimatedInputLatency.score * 100),
-      },
-      si: {
-        val: parseFloat(speedIndex.numericValue.toFixed(2)),
-        score: Math.round(speedIndex.score * 100),
-      },
-      tbt: {
-        val: parseFloat(totalBlockingTime.numericValue.toFixed(2)),
-        score: Math.round(totalBlockingTime.score * 100),
-      },
-      mpfid: {
-        val: parseFloat(maxPotentialFid.numericValue.toFixed(2)),
-        score: Math.round(maxPotentialFid.score * 100),
-      },
-      ttfb: {
-        val: parseFloat(timeToFirstByte.numericValue.toFixed(2)),
-        score: Math.round(timeToFirstByte.score * 100),
-      },
-      perf: {
-        val: Math.round(performance.score * 100),
-        score: Math.round(performance.score * 100),
-      },
-    }
-
-    const dbData = {
-      fu: finalUrl,
-      ft: fetchTime,
-      re: runtimeError ? runtimeError.code : 'Runtime Error is Undefined',
-      ...auditData,
-    }
-
-    return {
-      fetchTime,
-      dbData,
-      date,
-      finalUrl,
-      report,
-      performance,
-    }
+  if (!lighthouse || !lighthouse.lhr) {
+    return {}
   }
-  return {}
+  const { lhr, report, err } = lighthouse
+
+  const { fetchTime, audits, categories, runtimeError, finalUrl } = lhr
+  const { performance } = categories
+  const date = base64.encode(fetchTime)
+  const {
+    interactive,
+    'first-contentful-paint': firstContentfulPaint,
+    'first-meaningful-paint': firstMeaningfulPaint,
+    'estimated-input-latency': estimatedInputLatency,
+    'first-cpu-idle': firstCpuIdle,
+    'speed-index': speedIndex,
+    'total-blocking-time': totalBlockingTime,
+    'max-potential-fid': maxPotentialFid,
+    'time-to-first-byte': timeToFirstByte,
+  } = audits
+
+  const auditData = {
+    fcp: {
+      val: parseFloat(firstContentfulPaint.numericValue.toFixed(2)),
+      score: Math.round(firstContentfulPaint.score * 100),
+    },
+    fmp: {
+      val: parseFloat(firstMeaningfulPaint.numericValue.toFixed(2)),
+      score: Math.round(firstMeaningfulPaint.score * 100),
+    },
+    i: {
+      val: parseFloat(interactive.numericValue.toFixed(2)),
+      score: Math.round(interactive.score * 100),
+    },
+    fci: {
+      val: parseFloat(firstCpuIdle.numericValue.toFixed(2)),
+      score: Math.round(firstCpuIdle.score * 100),
+    },
+    eil: {
+      val: parseFloat(estimatedInputLatency.numericValue.toFixed(2)),
+      score: Math.round(estimatedInputLatency.score * 100),
+    },
+    si: {
+      val: parseFloat(speedIndex.numericValue.toFixed(2)),
+      score: Math.round(speedIndex.score * 100),
+    },
+    tbt: {
+      val: parseFloat(totalBlockingTime.numericValue.toFixed(2)),
+      score: Math.round(totalBlockingTime.score * 100),
+    },
+    mpfid: {
+      val: parseFloat(maxPotentialFid.numericValue.toFixed(2)),
+      score: Math.round(maxPotentialFid.score * 100),
+    },
+    ttfb: {
+      val: parseFloat(timeToFirstByte.numericValue.toFixed(2)),
+      score: Math.round(timeToFirstByte.score * 100),
+    },
+    perf: {
+      val: Math.round(performance.score * 100),
+      score: Math.round(performance.score * 100),
+    },
+  }
+
+  const dbData = {
+    fu: finalUrl,
+    ft: fetchTime,
+    re: runtimeError ? runtimeError.code : 'Runtime Error is Undefined',
+    err,
+    ...auditData,
+  }
+
+  return {
+    fetchTime,
+    dbData,
+    date,
+    finalUrl,
+    report,
+    performance,
+  }
 }
 
 /////////////////////////////////
@@ -315,91 +312,91 @@ async function getShowcaseUrlsRunLighthouseSetData() {
   return
 }
 
-async function averageShowcaseScores() {
-  const showcaseUrls = await getShowcaseUrls()
+// async function averageShowcaseScores() {
+//   const showcaseUrls = await getShowcaseUrls()
 
-  for (const [url, val] of showcaseUrls) {
-    try {
-      const showcaseRef = db
-        .ref()
-        .child('showcaseReports')
-        .child(url)
-        .child('lhr')
+//   for (const [url, val] of showcaseUrls) {
+//     try {
+//       const showcaseRef = db
+//         .ref()
+//         .child('showcaseReports')
+//         .child(url)
+//         .child('lhr')
 
-      if (!showcaseRef) {
-        return
-      }
+//       if (!showcaseRef) {
+//         return
+//       }
 
-      const showcaseSnapshot = await showcaseRef.once('value')
-      const showcaseSnapshotVal = await showcaseSnapshot.val()
-      const showcaseLHRReportsByDate =
-        showcaseSnapshotVal && Object.values(showcaseSnapshotVal)
+//       const showcaseSnapshot = await showcaseRef.once('value')
+//       const showcaseSnapshotVal = await showcaseSnapshot.val()
+//       const showcaseLHRReportsByDate =
+//         showcaseSnapshotVal && Object.values(showcaseSnapshotVal)
 
-      const avg =
-        showcaseLHRReportsByDate && averageAll(showcaseLHRReportsByDate)
-      const { cat } = val
-      const monthYear = getMonthYear()
+//       const avg =
+//         showcaseLHRReportsByDate && averageAll(showcaseLHRReportsByDate)
+//       const { cat } = val
+//       const monthYear = getMonthYear()
 
-      db.ref()
-        .child('showcaseReports')
-        .child(url)
-        .update({ avg, cat })
-      db.ref()
-        .child('showcaseReports')
-        .child(url)
-        .child('pastAvg')
-        .child(monthYear)
-        .set(avg)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-  console.log('average showcase scores complete')
-  return
-}
+//       db.ref()
+//         .child('showcaseReports')
+//         .child(url)
+//         .update({ avg, cat })
+//       db.ref()
+//         .child('showcaseReports')
+//         .child(url)
+//         .child('pastAvg')
+//         .child(monthYear)
+//         .set(avg)
+//     } catch (error) {
+//       console.log(error)
+//     }
+//   }
+//   console.log('average showcase scores complete')
+//   return
+// }
 
-///////////////////////////
-/////////////////////////////
-///////Averages Helpers
+// ///////////////////////////
+// /////////////////////////////
+// ///////Averages Helpers
 
-function averageAll(reports) {
-  let avg = {}
-  const metrics = [
-    'i',
-    'perf',
-    'fci',
-    'fmp',
-    'fcp',
-    'eil',
-    'si',
-    'ttfb',
-    'mpfid',
-    'tbt',
-  ]
-  for (const metric of metrics) {
-    avg = {
-      ...avg,
-      [metric]: average(
-        reports,
-        (accumlator, nextReport) => accumlator + nextReport[metric].val
-      ),
-    }
-  }
-  return avg
-}
+// function averageAll(reports) {
+//   let avg = {}
+//   const metrics = [
+//     'i',
+//     'perf',
+//     'fci',
+//     'fmp',
+//     'fcp',
+//     'eil',
+//     'si',
+//     'ttfb',
+//     'mpfid',
+//     'tbt',
+//   ]
+//   for (const metric of metrics) {
+//     avg = {
+//       ...avg,
+//       [metric]: average(
+//         reports,
+//         (accumlator, nextReport) => accumlator + nextReport[metric].val
+//       ),
+//     }
+//   }
+//   return avg
+// }
 
-function average(arr, callback) {
-  const average = arr.reduce(callback, 0) / arr.length
-  return parseFloat(average.toFixed(2))
-}
+// function average(arr, callback) {
+//   const average = arr.reduce(callback, 0) / arr.length
+//   return parseFloat(average.toFixed(2))
+// }
 
-function getMonthYear() {
-  const date = new Date()
-  const year = date.getFullYear()
-  const month = date.getMonth()
-  console.log(`${month}${year}`)
-  return `${month}${year}`
-}
+// function getMonthYear() {
+//   const date = new Date()
+//   const year = date.getFullYear()
+//   const month = date.getMonth()
+//   console.log(`${month}${year}`)
+//   return `${month}${year}`
+// }
 
 //////////////////////////////////////
 /////////////////////////////////////
@@ -465,17 +462,17 @@ function setUserUrls() {
 }
 
 async function deleteShowcaseData() {
-  // const showcaseUrls = await getShowcaseUrls()
-  // for (const [url, val] of showcaseUrls) {
-  //   const urlRef = db
-  //     .ref()
-  //     .child('showcase')
-  //     .child(url)
-  //   urlRef.remove()
-  // }
-  // db.ref()
-  //   .child('showcase')
-  //   .remove()
+  const showcaseUrls = await getShowcaseUrls()
+  for (const [url, val] of showcaseUrls) {
+    const ref = db
+      .ref()
+      .child('showcaseReports')
+      .child(url)
+      .child('lhr')
+    ref.remove()
+  }
+
+  console.log('LHRs have been deleted for all showcase urls')
   return
 }
 async function setShowcaseCategories() {
@@ -511,40 +508,40 @@ async function setShowcaseUrls() {
   const Ref = db.ref().child('showcaseUrls')
 
   const urls = [
-    { domain: 'https://www.redfin.com', cat: 'Real Estate' },
-    { domain: 'https://www.trulia.com', cat: 'Real Estate' },
-    { domain: 'https://www.landandfarm.com', cat: 'Real Estate' },
-    { domain: 'https://www.land.com', cat: 'Real Estate' },
-    { domain: 'https://www.landsofamerica.com', cat: 'Real Estate' },
-    { domain: 'https://www.zillow.com', cat: 'Real Estate' },
-    { domain: 'https://www.realtor.com', cat: 'Real Estate' },
+    // { domain: 'https://www.redfin.com', cat: 'Real Estate' },
+    // { domain: 'https://www.trulia.com', cat: 'Real Estate' },
+    // { domain: 'https://www.landandfarm.com', cat: 'Real Estate' },
+    // { domain: 'https://www.land.com', cat: 'Real Estate' },
+    // { domain: 'https://www.landsofamerica.com', cat: 'Real Estate' },
+    // { domain: 'https://www.zillow.com', cat: 'Real Estate' },
+    // { domain: 'https://www.realtor.com', cat: 'Real Estate' },
     { domain: 'https://www.loopnet.com', cat: 'Real Estate' },
-    { domain: 'https://www.remax.com', cat: 'Real Estate' },
-    { domain: 'https://www.movoto.com', cat: 'Real Estate' },
-    { domain: 'https://www.sothebysrealty.com/eng', cat: 'Real Estate' },
-    { domain: 'https://www.costar.com', cat: 'Real Estate' },
-    { domain: 'https://www.century21.com', cat: 'Real Estate' },
-    { domain: 'https://www.coldwellbanker.com', cat: 'Real Estate' },
+    // { domain: 'https://www.remax.com', cat: 'Real Estate' },
+    // { domain: 'https://www.movoto.com', cat: 'Real Estate' },
+    // { domain: 'https://www.sothebysrealty.com/eng', cat: 'Real Estate' },
+    // { domain: 'https://www.costar.com', cat: 'Real Estate' },
+    // { domain: 'https://www.century21.com', cat: 'Real Estate' },
+    // { domain: 'https://www.coldwellbanker.com', cat: 'Real Estate' },
     { domain: 'https://www.landwatch.com', cat: 'Real Estate' },
-    { domain: 'https://www.wsj.com', cat: 'Newspapers' },
-    { domain: 'https://economictimes.indiatimes.com', cat: 'Newspapers' },
+    // { domain: 'https://www.wsj.com', cat: 'Newspapers' },
+    // { domain: 'https://economictimes.indiatimes.com', cat: 'Newspapers' },
     { domain: 'https://www.ft.com/', cat: 'Newspapers' },
     { domain: 'https://www.economist.com', cat: 'Newspapers' },
-    { domain: 'https://www.bizjournals.com', cat: 'Newspapers' },
-    { domain: 'https://www.globes.co.il', cat: 'Newspapers' },
-    { domain: 'https://www.ibtimes.com', cat: 'Newspapers' },
-    { domain: 'https://www.brecorder.com', cat: 'Newspapers' },
-    { domain: 'http://labusinessjournal.com', cat: 'Newspapers' },
-    { domain: 'https://www.businessnews.com.au', cat: 'Newspapers' },
-    { domain: 'https://www.texastribune.org', cat: 'Newspapers' },
-    { domain: 'https://www.dallasnews.com', cat: 'Newspapers' },
-    { domain: 'https://www.foxnews.com', cat: 'Newspapers' },
-    { domain: 'https://www.nytimes.com', cat: 'Newspapers' },
-    { domain: 'https://www.telegraph.co.uk', cat: 'Newspapers' },
-    { domain: 'https://www.cnn.com', cat: 'Newspapers' },
-    { domain: 'https://www.amazon.com', cat: 'Shopping' },
-    { domain: 'https://www.bestbuy.com', cat: 'Shopping' },
-    { domain: 'https://www.nike.com', cat: 'Shopping' },
+    // { domain: 'https://www.bizjournals.com', cat: 'Newspapers' },
+    // { domain: 'https://www.globes.co.il', cat: 'Newspapers' },
+    // { domain: 'https://www.ibtimes.com', cat: 'Newspapers' },
+    // { domain: 'https://www.brecorder.com', cat: 'Newspapers' },
+    // { domain: 'http://labusinessjournal.com', cat: 'Newspapers' },
+    // { domain: 'https://www.businessnews.com.au', cat: 'Newspapers' },
+    // { domain: 'https://www.texastribune.org', cat: 'Newspapers' },
+    // { domain: 'https://www.dallasnews.com', cat: 'Newspapers' },
+    // { domain: 'https://www.foxnews.com', cat: 'Newspapers' },
+    // { domain: 'https://www.nytimes.com', cat: 'Newspapers' },
+    // { domain: 'https://www.telegraph.co.uk', cat: 'Newspapers' },
+    // { domain: 'https://www.cnn.com', cat: 'Newspapers' },
+    // { domain: 'https://www.amazon.com', cat: 'Shopping' },
+    // { domain: 'https://www.bestbuy.com', cat: 'Shopping' },
+    // { domain: 'https://www.nike.com', cat: 'Shopping' },
     { domain: 'https://www.zappos.com', cat: 'Shopping' },
     { domain: 'https://www.wholefoodsmarket.com', cat: 'Shopping' },
   ]
@@ -554,6 +551,8 @@ async function setShowcaseUrls() {
   }, {})
 
   Ref.set(urlObj)
+  console.log('Showcase Urls have been put in firebase')
+  return
 }
 
 function setTopSites() {

@@ -27,7 +27,7 @@ export const Buffer = styled.div`
 export const URLSection = styled.div`
   box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 2px 1px;
   box-sizing: border-box;
-  height: 100px;
+  min-height: 100px;
   width: 300px;
   padding: 15px;
   display: flex;
@@ -91,4 +91,8 @@ export const Categories = styled.div`
   justify-content: flex-start;
   flex-direction: column;
   padding: 0 15px;
+`
+export const Err = styled.div`
+  color: red;
+  font-size: 0.8em;
 `
