@@ -2,11 +2,8 @@ import React, { Component, Fragment } from 'react'
 import base64 from 'base-64'
 import firebase from 'firebase/app'
 import 'firebase/database'
-
 import Error from './Error'
-
 import ShowCaseSection from './ShowcaseSection'
-
 import { MainWrapper, InnerWrapper } from './MainStyles'
 
 const config = {
@@ -61,10 +58,11 @@ const initialState = {
   categories: [
     'Top',
     'Real Estate',
-    'Newspapers',
+    'News',
     'Shopping',
     'Tech',
     'Entertainment',
+    'Travel',
   ],
 }
 class Main extends Component {
