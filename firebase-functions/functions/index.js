@@ -62,17 +62,18 @@ exports.averageLHRsAndDelete = functions.pubsub
           const { cat } = val
           const monthYear = getMonthYear()
           console.log('Here are the averages for this url', avg, url)
-
-          db.ref()
-            .child('showcaseReports')
-            .child(url)
-            .update({ avg, cat })
-          db.ref()
-            .child('showcaseReports')
-            .child(url)
-            .child('pastAvg')
-            .child(monthYear)
-            .set(avg)
+          if (avg) {
+            db.ref()
+              .child('showcaseReports')
+              .child(url)
+              .update({ avg, cat })
+            db.ref()
+              .child('showcaseReports')
+              .child(url)
+              .child('pastAvg')
+              .child(monthYear)
+              .set(avg)
+          }
         } catch (error) {
           console.log(error)
         }

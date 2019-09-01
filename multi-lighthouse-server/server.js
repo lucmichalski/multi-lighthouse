@@ -24,7 +24,7 @@ async function triggerPubSub() {
 dotenv.config()
 ;(async function onStartup() {
   // await runLHSetDataForAllUsersUrls()
-  // await getShowcaseUrlsRunLighthouseSetData()
+  await getShowcaseUrlsRunLighthouseSetData()
   // await triggerPubSub()
 
   ///UTILITY///
