@@ -7,11 +7,12 @@ admin.initializeApp()
 
 // Take the text parameter passed to this HTTP endpoint and insert it into the
 // Realtime Database under the path /messages/:pushId/original
-exports.averageLHRs = functions.pubsub
-  .schedule('every day 00:00')
+exports.averageLHRsAndDelete = functions.pubsub
+  .schedule('every 2 minutes')
   .onRun(async context => {
     const db = admin.database()
     await averageShowcaseScores()
+    await deleteShowcaseData()
 
     async function getShowcaseUrls() {
       const showcaseRef = db.ref().child('showcaseUrls')
@@ -19,6 +20,20 @@ exports.averageLHRs = functions.pubsub
       const showcaseUrls = Object.entries(showcaseSnapshot.val())
 
       return showcaseUrls
+    }
+    async function deleteShowcaseData() {
+      const showcaseUrls = await getShowcaseUrls()
+      for (const [url, val] of showcaseUrls) {
+        const ref = db
+          .ref()
+          .child('showcaseReports')
+          .child(url)
+          .child('lhr')
+        ref.remove()
+      }
+
+      console.log('LHRs have been deleted for all showcase urls')
+      return
     }
 
     async function averageShowcaseScores() {

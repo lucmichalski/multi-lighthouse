@@ -65,7 +65,7 @@ class Main extends Component {
 
   getShowcaseData = async category => {
     const { showcaseData } = this.state
-    console.log(showcaseData)
+
     if (showcaseData[category]) {
       return
     } else {

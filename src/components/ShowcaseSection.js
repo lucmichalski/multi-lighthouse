@@ -13,6 +13,7 @@ import {
   URLSection,
   Buffer,
   Time,
+  Err,
 } from './ShowcaseSectionStyles'
 
 function getPercentageChange(oldNumber, newNumber) {
@@ -60,9 +61,6 @@ const ShowcaseSection = ({
                 { averageScores, decodedURL, currentScores, pastAverageScores },
                 URLindex
               ) => {
-                if (!currentScores) {
-                  return null
-                }
                 const domain = new URL(decodedURL)
                 const {
                   perf,
@@ -110,6 +108,9 @@ const ShowcaseSection = ({
                         {domain.hostname.split('.')[1]}
                       </H3>
                       <H4>{decodedURL}</H4>
+                      {currentScores.err !== 0 && (
+                        <Err>{currentScores.err}</Err>
+                      )}
                     </URLSection>
 
                     {scores &&
