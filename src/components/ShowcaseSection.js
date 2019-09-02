@@ -27,6 +27,7 @@ const ShowcaseSection = ({
   getShowcaseData,
   metrics,
   metricsDisplayNames,
+  loading,
 }) => {
   const [isOpen, toggleOpen] = useState(false)
   const getShowcaseDataAndOpen = () => {
@@ -47,6 +48,13 @@ const ShowcaseSection = ({
       >
         {category}
       </Button>
+      {loading && isOpen && (
+        <div className="progress-container" style={{ width: `100%` }}>
+          <div className="progress-bar">
+            <span className="progress-value" style={{ width: `100%` }} />
+          </div>
+        </div>
+      )}
       {showcaseData[category] && isOpen && (
         <ShowcaseContainer>
           <Header>

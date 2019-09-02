@@ -64,12 +64,14 @@ const initialState = {
     'Entertainment',
     'Travel',
   ],
+  loading: false,
 }
 class Main extends Component {
   state = { ...initialState }
 
   getShowcaseData = async category => {
     const { showcaseData } = this.state
+    this.setState({ loading: true })
 
     if (showcaseData[category]) {
       return
@@ -108,6 +110,7 @@ class Main extends Component {
         (a, b) => b.currentScores.perf.score - a.currentScores.perf.score
       )
       this.setState(state => ({
+        loading: false,
         showcaseData: { ...state.showcaseData, [category]: showcaseData },
       }))
       return showcaseData
@@ -137,6 +140,7 @@ class Main extends Component {
       errorUrl,
       showcaseData,
       categories,
+      loading,
     } = this.state
 
     return (
@@ -147,6 +151,7 @@ class Main extends Component {
               {categories.map(category => (
                 <ShowCaseSection
                   key={category}
+                  loading={loading}
                   metrics={metrics}
                   getShowcaseData={this.getShowcaseData}
                   showcaseData={showcaseData}
