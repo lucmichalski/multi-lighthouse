@@ -136,6 +136,7 @@ async function setShowcaseUrls() {
     { domain: 'https://www.twitter.com', cat: 'Tech' },
     { domain: 'https://www.pinterest.com', cat: 'Tech' },
     { domain: 'https://www.instagram.com', cat: 'Tech' },
+    { domain: 'https://www.ibm.com', cat: 'Tech' },
     { domain: 'https://www.yahoo.com', cat: 'Tech' },
     { domain: 'https://www.youtube.com', cat: 'Entertainment' },
     { domain: 'https://www.netflix.com', cat: 'Entertainment' },
