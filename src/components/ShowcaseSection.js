@@ -99,11 +99,11 @@ const ShowcaseSection = ({
                 } = averageScores
                 const scores = [
                   [perf, avgPerf],
-                  [fcp, avgFcp],
-                  [fmp, avgFmp],
-                  [si, avgSi],
-                  [fci, avgFci],
                   [i, avgI],
+                  [si, avgSi],
+                  [fcp, avgFcp],
+                  [fci, avgFci],
+                  [fmp, avgFmp],
                   [eil, avgEil],
                   [ttfb, avgTtfb],
                   [tbt, avgTbt],

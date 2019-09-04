@@ -18,14 +18,15 @@ const config = {
 if (!firebase.apps.length) {
   firebase.initializeApp(config)
 }
+// Must match order of "scores" array in showcase section.
 const defaultMetrics = Object.freeze({
   perf: { score: 0, value: 0 },
   i: { score: 0, value: 0 },
+  si: { score: 0, value: 0 },
   fcp: { score: 0, value: 0 },
   fci: { score: 0, value: 0 },
-  eil: { score: 0, value: 0 },
   fmp: { score: 0, value: 0 },
-  si: { score: 0, value: 0 },
+  eil: { score: 0, value: 0 },
   ttfb: { score: 0, value: 0 },
   tbt: { score: 0, value: 0 },
   mpfid: { score: 0, value: 0 },
@@ -71,15 +72,17 @@ class Main extends Component {
 
   getShowcaseData = async category => {
     const { showcaseData } = this.state
-    this.setState({ loading: true })
 
     if (showcaseData[category]) {
       return
     } else {
+      this.setState({ loading: true })
       const URLs = await this.getCategoryURLs(category)
       if (!URLs) {
+        this.setState({ loading: false })
         return null
       }
+
       const db = firebase.database()
       const showcaseDataPromises = URLs.map(async URL => {
         const showCaseRef = db.ref('showcaseReports').child(URL)

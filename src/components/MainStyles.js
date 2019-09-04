@@ -9,6 +9,9 @@ export const MainWrapper = styled.div`
   min-height: 100vh;
   overflow-x: scroll;
   -webkit-overflow-scrolling: touch;
+  @media (min-width: 1800px) {
+    overflow-x: visible;
+  }
 `
 export const InnerWrapper = styled.div`
   display: flex;
