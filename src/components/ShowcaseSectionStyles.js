@@ -81,12 +81,11 @@ export const Time = styled.div`
   font-size: 0.8em;
   letter-spacing: 0.05px;
   color: rgb(44, 44, 44);
+  white-space: nowrap;
 `
 
 export const Categories = styled.div`
   width: auto;
-  overflow-x: scroll;
-  -webkit-overflow-scrolling: touch
   display: flex;
   justify-content: flex-start;
   flex-direction: column;
