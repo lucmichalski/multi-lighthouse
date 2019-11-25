@@ -6,7 +6,8 @@ const { topsites } = require('./.response.js')
 
 ;(async function onStartup() {
   ///UTILITY///
-  // These next two have to be run together. Put them in a function. Probably should rename alot of this too.
+  // IF you run this file server.js will run since we are importing it here.
+  // These next two have to be run together and IN ORDER. Put them in a function. Probably should rename alot of this too.
   // await setShowcaseUrls()
   // await setTopSites()
   // await setShowcaseCategories()
@@ -18,16 +19,18 @@ const { topsites } = require('./.response.js')
 function setUserUrls() {
   const urls = [
     'https://www-dev.landsofamerica.com',
+    'https://www-dev.landsofamerica.com/Texas',
     'https://www-dev.landsofamerica.com/United-States/all-land',
     'https://www-dev.landsofamerica.com/Texas/all-land',
     'https://www-dev.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158',
     'https://www-dev.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
     'https://www.landsofamerica.com',
+    'https://www.landsofamerica.com/Texas',
     'https://www.landsofamerica.com/United-States/all-land',
     'https://www.landsofamerica.com/Texas/all-land',
     'https://www.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158',
     'https://www.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
-    `https://www.landsoftexas.com`,
+    `https://www.landsoftexas.com/Texas`,
     'https://www.landsoftexas.com/texas/all-land',
     'https://www.landsoftexas.com/property/Hope-Drive-Cleveland-Texas-77327/7019079',
     `https://www.landwatch.com`,
@@ -95,6 +98,7 @@ async function setShowcaseUrls() {
     { domain: 'https://www.century21.com', cat: 'Real Estate' },
     { domain: 'https://www.coldwellbanker.com', cat: 'Real Estate' },
     { domain: 'https://www.landwatch.com', cat: 'Real Estate' },
+    { domain: 'https://www.forrent.com', cat: 'Real Estate' },
     { domain: 'https://www.wsj.com', cat: 'News' },
     { domain: 'https://economictimes.indiatimes.com', cat: 'News' },
     { domain: 'https://www.ft.com/', cat: 'News' },
@@ -106,6 +110,11 @@ async function setShowcaseUrls() {
     { domain: 'http://labusinessjournal.com', cat: 'News' },
     { domain: 'https://www.businessnews.com.au', cat: 'News' },
     { domain: 'https://www.texastribune.org', cat: 'News' },
+    { domain: 'https://www.chron.com', cat: 'News' },
+    { domain: 'https://www.statesman.com', cat: 'News' },
+    { domain: 'https://www.mysanantonio.com', cat: 'News' },
+    { domain: 'https://www.dailytexanonline.com', cat: 'News' },
+    { domain: 'https://www.star-telegram.com', cat: 'News' },
     { domain: 'https://www.dallasnews.com', cat: 'News' },
     { domain: 'https://www.foxnews.com', cat: 'News' },
     { domain: 'https://www.nytimes.com', cat: 'News' },
