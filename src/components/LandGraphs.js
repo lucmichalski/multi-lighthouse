@@ -99,9 +99,14 @@ class LandGraphs extends Component {
         const exists = snapshot.exists()
         if (exists) {
           const data = snapshot.val()
+          const dataArr = Object.entries(data)
+          this.preCalc(dataArr);
 
           this.setState(state => ({
-            urlLHRData: { ...state.urlLHRData, [url]: Object.entries(data) },
+            urlLHRData: {
+              ...state.urlLHRData,
+              [url]: dataArr,
+            },
             error: false,
             fetching: false,
           }))
@@ -116,6 +121,58 @@ class LandGraphs extends Component {
       errorObject => {
         console.log('The read failed: ' + errorObject.code)
       }
+    )
+  }
+
+  calc = (data, range) => {
+    const sliced = data.slice(range[0], range[1])
+    const sorted = sliced
+      .sort((a, b) => a[1].perf.score - b[1].perf.score)
+      .map(item => item[1].perf.score)
+    console.log(sorted.length)
+    const mean = sorted.reduce((acc, item) => acc + item) / sorted.length
+    const half = Math.floor(sorted.length / 2)
+    const median =
+      sorted.length % 2 ? sorted[half] : (sorted[half - 1] + sorted[half]) / 2.0
+    const min = sorted[0];
+    const max = sorted[sorted.length - 1]
+    return { median, mean, min, max, sorted }
+  }
+
+  preCalc = (data) => {
+    const dataSortedByDate =  data.sort((a, b) => new Date(a.ft) - new Date(b.ft))
+    console.log(dataSortedByDate)
+    const len = dataSortedByDate.length;
+    const thirtyDays = {
+      title: '30 days',
+      range: [len - 30 * 2, len ],
+    }
+    const sevenDays = {
+      title: '7 days',
+      range: [len - 7 * 2, len ],
+    };
+
+    // these are off by 7 because I don't want the release date I want 7 days after
+     // What should be done is I slice the datasortedbydate into seperate arrays here and filter by date ranges to include
+     // and passs that to the calc function instead of ranges to slice.  Will be more future proof that way
+    const nov6 = {
+      title: 'nov6',
+      range: [len - 14 * 2, len -  7 * 2],
+    };
+    const oct23 = {
+      title: 'oct23',
+      range: [len - 21 * 2, len -  14 * 2],
+    };
+    const oct9 = {
+      title: 'oct9',
+      range: [len - 49 * 2, len -  21 * 2],
+    };
+    const sept25 = {
+      title: 'sept25',
+      range: [len - 63 * 2, len -  49 * 2],
+    };
+    [thirtyDays, sevenDays, nov6, oct23, oct9, sept25].forEach(({ title, range }) =>
+      console.log({ [title]: this.calc(dataSortedByDate, range) })
     )
   }
 
