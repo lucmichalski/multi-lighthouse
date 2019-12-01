@@ -11,9 +11,8 @@ const { topsites } = require('./.response.js')
   // await setShowcaseUrls()
   // await setTopSites()
   // await setShowcaseCategories()
-  // await setUserUrls()
-
-  return
+  await setUserUrls()
+  // return
 })()
 
 function setUserUrls() {
@@ -24,16 +23,23 @@ function setUserUrls() {
     'https://www-dev.landsofamerica.com/Texas/all-land',
     'https://www-dev.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158',
     'https://www-dev.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
+    'https://www.landsofamerica.com/amp/',
+    'https://www.landsofamerica.com/amp/Texas',
+    'https://www.landsofamerica.com/amp/united-states/all-land',
+    'https://www.landsofamerica.com/amp/texas/all-land',
     'https://www.landsofamerica.com',
+    'https://www.landsofamerica.com/sitemap',
+    'https://www.landsofamerica.com/sitemap/texas',
     'https://www.landsofamerica.com/Texas',
     'https://www.landsofamerica.com/United-States/all-land',
     'https://www.landsofamerica.com/Texas/all-land',
     'https://www.landsofamerica.com/property/3015-acres-in-Dimmit-County-Texas/4398158',
     'https://www.landsofamerica.com/property/36-acres-in-Apache-County-Arizona/2876090',
-    `https://www.landsoftexas.com/Texas`,
+    'https://www.landsoftexas.com',
+    'https://www.landsoftexas.com/Texas',
     'https://www.landsoftexas.com/texas/all-land',
     'https://www.landsoftexas.com/property/Hope-Drive-Cleveland-Texas-77327/7019079',
-    `https://www.landwatch.com`,
+    'https://www.landwatch.com',
     'https://www.landwatch.com/Texas_land_for_sale',
     'https://www.landwatch.com/Land_For_Sale',
     'https://www.landwatch.com/Arizona-Farms-and-Ranches-for-sale/pid/25009743',
@@ -204,19 +210,19 @@ function setTopSites() {
 //////////////////////////////////////
 /////////////////////////////////////
 //Helpers
-async function deleteUserData() {
-  const users = await getUsers()
-  for (const user of users) {
-    const lhrRef = db
-      .ref()
-      .child(user)
-      .child('lhr')
-    lhrRef.remove()
-    const reportRef = db
-      .ref()
-      .child(user)
-      .child('report')
-    reportRef.remove()
-  }
-  return
-}
+// async function deleteUserData() {
+//   const users = await getUsers()
+//   for (const user of users) {
+//     const lhrRef = db
+//       .ref()
+//       .child(user)
+//       .child('lhr')
+//     lhrRef.remove()
+//     const reportRef = db
+//       .ref()
+//       .child(user)
+//       .child('report')
+//     reportRef.remove()
+//   }
+//   return
+// }
