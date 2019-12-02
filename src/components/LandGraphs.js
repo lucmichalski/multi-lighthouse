@@ -149,7 +149,8 @@ class LandGraphs extends Component {
   preCalc = data => {
   
     // today needs to be any today
-    const today = new Date(2019, 11, 2)
+    const today = new Date()
+    const thirtyDaysPrior = new Date().setDate(today.getDate()-30)
     const nov_20_2019 = new Date(2019, 10, 20)
     const nov_6_2019 = new Date(2019, 10, 6)
     const oct_23_2019 = new Date(2019, 9, 23)
@@ -158,7 +159,7 @@ class LandGraphs extends Component {
 
     const thirtyDays = {
       title: '30 days',
-      range: this.getDateRange(data, new Date(2019, 10, 2), today),
+      range: this.getDateRange(data, thirtyDaysPrior, today),
     }
     const nov20Sprint = {
       title: 'nov20',
