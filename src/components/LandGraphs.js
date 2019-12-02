@@ -100,7 +100,7 @@ class LandGraphs extends Component {
         if (exists) {
           const data = snapshot.val()
           const dataArr = Object.entries(data)
-          this.preCalc(dataArr);
+          this.preCalc(dataArr)
 
           this.setState(state => ({
             urlLHRData: {
@@ -124,55 +124,71 @@ class LandGraphs extends Component {
     )
   }
 
-  calc = (data, range) => {
-    const sliced = data.slice(range[0], range[1])
-    const sorted = sliced
+  calc = range => {
+    const sorted = [...range]
       .sort((a, b) => a[1].perf.score - b[1].perf.score)
       .map(item => item[1].perf.score)
-    console.log(sorted.length)
     const mean = sorted.reduce((acc, item) => acc + item) / sorted.length
     const half = Math.floor(sorted.length / 2)
     const median =
       sorted.length % 2 ? sorted[half] : (sorted[half - 1] + sorted[half]) / 2.0
-    const min = sorted[0];
+    const min = sorted[0]
     const max = sorted[sorted.length - 1]
     return { median, mean, min, max, sorted }
   }
 
-  preCalc = (data) => {
-    const dataSortedByDate =  data.sort((a, b) => new Date(a.ft) - new Date(b.ft))
-    console.log(dataSortedByDate)
-    const len = dataSortedByDate.length;
+  getDateRange = (dataArr, start, end) => {
+    return dataArr.filter(data => {
+      const dataDate = new Date(data[1].ft)
+      return dataDate >= start && dataDate < end
+    }).sort(
+      (a, b) => new Date(a[1].ft) - new Date(b[1].ft) // Only sorting to check accuracy of dates
+    )
+  }
+
+  preCalc = data => {
+  
+    // today needs to be any today
+    const today = new Date(2019, 11, 2)
+    const nov_20_2019 = new Date(2019, 10, 20)
+    const nov_6_2019 = new Date(2019, 10, 6)
+    const oct_23_2019 = new Date(2019, 9, 23)
+    const oct_9_2019 = new Date(2019, 9, 9)
+    const sept_25_2019 = new Date(2019, 8, 25)
+
     const thirtyDays = {
       title: '30 days',
-      range: [len - 30 * 2, len ],
+      range: this.getDateRange(data, new Date(2019, 10, 2), today),
     }
-    const sevenDays = {
-      title: '7 days',
-      range: [len - 7 * 2, len ],
-    };
-
-    // these are off by 7 because I don't want the release date I want 7 days after
-     // What should be done is I slice the datasortedbydate into seperate arrays here and filter by date ranges to include
-     // and passs that to the calc function instead of ranges to slice.  Will be more future proof that way
-    const nov6 = {
+    const nov20Sprint = {
+      title: 'nov20',
+      range: this.getDateRange(data, nov_20_2019, today),
+    }
+    const nov6Sprint = {
       title: 'nov6',
-      range: [len - 14 * 2, len -  7 * 2],
-    };
-    const oct23 = {
+      range: this.getDateRange(data, nov_6_2019, nov_20_2019),
+    }
+    const oct23Sprint = {
       title: 'oct23',
-      range: [len - 21 * 2, len -  14 * 2],
-    };
-    const oct9 = {
+      range: this.getDateRange(data, oct_23_2019, nov_6_2019),
+    }
+    const oct9Sprint = {
       title: 'oct9',
-      range: [len - 49 * 2, len -  21 * 2],
-    };
-    const sept25 = {
+      range: this.getDateRange(data, oct_9_2019, oct_23_2019),
+    }
+    const sept25Sprint = {
       title: 'sept25',
-      range: [len - 63 * 2, len -  49 * 2],
-    };
-    [thirtyDays, sevenDays, nov6, oct23, oct9, sept25].forEach(({ title, range }) =>
-      console.log({ [title]: this.calc(dataSortedByDate, range) })
+      range: this.getDateRange(data, sept_25_2019, oct_9_2019),
+    }
+    ;[
+      thirtyDays,
+      nov20Sprint,
+      nov6Sprint,
+      oct23Sprint,
+      oct9Sprint,
+      sept25Sprint,
+    ].forEach(({ title, range }) =>
+      console.log({ [title]: this.calc(range), range })
     )
   }
 
