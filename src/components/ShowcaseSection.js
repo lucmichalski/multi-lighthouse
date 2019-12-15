@@ -81,6 +81,7 @@ const ShowcaseSection = ({
                   ttfb,
                   tbt,
                   mpfid,
+                  captcha,
                 } = currentScores
                 if (perf.score === 0) {
                   return null
@@ -121,6 +122,12 @@ const ShowcaseSection = ({
                       <H4>{decodedURL}</H4>
                       {currentScores.err !== 0 && (
                         <Err>{currentScores.err}</Err>
+                      )}
+                      {captcha && captcha.value === 0 && (
+                        <Err>
+                          Captcha was found on page load. This may provide
+                          innacurate results
+                        </Err>
                       )}
                     </URLSection>
 

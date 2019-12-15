@@ -30,6 +30,7 @@ const defaultMetrics = Object.freeze({
   ttfb: { score: 0, value: 0 },
   tbt: { score: 0, value: 0 },
   mpfid: { score: 0, value: 0 },
+  captcha: { score: 0, value: 0 },
 })
 
 const initialState = {
@@ -45,6 +46,7 @@ const initialState = {
     ttfb: 'Time To First Byte',
     tbt: 'Total Blocking Time',
     mpfid: 'Max Potential First Input Delay',
+    captcha: 'Has Captcha on Page Load',
   }),
   errorUrl: '',
   error: false,
