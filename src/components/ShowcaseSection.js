@@ -123,10 +123,10 @@ const ShowcaseSection = ({
                       {currentScores.err !== 0 && (
                         <Err>{currentScores.err}</Err>
                       )}
-                      {captcha && captcha.value === 0 && (
+                      {captcha && captcha.val === 0 && (
                         <Err>
-                          Captcha was found on page load. This may provide
-                          innacurate results
+                          Captcha was found on page load. This may interfere
+                          with performance scores
                         </Err>
                       )}
                     </URLSection>
