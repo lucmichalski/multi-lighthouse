@@ -20,7 +20,7 @@ module.exports = {
       resolve: `gatsby-plugin-manifest`,
       options: {
         name: `All the Lighthouses`,
-        short_name: `ATLH`,
+        short_name: `All the Lighthouses`,
         start_url: `/`,
         background_color: `#663399`,
         theme_color: `#663399`,

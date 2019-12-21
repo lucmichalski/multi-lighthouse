@@ -31,6 +31,10 @@ const defaultMetrics = Object.freeze({
   tbt: { score: 0, value: 0 },
   mpfid: { score: 0, value: 0 },
   captcha: { score: 0, value: 0 },
+  'field-fcp': { score: 0, value: 0, items: [] },
+  'field-fid': { score: 0, value: 0, items: [] },
+  'field-fcp-origin': { score: 0, value: 0, items: [] },
+  'field-fid-origin': { score: 0, value: 0, items: [] },
 })
 
 const initialState = {
@@ -47,6 +51,10 @@ const initialState = {
     tbt: 'Total Blocking Time',
     mpfid: 'Max Potential First Input Delay',
     captcha: 'Has Captcha on Page Load',
+    'field-fcp': 'Field First Contentful Paint',
+    'field-fid': 'Field First Input Delay',
+    'field-fcp-origin': 'Field First Contentful Paint Origin',
+    'field-fid-origin': 'Field First Input Delay Origin',
   }),
   errorUrl: '',
   error: false,
@@ -157,7 +165,7 @@ class Main extends Component {
                 <ShowCaseSection
                   key={category}
                   loading={loading}
-                  metrics={metrics}
+                  metrics={metrics.filter(metric => metric !== 'captcha')}
                   getShowcaseData={this.getShowcaseData}
                   showcaseData={showcaseData}
                   category={category}
