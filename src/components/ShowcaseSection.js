@@ -82,6 +82,10 @@ const ShowcaseSection = ({
                   tbt,
                   mpfid,
                   captcha,
+                  'field-fcp': fieldFCP,
+                  'field-fid': fieldFID,
+                  'field-fcp-origin': fieldFCPOrigin,
+                  'field-fid-origin': fieldFIDOrigin,
                 } = currentScores
                 if (perf.score === 0) {
                   return null
@@ -97,6 +101,10 @@ const ShowcaseSection = ({
                   ttfb: avgTtfb,
                   tbt: avgTbt,
                   mpfid: avgMpfid,
+                  fieldFCP: avgFieldFCP,
+                  fieldFID: avgFieldFID,
+                  fieldFCPOrigin: avgFieldFCPOrigin,
+                  fieldFIDOrigin: avgFieldFIDOrigin,
                 } = averageScores
                 const scores = [
                   [perf, avgPerf],
@@ -109,6 +117,10 @@ const ShowcaseSection = ({
                   [ttfb, avgTtfb],
                   [tbt, avgTbt],
                   [mpfid, avgMpfid],
+                  [fieldFCP, avgFieldFCP],
+                  [fieldFID, avgFieldFID],
+                  [fieldFCPOrigin, avgFieldFCPOrigin],
+                  [fieldFIDOrigin, avgFieldFIDOrigin],
                 ]
 
                 return (
@@ -133,7 +145,7 @@ const ShowcaseSection = ({
 
                     {scores &&
                       scores.map(([current, avg], index) => {
-                        if (!current || !avg) {
+                        if (!current) {
                           return null
                         }
                         const change = getPercentageChange(current.val, avg)
@@ -147,8 +159,16 @@ const ShowcaseSection = ({
                             ? true
                             : false
                         const changeStr = change.toString()
+
                         return (
                           <SummaryContainer key={metrics[index]}>
+                            {metrics[index].includes('field') &&
+                              currentScores[metrics[index]].items.map(item => (
+                                <div key={item.category}>
+                                  {item.category}
+                                  {item.distribution}
+                                </div>
+                              ))}
                             <Guage
                               label={value => `${value}/100`}
                               dialStartAngle={90}
