@@ -1,27 +1,29 @@
 const base64 = require('base-64')
 const lighthouse = require('lighthouse')
 const puppeteer = require('puppeteer')
-
+const { PubSub } = require('@google-cloud/pubsub')
 const { db } = require('./firebase')
 
-const { PubSub } = require('@google-cloud/pubsub')
-
+// eslint-disable-next-line import/newline-after-import
 ;(async function onStartup() {
   console.time('execution')
-  await runLHSetDataForAllUsersUrls()
+  // await runLHSetDataForAllUsersUrls()
   await getShowcaseUrlsRunLighthouseSetData()
-  await triggerPubSub()
+  // await triggerPubSub()
   console.timeEnd('execution')
   ///UTILITY///
-  // await testLH()
+  // (await testLH())
   return
 })()
 
+// eslint-disable-next-line no-unused-vars
 async function testLH() {
-  const lh = await launchPuppeteerRunLighthouse('https://www.zillow.com')
+  const lh = await launchPuppeteerRunLighthouse('https://www.alipay.com')
+  console.log(lh.lhr.audits, 'lh')
   const { dbData } = transformData(lh)
   console.log(dbData)
 }
+// eslint-disable-next-line no-unused-vars
 async function triggerPubSub() {
   // Creates a client
   const pubsub = new PubSub()
@@ -49,18 +51,23 @@ async function launchPuppeteerRunLighthouse(url) {
     })
     const config = {
       extends: 'lighthouse:default',
-      plugins: ['lighthouse-plugin-has-captcha-on-page-load'],
+      plugins: [
+        'lighthouse-plugin-has-captcha-on-page-load',
+        'lighthouse-plugin-field-performance',
+      ],
       settings: {
         maxWaitForFcp: 30 * 1000,
         onlyCategories: [
           'performance',
           'lighthouse-plugin-has-captcha-on-page-load',
+          'lighthouse-plugin-field-performance',
         ],
+        psiToken: 'AIzaSyBSKUoS5lsZwTusG6KnI0KSM3I10X0JGjg',
       },
     }
 
     const port = browser._connection._url.slice(15, 20)
-    const { lhr, report } = await lighthouse(
+    const { lhr } = await lighthouse(
       url,
       {
         port,
@@ -77,14 +84,14 @@ async function launchPuppeteerRunLighthouse(url) {
         const err = `Requested url does not match final url.\nRequested Url: ${
           lhr.requestedUrl
         }\nFinal Url: ${lhr.finalUrl}`
-        return { report, lhr, err }
+        return { lhr, err }
       }
       console.log(
         'Successful LHR',
         lhr.requestedUrl,
         lhr.categories.performance.score
       )
-      return { report, lhr, err: 0 }
+      return { lhr, err: 0 }
     }
     const runtimeError = lhr && lhr.runtimeError
     const errObj = JSON.stringify({ ...runtimeError, url })
@@ -94,6 +101,7 @@ async function launchPuppeteerRunLighthouse(url) {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 function getDefinedData(data) {
   let lighthouseReports = {}
 
@@ -129,6 +137,10 @@ function transformData(lighthouse) {
     'max-potential-fid': maxPotentialFid,
     'time-to-first-byte': timeToFirstByte,
     'has-captcha-on-page-load': hasCaptcha,
+    'field-fcp': fieldFCP,
+    'field-fid': fieldFID,
+    'field-fcp-origin': fieldFCPOrigin,
+    'field-fid-origin': fieldFIDOrigin,
   } = audits
 
   const auditData = {
@@ -176,6 +188,34 @@ function transformData(lighthouse) {
       val: parseFloat(hasCaptcha.score * 100),
       score: Math.round(hasCaptcha.score * 100),
     },
+    'field-fcp': fieldFCP.numericValue
+      ? {
+          val: parseFloat(fieldFCP.numericValue.toFixed(2)),
+          score: Math.round(fieldFCP.score * 100),
+          items: fieldFCP.details.items,
+        }
+      : { error: 'No Data' },
+    'field-fid': fieldFID.numericValue
+      ? {
+          val: parseFloat(fieldFID.numericValue.toFixed(2)),
+          score: Math.round(fieldFID.score * 100),
+          items: fieldFID.details.items,
+        }
+      : { error: 'No Data' },
+    'field-fcp-origin': fieldFCPOrigin.numericValue
+      ? {
+          val: parseFloat(fieldFCPOrigin.numericValue.toFixed(2)),
+          score: Math.round(fieldFCPOrigin.score * 100),
+          items: fieldFCPOrigin.details.items,
+        }
+      : { error: 'No Data' },
+    'field-fid-origin': fieldFIDOrigin.numericValue
+      ? {
+          val: parseFloat(fieldFIDOrigin.numericValue.toFixed(2)),
+          score: Math.round(fieldFIDOrigin.score * 100),
+          items: fieldFIDOrigin.details.items,
+        }
+      : { error: 'No Data' },
   }
 
   const dbData = {
@@ -291,6 +331,7 @@ async function getShowcaseUrlsRunLighthouseSetData() {
   // }
 
   //Real Deal
+  // eslint-disable-next-line no-unused-vars
   for (const [url, val] of showcaseUrls) {
     try {
       const decodedUrl = base64.decode(url)
@@ -312,6 +353,7 @@ async function getShowcaseUrlsRunLighthouseSetData() {
     } catch (error) {
       console.log(
         error,
+        base64.decode(url),
         'Error while running lighthouse and setting data for showcases'
       )
     }
