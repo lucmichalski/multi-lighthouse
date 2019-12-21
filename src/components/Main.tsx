@@ -6,11 +6,6 @@ import Error from './Error'
 import ShowCaseSection from './ShowcaseSection'
 import { MainWrapper, InnerWrapper } from './MainStyles'
 
-interface State {
-  categories: string[]
-  loading: boolean
-}
-
 const config = {
   apiKey: process.env.GATSBY_FIREBASE_API_KEY,
   authDomain: process.env.GATSBY_FIREBASE_AUTH_DOMAIN,
@@ -82,14 +77,20 @@ const initialState = {
   ],
   loading: false,
 }
-class Main extends Component<any, State> {
+export type GlobalState = typeof initialState
+
+class Main extends Component<{}, GlobalState> {
   state = { ...initialState }
 
-  getShowcaseData = async (category: string) => {
+  getShowcaseData = async (category: GlobalState['categories'][0]) => {
     const { showcaseData } = this.state
 
-    if (showcaseData[category]) {
-      return
+    if (
+      (showcaseData as { [key: string]: typeof defaultMetrics | string })[
+        category
+      ]
+    ) {
+      return null
     } else {
       this.setState({ loading: true })
       const URLs = await this.getCategoryURLs(category)
@@ -135,7 +136,7 @@ class Main extends Component<any, State> {
     }
   }
 
-  async getCategoryURLs(category: string) {
+  async getCategoryURLs(category: string): Promise<string[] | null> {
     const db = firebase.database()
     const ref = db
       .ref(`showcaseCategories`)
@@ -147,9 +148,10 @@ class Main extends Component<any, State> {
       const URLs = Object.keys(await urlsVal)
       return URLs
     }
+    return null
   }
 
-  render() {
+  render(): JSX.Element {
     const {
       metrics,
       metricsDisplayNames,

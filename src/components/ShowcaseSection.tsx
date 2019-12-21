@@ -8,6 +8,12 @@ import {
   Metric,
   Buffer,
 } from './ShowcaseSectionStyles'
+import { GlobalState } from './Main'
+
+interface Props extends Partial<GlobalState> {
+  category: GlobalState['categories'][0]
+  getShowcaseData: (category: GlobalState['categories'][0]) => void
+}
 
 const ShowcaseSection = ({
   category,
@@ -16,7 +22,7 @@ const ShowcaseSection = ({
   metrics,
   metricsDisplayNames,
   loading,
-}) => {
+}: Props): JSX.Element => {
   const [isOpen, toggleOpen] = useState(false)
   const getShowcaseDataAndOpen = () => {
     getShowcaseData(category)
@@ -31,7 +37,7 @@ const ShowcaseSection = ({
         onClick={
           !showcaseData[category] && !isOpen
             ? getShowcaseDataAndOpen
-            : () => toggleOpen(!isOpen)
+            : (): void => toggleOpen(!isOpen)
         }
       >
         {category}
@@ -47,15 +53,20 @@ const ShowcaseSection = ({
         <ShowcaseContainer>
           <Header>
             <Buffer />
-            {metrics.map(metric => (
+            {metrics.map((metric: any) => (
               <Metric key={metric}>{metricsDisplayNames[metric]}</Metric>
             ))}
           </Header>
           {showcaseData[category] &&
             showcaseData[category].map(
               (
-                { averageScores, decodedURL, currentScores, pastAverageScores },
-                URLindex
+                {
+                  averageScores,
+                  decodedURL,
+                  currentScores,
+                  pastAverageScores,
+                }: Props['showcaseData'],
+                URLindex: number
               ) => (
                 <ShowcaseRow
                   key={URLindex}
