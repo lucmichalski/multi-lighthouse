@@ -3,6 +3,7 @@
   "private": true,
   "description": "",
   "version": "0.1.0",
+  "typings": "src/pages/index",
   "author": "",
   "dependencies": {
     "axios": "^0.18.0",
@@ -18,6 +19,7 @@
     "gatsby-plugin-react-helmet": "^3.0.2",
     "gatsby-plugin-sharp": "^2.0.14",
     "gatsby-plugin-styled-components": "^3.0.4",
+    "gatsby-plugin-typescript": "^2.1.23",
     "gatsby-source-filesystem": "^2.0.8",
     "gatsby-transformer-sharp": "^2.1.8",
     "is-url": "^1.2.4",
@@ -40,17 +42,23 @@
     "start": "npm run develop",
     "format": "prettier --write \"src/**/*.js\"",
     "test": "echo \"Write tests! -> https://gatsby.app/unit-testing\"",
-    "lh": "lighthouse-ci"
+    "lh": "lighthouse-ci",
+    "type-check": "tsc"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.12.0",
+    "@typescript-eslint/parser": "^2.12.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.12.0",
     "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.1.2",
-    "eslint-plugin-react": "^7.12.3",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.17.0",
     "lighthouse-ci": "git+https://github.com/ebidel/lighthouse-ci.git",
-    "prettier": "^1.15.2"
+    "prettier": "^1.15.2",
+    "typescript": "^3.7.4"
   },
   "repository": {
     "type": "git",

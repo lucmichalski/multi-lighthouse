@@ -7,9 +7,9 @@ const { db } = require('./firebase')
 // eslint-disable-next-line import/newline-after-import
 ;(async function onStartup() {
   console.time('execution')
-  // await runLHSetDataForAllUsersUrls()
+  await runLHSetDataForAllUsersUrls()
   await getShowcaseUrlsRunLighthouseSetData()
-  // await triggerPubSub()
+  await triggerPubSub()
   console.timeEnd('execution')
   ///UTILITY///
   // (await testLH())

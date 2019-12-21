@@ -6,6 +6,11 @@ import Error from './Error'
 import ShowCaseSection from './ShowcaseSection'
 import { MainWrapper, InnerWrapper } from './MainStyles'
 
+interface State {
+  categories: string[]
+  loading: boolean
+}
+
 const config = {
   apiKey: process.env.GATSBY_FIREBASE_API_KEY,
   authDomain: process.env.GATSBY_FIREBASE_AUTH_DOMAIN,
@@ -77,10 +82,10 @@ const initialState = {
   ],
   loading: false,
 }
-class Main extends Component {
+class Main extends Component<any, State> {
   state = { ...initialState }
 
-  getShowcaseData = async category => {
+  getShowcaseData = async (category: string) => {
     const { showcaseData } = this.state
 
     if (showcaseData[category]) {
@@ -130,7 +135,7 @@ class Main extends Component {
     }
   }
 
-  async getCategoryURLs(category) {
+  async getCategoryURLs(category: string) {
     const db = firebase.database()
     const ref = db
       .ref(`showcaseCategories`)
