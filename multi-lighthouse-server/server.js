@@ -8,9 +8,9 @@ const { PubSub } = require('@google-cloud/pubsub')
 
 ;(async function onStartup() {
   console.time('execution')
-  // await runLHSetDataForAllUsersUrls()
+  await runLHSetDataForAllUsersUrls()
   await getShowcaseUrlsRunLighthouseSetData()
-  // await triggerPubSub()
+  await triggerPubSub()
   console.timeEnd('execution')
   ///UTILITY///
   // await testLH()
@@ -18,9 +18,7 @@ const { PubSub } = require('@google-cloud/pubsub')
 })()
 
 async function testLH() {
-  const lh = await launchPuppeteerRunLighthouse(
-    'https://www.landsofamerica.com'
-  )
+  const lh = await launchPuppeteerRunLighthouse('https://www.zillow.com')
   const { dbData } = transformData(lh)
   console.log(dbData)
 }
