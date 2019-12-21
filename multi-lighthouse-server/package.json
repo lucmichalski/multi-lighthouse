@@ -15,7 +15,8 @@
     "dotenv": "^8.0.0",
     "express": "^4.16.4",
     "firebase-admin": "^7.3.0",
-    "lighthouse": "^5.2.0",
+    "lighthouse": "^5.6.0",
+    "lighthouse-plugin-has-captcha-on-page-load": "^1.0.4",
     "node-fetch": "^2.5.0",
     "puppeteer": "^1.15.0"
   },

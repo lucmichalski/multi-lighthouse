@@ -1,5 +1,4 @@
 const base64 = require('base-64')
-
 const lighthouse = require('lighthouse')
 const puppeteer = require('puppeteer')
 
@@ -14,9 +13,15 @@ const { PubSub } = require('@google-cloud/pubsub')
   await triggerPubSub()
   console.timeEnd('execution')
   ///UTILITY///
-  //await launchPuppeteerRunLighthouse('https://www.movoto.com')
+  // await testLH()
   return
 })()
+
+async function testLH() {
+  const lh = await launchPuppeteerRunLighthouse('https://www.zillow.com')
+  const { dbData } = transformData(lh)
+  console.log(dbData)
+}
 async function triggerPubSub() {
   // Creates a client
   const pubsub = new PubSub()
@@ -44,9 +49,13 @@ async function launchPuppeteerRunLighthouse(url) {
     })
     const config = {
       extends: 'lighthouse:default',
+      plugins: ['lighthouse-plugin-has-captcha-on-page-load'],
       settings: {
         maxWaitForFcp: 30 * 1000,
-        onlyCategories: ['performance'],
+        onlyCategories: [
+          'performance',
+          'lighthouse-plugin-has-captcha-on-page-load',
+        ],
       },
     }
 
@@ -68,7 +77,6 @@ async function launchPuppeteerRunLighthouse(url) {
         const err = `Requested url does not match final url.\nRequested Url: ${
           lhr.requestedUrl
         }\nFinal Url: ${lhr.finalUrl}`
-        console.log(err)
         return { report, lhr, err }
       }
       console.log(
@@ -120,6 +128,7 @@ function transformData(lighthouse) {
     'total-blocking-time': totalBlockingTime,
     'max-potential-fid': maxPotentialFid,
     'time-to-first-byte': timeToFirstByte,
+    'has-captcha-on-page-load': hasCaptcha,
   } = audits
 
   const auditData = {
@@ -162,6 +171,10 @@ function transformData(lighthouse) {
     perf: {
       val: Math.round(performance.score * 100),
       score: Math.round(performance.score * 100),
+    },
+    captcha: {
+      val: parseFloat(hasCaptcha.score * 100),
+      score: Math.round(hasCaptcha.score * 100),
     },
   }
 
