@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react'
+import FieldInfo from './FieldInfo'
 import LineGraph from './LineGraph'
 import Guage from './Guage'
 import { H3, H4 } from './MainStyles'
@@ -118,13 +119,10 @@ const ShowcaseRow = ({
                 current.error
               ) : (
                 <Fragment>
-                  {metrics[index].includes('field') &&
-                    currentScores[metrics[index]].items.map(item => (
-                      <div key={item.category}>
-                        {item.category}
-                        {item.distribution}
-                      </div>
-                    ))}
+                  {metrics[index].includes('field') && (
+                    <FieldInfo current={current} />
+                  )}
+
                   <Guage
                     label={value => `${value}/100`}
                     dialStartAngle={90}
