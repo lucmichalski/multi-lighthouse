@@ -1,3 +1,4 @@
+require('dotenv').config()
 const base64 = require('base-64')
 const lighthouse = require('lighthouse')
 const puppeteer = require('puppeteer')
@@ -62,7 +63,7 @@ async function launchPuppeteerRunLighthouse(url) {
           'lighthouse-plugin-has-captcha-on-page-load',
           'lighthouse-plugin-field-performance',
         ],
-        psiToken: 'AIzaSyBSKUoS5lsZwTusG6KnI0KSM3I10X0JGjg',
+        psiToken: process.env.PAGE_SPEED_INSIGHTS,
       },
     }
 
