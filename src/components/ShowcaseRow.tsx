@@ -134,7 +134,7 @@ const ShowcaseRow = ({
                       ? `${current.val} total`
                       : `${(current.val * 0.001).toFixed(2)}s`}
                   </Time>
-                  {change !== 0 && (
+                  {change !== 0 && changeStr !== 'NaN' && (
                     <Change isIncrease={isIncrease}>
                       {changeStr[0] === '-' ? changeStr.slice(1) : changeStr}%
                       {isIncrease ? <span>&darr;</span> : <span>&uarr;</span>}

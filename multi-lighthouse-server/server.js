@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable @typescript-eslint/no-var-requires */
 require('dotenv').config()
 const base64 = require('base-64')
 const lighthouse = require('lighthouse')
