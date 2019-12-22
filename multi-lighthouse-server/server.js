@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable @typescript-eslint/no-var-requires */
+require('dotenv').config()
 const base64 = require('base-64')
 const lighthouse = require('lighthouse')
 const puppeteer = require('puppeteer')
@@ -7,9 +10,9 @@ const { db } = require('./firebase')
 // eslint-disable-next-line import/newline-after-import
 ;(async function onStartup() {
   console.time('execution')
-  // await runLHSetDataForAllUsersUrls()
+  await runLHSetDataForAllUsersUrls()
   await getShowcaseUrlsRunLighthouseSetData()
-  // await triggerPubSub()
+  await triggerPubSub()
   console.timeEnd('execution')
   ///UTILITY///
   // (await testLH())
@@ -62,7 +65,7 @@ async function launchPuppeteerRunLighthouse(url) {
           'lighthouse-plugin-has-captcha-on-page-load',
           'lighthouse-plugin-field-performance',
         ],
-        psiToken: 'AIzaSyBSKUoS5lsZwTusG6KnI0KSM3I10X0JGjg',
+        psiToken: process.env.PAGE_SPEED_INSIGHTS,
       },
     }
 

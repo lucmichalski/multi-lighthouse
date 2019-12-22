@@ -100,7 +100,7 @@ class LandGraphs extends Component {
         if (exists) {
           const data = snapshot.val()
 
-          this.setState(state => ({
+          this.setState((state: typeof initialState) => ({
             urlLHRData: { ...state.urlLHRData, [url]: Object.entries(data) },
             error: false,
             fetching: false,
@@ -225,7 +225,6 @@ class LandGraphs extends Component {
               style={{
                 width: '100%',
                 height: '100%',
-                overflowScrolling: 'touch',
                 WebkitOverflowScrolling: 'touch',
                 overflow: 'scroll',
               }}

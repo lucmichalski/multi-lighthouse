@@ -63,7 +63,11 @@ const BarGraphTimeline = ({
             barWidth={0.8}
             color={color}
             data={[...data]
-              .sort((a, b) => new Date(a.ft) - new Date(b.ft))
+              .sort(
+                (a: { ft: number }, b: { ft: number }) =>
+                  ((new Date(a.ft) as unknown) as number) -
+                  ((new Date(b.ft) as unknown) as number)
+              )
               .map(item => ({
                 x: item.ft,
                 y: item[metric] && item[metric].val ? item[metric].val : 0,

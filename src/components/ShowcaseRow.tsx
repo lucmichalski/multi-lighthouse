@@ -14,7 +14,7 @@ import {
 
 function getPercentageChange(oldNumber, newNumber) {
   const decreaseValue = oldNumber - newNumber
-  return ((decreaseValue / oldNumber) * 100).toFixed(2)
+  return (decreaseValue / oldNumber) * 100
 }
 
 const ShowcaseRow = ({
@@ -111,7 +111,7 @@ const ShowcaseRow = ({
               : change > 0
               ? true
               : false
-          const changeStr = change.toString()
+          const changeStr = change.toFixed(2)
 
           return (
             <SummaryContainer key={metrics[index]}>
@@ -134,7 +134,7 @@ const ShowcaseRow = ({
                       ? `${current.val} total`
                       : `${(current.val * 0.001).toFixed(2)}s`}
                   </Time>
-                  {change !== 'NaN' && (
+                  {change !== 0 && changeStr !== 'NaN' && (
                     <Change isIncrease={isIncrease}>
                       {changeStr[0] === '-' ? changeStr.slice(1) : changeStr}%
                       {isIncrease ? <span>&darr;</span> : <span>&uarr;</span>}

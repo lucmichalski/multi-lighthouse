@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Form, Input, Button, InputWrapper, Plus } from './SearchStyles'
-import lighthouseImg from '../images/lighthouse.png'
+// import lighthouseImg from '../images/lighthouse.png'
 
 const Search = ({ input, onChange, onSubmit, placeholder, UrlSearch }) => {
   return (
@@ -22,11 +22,7 @@ const Search = ({ input, onChange, onSubmit, placeholder, UrlSearch }) => {
           type="button"
           onClick={() => onSubmit()}
         >
-          {UrlSearch ? (
-            <Plus>&#43;</Plus>
-          ) : (
-            <img src={lighthouseImg} alt="Logo" />
-          )}
+          {UrlSearch ? <Plus>&#43;</Plus> : <img src={null} alt="Logo" />}
         </Button>
       </InputWrapper>
     </Form>

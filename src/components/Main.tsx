@@ -77,14 +77,20 @@ const initialState = {
   ],
   loading: false,
 }
-class Main extends Component {
+export type GlobalState = typeof initialState
+
+class Main extends Component<{}, GlobalState> {
   state = { ...initialState }
 
-  getShowcaseData = async category => {
+  getShowcaseData = async (category: GlobalState['categories'][0]) => {
     const { showcaseData } = this.state
 
-    if (showcaseData[category]) {
-      return
+    if (
+      (showcaseData as { [key: string]: typeof defaultMetrics | string })[
+        category
+      ]
+    ) {
+      return null
     } else {
       this.setState({ loading: true })
       const URLs = await this.getCategoryURLs(category)
@@ -130,7 +136,7 @@ class Main extends Component {
     }
   }
 
-  async getCategoryURLs(category) {
+  async getCategoryURLs(category: string): Promise<string[] | null> {
     const db = firebase.database()
     const ref = db
       .ref(`showcaseCategories`)
@@ -142,9 +148,10 @@ class Main extends Component {
       const URLs = Object.keys(await urlsVal)
       return URLs
     }
+    return null
   }
 
-  render() {
+  render(): JSX.Element {
     const {
       metrics,
       metricsDisplayNames,
