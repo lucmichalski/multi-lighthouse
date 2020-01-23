@@ -138,59 +138,70 @@ class LandGraphs extends Component {
   }
 
   getDateRange = (dataArr, start, end) => {
-    return dataArr.filter(data => {
-      const dataDate = new Date(data[1].ft)
-      return dataDate >= start && dataDate < end
-    }).sort(
-      (a, b) => new Date(a[1].ft) - new Date(b[1].ft) // Only sorting to check accuracy of dates
-    )
+    return dataArr
+      .filter(data => {
+        const dataDate = new Date(data[1].ft)
+        return dataDate >= start && dataDate < end
+      })
+      .sort(
+        (a, b) => new Date(a[1].ft) - new Date(b[1].ft) // Only sorting to check accuracy of dates
+      )
   }
 
   preCalc = data => {
-  
-    // today needs to be any today
-    const today = new Date()
-    const thirtyDaysPrior = new Date().setDate(today.getDate()-30)
-    const nov_20_2019 = new Date(2019, 10, 20)
-    const nov_6_2019 = new Date(2019, 10, 6)
-    const oct_23_2019 = new Date(2019, 9, 23)
-    const oct_9_2019 = new Date(2019, 9, 9)
-    const sept_25_2019 = new Date(2019, 8, 25)
+    // const today = new Date()
+    // const thirtyDaysPrior = new Date().setDate(today.getDate() - 30)
+    const jan_22_2020 = new Date(2020, 0, 22)
+    const jan_8_2020 = new Date(2020, 0, 8)
+    // const dec_11_2019 = new Date(2019, 11, 11)
+    // const nov_20_2019 = new Date(2019, 10, 20)
+    // const nov_6_2019 = new Date(2019, 10, 6)
+    // const oct_23_2019 = new Date(2019, 9, 23)
+    // const oct_9_2019 = new Date(2019, 9, 9)
+    // const sept_25_2019 = new Date(2019, 8, 25)
 
-    const thirtyDays = {
-      title: '30 days',
-      range: this.getDateRange(data, thirtyDaysPrior, today),
+    // const thirtyDays = {
+    //   title: '30 days',
+    //   range: this.getDateRange(data, thirtyDaysPrior, today),
+    // }
+    const jan22Sprint = {
+      title: 'jan22',
+      range: this.getDateRange(data, jan_8_2020, jan_22_2020),
     }
-    const nov20Sprint = {
-      title: 'nov20',
-      range: this.getDateRange(data, nov_20_2019, today),
-    }
-    const nov6Sprint = {
-      title: 'nov6',
-      range: this.getDateRange(data, nov_6_2019, nov_20_2019),
-    }
-    const oct23Sprint = {
-      title: 'oct23',
-      range: this.getDateRange(data, oct_23_2019, nov_6_2019),
-    }
-    const oct9Sprint = {
-      title: 'oct9',
-      range: this.getDateRange(data, oct_9_2019, oct_23_2019),
-    }
-    const sept25Sprint = {
-      title: 'sept25',
-      range: this.getDateRange(data, sept_25_2019, oct_9_2019),
-    }
+    // const dec11Sprint = {
+    //   title: 'dec11',
+    //   range: this.getDateRange(data, dec_11_2019, jan_8_2020),
+    // }
+    // const nov20Sprint = {
+    //   title: 'nov20',
+    //   range: this.getDateRange(data, nov_20_2019, dec_11_2019),
+    // }
+    // const nov6Sprint = {
+    //   title: 'nov6',
+    //   range: this.getDateRange(data, nov_6_2019, nov_20_2019),
+    // }
+    // const oct23Sprint = {
+    //   title: 'oct23',
+    //   range: this.getDateRange(data, oct_23_2019, nov_6_2019),
+    // }
+    // const oct9Sprint = {
+    //   title: 'oct9',
+    //   range: this.getDateRange(data, oct_9_2019, oct_23_2019),
+    // }
+    // const sept25Sprint = {
+    //   title: 'sept25',
+    //   range: this.getDateRange(data, sept_25_2019, oct_9_2019),
+    // }
     ;[
-      thirtyDays,
-      nov20Sprint,
-      nov6Sprint,
-      oct23Sprint,
-      oct9Sprint,
-      sept25Sprint,
-    ].forEach(({ title, range }) =>
-      console.log({ [title]: this.calc(range), range })
-    )
+      // thirtyDays,
+      jan22Sprint,
+      //   dec11Sprint,
+      //   nov20Sprint,
+      // nov6Sprint,
+      // oct23Sprint,
+      // oct9Sprint,
+      // sept25Sprint,
+    ].forEach(({ title, range }) => console.log({ [title]: this.calc(range) }))
   }
 
   retrieveDbReport = (URL, date) => {
