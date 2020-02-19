@@ -4,6 +4,7 @@ import Loading from './Loading'
 import Guage from './Guage'
 import URLGraphSection from './URLGraphSection'
 import Error from './Error'
+import base64 from 'base-64'
 import 'firebase/database'
 
 import {
@@ -60,6 +61,7 @@ const initialState = {
   errorMessage: '',
   fetching: false,
   urlLHRData: [],
+  stats: {},
 }
 
 class LandGraphs extends Component {
@@ -100,7 +102,7 @@ class LandGraphs extends Component {
         if (exists) {
           const data = snapshot.val()
           const dataArr = Object.entries(data)
-          this.preCalc(dataArr)
+          this.preCalc(dataArr, base64.decode(url))
 
           this.setState(state => ({
             urlLHRData: {
@@ -134,7 +136,7 @@ class LandGraphs extends Component {
       sorted.length % 2 ? sorted[half] : (sorted[half - 1] + sorted[half]) / 2.0
     const min = sorted[0]
     const max = sorted[sorted.length - 1]
-    return { median, mean, min, max, sorted }
+    return { median, mean, min, max }
   }
 
   getDateRange = (dataArr, start, end) => {
@@ -148,11 +150,13 @@ class LandGraphs extends Component {
       )
   }
 
-  preCalc = data => {
+  preCalc = (data, url) => {
     // const today = new Date()
     // const thirtyDaysPrior = new Date().setDate(today.getDate() - 30)
-    const jan_22_2020 = new Date(2020, 0, 22)
-    const jan_8_2020 = new Date(2020, 0, 8)
+    const feb_19_2020 = new Date(2020, 1, 19)
+    const feb_5_2020 = new Date(2020, 1, 5)
+    // const jan_22_2020 = new Date(2020, 0, 22)
+    // const jan_8_2020 = new Date(2020, 0, 8)
     // const dec_11_2019 = new Date(2019, 11, 11)
     // const nov_20_2019 = new Date(2019, 10, 20)
     // const nov_6_2019 = new Date(2019, 10, 6)
@@ -164,10 +168,18 @@ class LandGraphs extends Component {
     //   title: '30 days',
     //   range: this.getDateRange(data, thirtyDaysPrior, today),
     // }
-    const jan22Sprint = {
-      title: 'jan22',
-      range: this.getDateRange(data, jan_8_2020, jan_22_2020),
+    const feb19Sprint = {
+      title: 'feb19',
+      range: this.getDateRange(data, feb_5_2020, feb_19_2020),
     }
+    // const feb5Sprint = {
+    //   title: 'feb5',
+    //   range: this.getDateRange(data, jan_22_2020, feb_5_2020),
+    // }
+    // const jan22Sprint = {
+    //   title: 'jan22',
+    //   range: this.getDateRange(data, jan_8_2020, jan_22_2020),
+    // }
     // const dec11Sprint = {
     //   title: 'dec11',
     //   range: this.getDateRange(data, dec_11_2019, jan_8_2020),
@@ -194,14 +206,20 @@ class LandGraphs extends Component {
     // }
     ;[
       // thirtyDays,
-      jan22Sprint,
+      feb19Sprint,
+      //   feb5Sprint,
+      //   jan22Sprint,
       //   dec11Sprint,
       //   nov20Sprint,
       // nov6Sprint,
       // oct23Sprint,
       // oct9Sprint,
       // sept25Sprint,
-    ].forEach(({ title, range }) => console.log({ [title]: this.calc(range) }))
+    ].forEach(({ title, range }) =>
+      this.setState(state => ({
+        stats: { ...state.stats, [url]: this.calc(range) },
+      }))
+    )
   }
 
   retrieveDbReport = (URL, date) => {
