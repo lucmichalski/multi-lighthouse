@@ -74,6 +74,7 @@ const initialState = {
     'Tech',
     'Entertainment',
     'Travel',
+    'Health',
   ],
   loading: false,
 }
