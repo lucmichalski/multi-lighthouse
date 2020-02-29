@@ -5,7 +5,7 @@ import Layout from '../components/Layout'
 import UserGraphs from '../components/UserGraphs'
 import SEO from '../components/Seo'
 
-const Land = () => (
+const HeartAndSoulCare = () => (
   <Fragment>
     <Helmet>
       <link
@@ -30,9 +30,9 @@ const Land = () => (
       >
         Home
       </Link>
-      <UserGraphs uid={'ChqBqCMRh1R2g8cAMjIezSabGMl2'} />
+      <UserGraphs uid={'heartandsoulcare'} />
     </Layout>
   </Fragment>
 )
 
-export default Land
+export default HeartAndSoulCare
