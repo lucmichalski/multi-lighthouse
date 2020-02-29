@@ -243,10 +243,7 @@ function transformData(lighthouse) {
 /////////////////////////////////
 /////Users
 
-async function runLighthouseSetUserData(
-  url,
-  uid = 'ChqBqCMRh1R2g8cAMjIezSabGMl2'
-) {
+async function runLighthouseSetUserData(url, uid) {
   const formatURL = url[url.length - 1] === '/' ? url.slice(0, -1) : url
   const encodedQuery = base64.encode(formatURL)
   const lighthouse = await launchPuppeteerRunLighthouse(formatURL)

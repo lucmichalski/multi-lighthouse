@@ -28,7 +28,7 @@ if (!firebase.apps.length) {
 }
 
 const initialState = {
-  user: { uid: 'ChqBqCMRh1R2g8cAMjIezSabGMl2', urls: [] },
+  user: { uid: '', urls: [] },
   detailedLHRByDate: null,
   metrics: [
     'perf',
@@ -61,17 +61,20 @@ const initialState = {
   fetching: false,
   urlLHRData: [],
 }
-
-class LandGraphs extends Component {
-  state = { ...initialState }
+interface Props {
+  uid: string
+}
+class UserGraphs extends Component<Readonly<Props>, typeof initialState> {
+  state = { ...initialState, user: { uid: this.props.uid, urls: [] } }
 
   async componentDidMount() {
     this.fetchUserURLs()
   }
 
-  reset = () =>
-    this.setState(state => ({
+  reset = (): void =>
+    this.setState(() => ({
       ...initialState,
+      user: { uid: this.props.uid, urls: [] },
     }))
 
   fetchUserURLs = async () => {
@@ -265,4 +268,4 @@ class LandGraphs extends Component {
   }
 }
 
-export default LandGraphs
+export default UserGraphs
